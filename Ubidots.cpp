@@ -8,30 +8,36 @@ Ubidots::Ubidtos(String token)
 {
 	_token = token;
 }
+String Ubidots::assemble(String method, String endpoint)
+{
+	String chain = method + "/api/v1.6/"+endpoint+" HTTP/1.1\nHost: "+base_url+"\nUser-Agent: "+user_agent+"\nX-Auth-Token: "+_token+"\n\n";
+
+}
 
 
 void Ubidots::start(){
-	String chain = "GET /api/v1.6/datasources/?tag="+ID+" HTTP/1.1\nX-Auth-Token: "+_token+"\nHost: things.ubidots.com\n";
-	info = chain;
+	info = assemble();
+	int data = Send;
 	
 }
 void Ubidots::create_datasource(){
-	String chain = "POST /api/v1.6/datasources/?tag="+ID+" HTTP/1.1\nX-Auth-Token: "+_token+"\nHost: things.ubidots.com\n";
-	info = chain;
+	info = assemble();
+	int data = Send;
 
 }
 
 void Ubidots::save_value(String varibleName, String varialbeValue) {
-	String chain = "POST /api/v1.6/datasources/"+ID+"/variables HTTP/1.1\nX-Auth-Token: "+_token+"\nHost: things.ubidots.com\n";
-	info = chain;
+	info = assemble();
+	int data = Send;
 
 }
 void Ubidots::create_variable(){
-
+	info = assemble();
+	int data = Send;
 }
 void Ubidots::save_value(String varibleName, String varialbeValue, String context) {
-
-
+	info = assemble();
+	int data = Send;
 }
 
 

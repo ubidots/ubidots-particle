@@ -10,11 +10,13 @@
 class Ubidots {
 	public:
 		Ubidots(String token);
+		String assemble(String method, String endpoint);
 		boolean connect();
 		int Send();
 		void save_value(String varibleName, String varialbeValue);
 		void save_value(String varibleName, String varialbeValue, String context);
-
+		String user_agent = "Ubidots/v1 Particle/1.0"
+		String base_url = "things.ubidots.com"
 		String info;
 		boolean flag;
 		String ID = Spark.deviceID();
