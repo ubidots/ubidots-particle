@@ -8,9 +8,20 @@ Ubidots::Ubidtos(String token)
 {
 	_token = token;
 }
-String Ubidots::assemble(String method, String endpoint)
+void Ubidots::assemble(char* chain, char* method, char* endpoint)
 {
-	String chain = method + "/api/v1.6/"+endpoint+" HTTP/1.1\nHost: "+base_url+"\nUser-Agent: "+user_agent+"\nX-Auth-Token: "+_token+"\n\n";
+	//String chain = method + "/api/v1.6/"+endpoint+" HTTP/1.1\nHost: "+base_url+"\nUser-Agent: "+user_agent+"\nX-Auth-Token: "+_token+"\n";
+
+	sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %S\nUser-Agent: %s \nX-Auth-Token: %s", method, BASE_URL, endpoint, USER_AGENT, _token);
+
+
+}
+void Ubidots::assemble_with_data(char* chain, char* method, char* endpoint, char* data)
+{
+	
+	assemble(chain, method, endpoint);
+	sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", chain, strlen(data), data)
+	//chain += "\nContent-Type: application/json\nContent-Length: "+len+"\n\n"+data;
 
 }
 
@@ -21,9 +32,16 @@ void Ubidots::start(){
 	
 }
 void Ubidots::create_datasource(){
-	info = assemble();
-	int data = Send;
-
+    char chain[500];
+    char state[];
+    char body[];
+	assemble(chain,"GET","datasources/?tag="+ID); // send core id and check if it is living
+	int data = Send();
+	if (dat==1)
+	{
+		assemble_with_data("POST","datasources/?tag="+ID,"{\"name\": \"Particle\",\"tags\":[\""ID"\"]}");
+		int data = Send();
+	}
 }
 
 void Ubidots::save_value(String varibleName, String varialbeValue) {
@@ -39,55 +57,57 @@ void Ubidots::save_value(String varibleName, String varialbeValue, String contex
 	info = assemble();
 	int data = Send;
 }
+//---------------------------------------------------------------------------
+/* This function is to connect to the Ubidots API, and this one 
+   saves the data that the API send you 
+   
+   @arg state This array is to save the information to
+              confirm the connection status, example 200, 201 or wathever.
+   @arg body  This array is to save the body that you get.
+   @return true upon success, false upon error
+*/
 
-
-int Ubidots::Send()
+boolean Ubidots::Send(char* state, char* body)
 {
 	TCPClient client;
-	char result[512];
+	int len_result = 2048;
+	char result[len_result];
 	int i = 0;
+	String
 	int status = 0;
 
-	if (client.connect("things.ubidots.com", 80)) // Connect to the server
+
+	if (client.connect("things.ubidots.com", 80))        // Connect to the server
 	{
-		// phant.post() will return a string formatted as an HTTP POST.
-		// It'll include all of the field/data values we added before.
-		// Use client.print() to send that string to the server.
-		client.print(info);
-		//delay(1000);
-		// Now we'll do some simple checking to see what (if any) response
-		// the server gives us.
+		client.print(info+"\n");                         // Print the data to the client
 		int timeout = 1000;
-		while (client.available() || (timeout-- > 0))
+		while (client.available() || (timeout-- > 0))    // Wait until the API return the data
 		{
-			char c = client.read();
-			Serial.print(c);	// Print the response for debugging help.
+			char c = client.read();                      // Save the data into a char
+			Serial.print(c);	
 			if (i < 512)
-				result[i++] = c; // Add character to response string
+				result[i++] = c;                         // Organice the data into a char array
 			delay(1);
 		}
-		// Search the response string for "200 OK", if that's found the post
-		// succeeded.
-		if (strstr(result, "200 OK"))
+		i = 0;
+		while(i<(len_result-1))                          // Select the important data from the char array, body and state
 		{
-			status = 1;
-		}
-		else if (strstr(result, "400 Bad Request"))
-		{	// "400 Bad Request" means the Phant POST was formatted incorrectly.
-			// This most commonly ocurrs because a field is either missing,
-			// duplicated, or misspelled.
-			status = 2;
-		}
-		else
-		{
-			// Otherwise we got a response we weren't looking for.
-			status = 3;
-		}
-	}
-	else
-	{	// If the connection failed:
-		status = 4;
-	}
-	client.stop();	// Close the connection to server.
-	return status;
+			if(result[i] == '\n'&&result[i+1] == '\n')   // This code is to find 2 consecutives "\n" 
+			{
+				break;
+			}
+			i++;
+		} 
+		status = result.find("HTTP/")+9;                 // This code is to save the body and the state in two char arrays
+		sprintf(state, "%s", result.substring(status,3));
+		sprintf(body, "%s",result.substring(i));
+	
+	client.stop();	                                     // Close the connection to server.
+	return 1;
+    }
+    else
+    {
+    	return 0;
+    }
 }
+
