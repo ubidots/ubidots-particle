@@ -1,9 +1,6 @@
 #ifndef __Ubidots_H_
 #define __Ubidots_H_
 
-#ifndef __Ubidots_H_
-#define __Ubidots_H_
-
 #include "application.h"
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
@@ -20,7 +17,7 @@ class Ubidots {
 		void assemble(char* chain, char* method, char* endpoint);
 		void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
 		void get_or_create_datasource();
-		boolean Send(char* chain, String state, String body);
+		boolean Send(char* chain, char* status, char* body);
 		char* _token;
 
 	private:
