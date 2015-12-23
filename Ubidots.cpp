@@ -1,63 +1,72 @@
 #include "Ubidots.h"
-#include <stdlib.h>
 
 /**
 * Constructor.
 */
-Ubidots::Ubidtos(String token)
+Ubidots::Ubidots(char* token)
 {
 	_token = token;
 }
 void Ubidots::assemble(char* chain, char* method, char* endpoint)
 {
+    delay(5000);
 	//String chain = method + "/api/v1.6/"+endpoint+" HTTP/1.1\nHost: "+base_url+"\nUser-Agent: "+user_agent+"\nX-Auth-Token: "+_token+"\n";
-
-	sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %S\nUser-Agent: %s \nX-Auth-Token: %s", method, BASE_URL, endpoint, USER_AGENT, _token);
-
-
+	sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s", method, endpoint, BASE_URL, USER_AGENT, _token);
+	//strstr(chain, "User-Agent");
 }
-void Ubidots::assemble_with_data(char* chain, char* method, char* endpoint, char* data)
+void Ubidots::assemble_with_data(char* method, char* chain, char* endpoint, char* data)
 {
-	
+    
 	assemble(chain, method, endpoint);
-	sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", chain, strlen(data), data)
+	sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", chain, strlen(data), data);
 	//chain += "\nContent-Type: application/json\nContent-Length: "+len+"\n\n"+data;
-
 }
-
-
-void Ubidots::start(){
-	info = assemble();
-	int data = Send;
+void Ubidots::get_or_create_datasource(){
+    char chain[700];
+    char endpoint[100];
+    char data[100];
+    const char* ID = Particle.deviceID();
+    sprintf(endpoint, "datasources/?tag=%s", ID);
+    sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", ID);
+    String state;
+    String body;
+	assemble((char *) chain, (char *)"GET",(char *) endpoint); // send core id and check if it is living
+	Send(chain, state, body);
+	memset(chain, 0, sizeof(chain));
+	assemble_with_data("POST", chain, endpoint, data);
+	Send(chain, state, body);
+	memset(chain, 0, sizeof(chain));
 	
 }
-void Ubidots::create_datasource(){
-    char chain[500];
-    char state[];
-    char body[];
-	assemble(chain,"GET","datasources/?tag="+ID); // send core id and check if it is living
-	int data = Send();
-	if (dat==1)
-	{
-		assemble_with_data("POST","datasources/?tag="+ID,"{\"name\": \"Particle\",\"tags\":[\""ID"\"]}");
-		int data = Send();
-	}
-}
+// int check_get_datasource(char* state, char* body)
+// {
+// 	int first_number = 0;
+// 	char request[];
+// 	if(strcmp(state, "200")&&strcmp(body, "\"id\": "))
+// 	{
+// 		first_number = body.find("\"id\": ")+8;
+// 		sprintf(request, "%s", body.substring(first_number,24));
+// 	}
+// 	else
+// 	{
+// 		return 1;
+// 	}
+// }
+// int check_post_datasource(char* state, char* body)
+// {
+// 	int first_number = 0;
+	
+// 	if(strcmp(state, "201"))
+// 	{
+// 		first_number = body.find("\"id\": ")+8;
+// 		//24
+// 	}
+// 	else
+// 	{
+// 		return 1;
+// 	}
+// }
 
-void Ubidots::save_value(String varibleName, String varialbeValue) {
-	info = assemble();
-	int data = Send;
-
-}
-void Ubidots::create_variable(){
-	info = assemble();
-	int data = Send;
-}
-void Ubidots::save_value(String varibleName, String varialbeValue, String context) {
-	info = assemble();
-	int data = Send;
-}
-//---------------------------------------------------------------------------
 /* This function is to connect to the Ubidots API, and this one 
    saves the data that the API send you 
    
@@ -67,24 +76,25 @@ void Ubidots::save_value(String varibleName, String varialbeValue, String contex
    @return true upon success, false upon error
 */
 
-boolean Ubidots::Send(char* state, char* body)
+boolean Ubidots::Send(char* chain, String state, String body)
 {
-	TCPClient client;
+    TCPClient client;
 	int len_result = 2048;
 	char result[len_result];
 	int i = 0;
-	String
 	int status = 0;
-
+	String info;
+	info = String(chain);
+	Serial.println(info);
+	delay(2000);
 
 	if (client.connect("things.ubidots.com", 80))        // Connect to the server
 	{
-		client.print(info+"\n");                         // Print the data to the client
+		client.print(info+"\n\n");                         // Print the data to the client
 		int timeout = 1000;
 		while (client.available() || (timeout-- > 0))    // Wait until the API return the data
 		{
 			char c = client.read();                      // Save the data into a char
-			Serial.print(c);	
 			if (i < 512)
 				result[i++] = c;                         // Organice the data into a char array
 			delay(1);
@@ -98,16 +108,17 @@ boolean Ubidots::Send(char* state, char* body)
 			}
 			i++;
 		} 
-		status = result.find("HTTP/")+9;                 // This code is to save the body and the state in two char arrays
-		sprintf(state, "%s", result.substring(status,3));
-		sprintf(body, "%s",result.substring(i));
-	
-	client.stop();	                                     // Close the connection to server.
-	return 1;
+		String b = String(result);
+		Serial.print(b);
+		status = b.indexOf("HTTP/"); 
+		state = b.substring(status,3);
+		
+		body = b.substring(i);
+    	client.stop();	                                     // Close the connection to server.
+	    return 1;
     }
     else
     {
     	return 0;
     }
 }
-
