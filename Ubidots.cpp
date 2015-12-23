@@ -9,17 +9,13 @@ Ubidots::Ubidots(char* token)
 }
 void Ubidots::assemble(char* chain, char* method, char* endpoint)
 {
-    delay(5000);
-	//String chain = method + "/api/v1.6/"+endpoint+" HTTP/1.1\nHost: "+base_url+"\nUser-Agent: "+user_agent+"\nX-Auth-Token: "+_token+"\n";
 	sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s", method, endpoint, BASE_URL, USER_AGENT, _token);
 	//strstr(chain, "User-Agent");
 }
 void Ubidots::assemble_with_data(char* method, char* chain, char* endpoint, char* data)
 {
-    
-	assemble(chain, method, endpoint);
+    assemble(chain, method, endpoint);
 	sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", chain, strlen(data), data);
-	//chain += "\nContent-Type: application/json\nContent-Length: "+len+"\n\n"+data;
 }
 void Ubidots::get_or_create_datasource(){
     char chain[700];
@@ -86,8 +82,7 @@ boolean Ubidots::Send(char* chain, String state, String body)
 	String info;
 	info = String(chain);
 	Serial.println(info);
-	delay(2000);
-
+	
 	if (client.connect("things.ubidots.com", 80))        // Connect to the server
 	{
 		client.print(info+"\n\n");                         // Print the data to the client
