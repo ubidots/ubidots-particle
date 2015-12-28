@@ -64,7 +64,7 @@ bool Ubidots::get_or_create_datasource(){
         return false;
     }
     memset(chain, 0, sizeof(chain));
-    if(!check_get_datasource(status, body, datasource))
+    if(!check_get_datasource(status, body, datasource) && strstr(body,"\"count\": 0")!=NULL)
     {
         Serial.println(ID);
         memset(endpoint, 0, sizeof(endpoint));
