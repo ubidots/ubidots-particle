@@ -22,15 +22,10 @@ typedef struct UbidotsCollection {
 class ubidots {
     public:
         ubidots(char* token);
-        void ubidots_init(char * variableName);
-        void save_values(String* IDs, String* values,  int quantity);
-        void assemble(char* chain, char* method, char* endpoint);
-        void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
         char* get_or_create_datasource();
         char* get_or_create_variable(char* ID, char* variableName);
         bool send(char* chain, char* status, char* body);
-        bool check_get_datasource(char* status, char* body, char* datasource);
-        bool check_get_variable(char* status, char* body, char* datasource);
+        bool check(char* status, char* body, char* datasource);
         bool send_with_reconect(char* chain, char* status, char* body);
         
         UbidotsCollection* ubidots_collection_init(int n);
@@ -41,6 +36,8 @@ class ubidots {
         char* _token;
 
     private:
+        void assemble(char* chain, char* method, char* endpoint);
+        void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
         
 
 };

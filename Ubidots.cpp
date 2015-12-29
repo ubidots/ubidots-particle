@@ -1,7 +1,5 @@
 #include "Ubidots.h"
 static const uint16_t TIMEOUT = 2000;
-
-
 /**
  * Instantiate a collection.
  * @arg n  Number of values in this collection.
@@ -18,8 +16,6 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n) {
 
   return coll;
 }
-
-
 /**
  * Add a value to a collection.
  * @arg coll         Pointer to the collection made by ubidots_collection_init().
@@ -37,7 +33,11 @@ void ubidots::ubidots_collection_add(UbidotsCollection *coll, char* name, double
 
   coll->i++;
 }
-
+/**
+ * Save a collection.
+ * @arg coll Collection to save.
+ * @reutrn Zero upon success, non-zero upon error.
+ */
 int ubidots::ubidots_collection_save(UbidotsCollection *coll) {
     int i, n = coll->n;
     char chain[700];
@@ -60,8 +60,11 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll) {
   }
   Serial.println(data);
   assemble_with_data("POST", chain, endpoint, data);
-  send_with_reconect(chain, status, body);
-  return 1;
+  if(!send_with_reconect(chain, status, body)){
+        Serial.print("Connection error");
+        return 1;
+    }
+  return 0;
 }
 void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll) {
   int i, n = coll->n;
@@ -81,9 +84,6 @@ ubidots::ubidots(char* token)
 {
     _token = token;
 }
-void ubidots::ubidots_init(char * variableName){
-    
-}
 /* This function is to assemble the data to send to Ubidots
    
    @arg chain This array is to save all data to send to the API 
@@ -91,22 +91,13 @@ void ubidots::ubidots_init(char * variableName){
    @arg endpoint  This array contains the endpoint to send to the API
    
 */
-void ubidots::save_values(String* IDs, String* values, int quantity)
-{
-    int i = 0;
-    while(i<quantity)
-    {
-        
-    }
-    
-}
+
 void ubidots::assemble(char* chain, char* method, char* endpoint)
 {
     sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s", method, endpoint, BASE_URL, USER_AGENT, _token);
     #ifdef DEBUG_UBIDOTS
     Serial.println(chain);
     #endif
-    //strstr(chain, "User-Agent");
 }
 /* This function is to assemble the data with length and value of variable
    to send to Ubidots
@@ -150,19 +141,13 @@ char* ubidots::get_or_create_datasource(){
         return NULL;
     }
     memset(chain, 0, sizeof(chain));
-    if(!check_get_datasource(status, body, datasource) && strstr(body,"\"count\": 0")!=NULL)
-    {
-        memset(endpoint, 0, sizeof(endpoint));
+    if(!check(status, body, datasource) && strstr(body,"\"count\": 0")!=NULL){
         memset(data, 0, sizeof(data));
-        sprintf(endpoint, "datasources/?tag=%s", ID);
         sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", ID);
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body);
-        memset(chain, 0, sizeof(chain));
     }
     return datasource;
-    
-    
 }
 char* ubidots::get_or_create_variable(char* ID, char* variableName){
     char chain[700];
@@ -180,32 +165,15 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         Serial.print("Connection error");
         return NULL;
     }
-    if(!check_get_variable(status, body, datasource) && strstr(body,"\"count\": 0")!=NULL){
-        memset(endpoint, 0, sizeof(endpoint));
+    if(!check(status, body, datasource) && strstr(body,"\"count\": 0")!=NULL){
         memset(data, 0, sizeof(data));
-        sprintf(endpoint, "datasources/%s/variables/?tag=%s", ID, variableName);
         sprintf(data, "{\"name\": \"%s\",\"tags\":[\"%s\"]}", variableName, variableName);
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body);
-        memset(chain, 0, sizeof(chain));
     }
     return datasource;
    
 }
-bool ubidots::check_get_variable(char* status, char* body, char* datasource){
-    String raw_response(body);
-    int bodyPos = raw_response.indexOf("\"id\": ");
-    if(strstr(status, "200")!=NULL && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
-        raw_response.substring(bodyPos+7).toCharArray(datasource, 25);
-        #ifdef DEBUG_UBIDOTS
-        Serial.println(datasource);
-        #endif
-        return true;
-    }else{
-        return false;
-    }
-}
-
 /* This function is to know if there is spark ID
    datasource in the API
    
@@ -215,7 +183,7 @@ bool ubidots::check_get_variable(char* status, char* body, char* datasource){
    @arg datasource  This array is to save the ID of the API response 
    @return true if there is created ID, false if there is not created ID
 */
-bool ubidots::check_get_datasource(char* status, char* body, char* datasource){
+bool ubidots::check(char* status, char* body, char* datasource){
     String raw_response(body);
     int bodyPos = raw_response.indexOf("\"id\": ");
     if(strstr(status, "200")!=NULL && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
@@ -236,7 +204,6 @@ bool ubidots::check_get_datasource(char* status, char* body, char* datasource){
    @arg body  This array is to save the body that you get.
    @return true upon success, false upon i>ATTEMPS
 */
-
 bool ubidots::send_with_reconect(char* chain, char* status, char* body)
 {
     int i = 0;
@@ -247,23 +214,7 @@ bool ubidots::send_with_reconect(char* chain, char* status, char* body)
         i++;
     }
     return true;
-    
 }
-// int check_post_datasource(char* state, char* body)
-// {
-//  int first_number = 0;
-    
-//  if(strcmp(state, "201"))
-//  {
-//      first_number = body.find("\"id\": ")+8;
-//      //24
-//  }
-//  else
-//  {
-//      return 1;
-//  }
-// }
-
 /* This function is to connect to the Ubidots API, and this one 
    saves the data that the API send you 
    
@@ -316,8 +267,7 @@ boolean ubidots::send(char* chain, char* status, char* body)
         } while (client.connected() && !timeout && !error);
         client.stop();
         // If result doesnt have any thing, return false
-        if(result[0]=='\0')
-        {
+        if(result[0]=='\0'){
             #ifdef DEBUG_UBIDOTS
             Serial.print("Error when particle recive the data");
             #endif
