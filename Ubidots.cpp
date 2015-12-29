@@ -1,8 +1,82 @@
 #include "Ubidots.h"
 static const uint16_t TIMEOUT = 2000;
+
+
+/**
+ * Instantiate a collection.
+ * @arg n  Number of values in this collection.
+ * @return A pointer to a collection.
+ */
+UbidotsCollection* ubidots::ubidots_collection_init(int n) {
+  UbidotsCollection* coll = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
+
+  coll->n = n;
+  coll->i = 0;
+  coll->variable_ids = (char **) malloc(sizeof(char*) * n);
+  coll->values = (float *) malloc(sizeof(float) * n);
+  coll->_ids = (char *) malloc(sizeof(char*) * n);
+
+  return coll;
+}
+
+
+/**
+ * Add a value to a collection.
+ * @arg coll         Pointer to the collection made by ubidots_collection_init().
+ * @arg variable_id  The ID of the variable this value is associated with.
+ * @arg value        The value.
+ */
+void ubidots::ubidots_collection_add(UbidotsCollection *coll, char* name, double value) {
+  int i = coll->i;
+
+  int len = sizeof(char) * strlen(name);
+  coll->variable_ids[i] = (char* ) malloc(len + 1);
+  strcpy(coll->variable_ids[i], name);
+
+  coll->values[i] = value;
+
+  coll->i++;
+}
+
+int ubidots::ubidots_collection_save(UbidotsCollection *coll) {
+    int i, n = coll->n;
+    char chain[700];
+    char endpoint[100];
+    char data[1000];
+    char status[3];
+    char body[200];
+    memset(chain, 0, sizeof(chain));
+    memset(endpoint, 0, sizeof(endpoint));
+    memset(data, 0, sizeof(data));
+    sprintf(endpoint, "collections/values");
+    sprintf(data, "[");
+  for (i = 0; i < n; i++) {
+      sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, coll->variable_ids[i], coll->values[i]);
+      if((i+2)>n){
+          sprintf(data, "%s]",data);
+      }else{
+          sprintf(data, "%s, ",data);
+      }
+  }
+  Serial.println(data);
+  assemble_with_data("POST", chain, endpoint, data);
+  send_with_reconect(chain, status, body);
+  return 1;
+}
+void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll) {
+  int i, n = coll->n;
+
+  for (i = 0; i < n; i++) {
+    free(coll->variable_ids[i]);
+  }
+  free(coll->variable_ids);
+  free(coll->values);
+  free(coll);
+}
 /**
 * Constructor.
 */
+
 ubidots::ubidots(char* token)
 {
     _token = token;
@@ -17,6 +91,15 @@ void ubidots::ubidots_init(char * variableName){
    @arg endpoint  This array contains the endpoint to send to the API
    
 */
+void ubidots::save_values(String* IDs, String* values, int quantity)
+{
+    int i = 0;
+    while(i<quantity)
+    {
+        
+    }
+    
+}
 void ubidots::assemble(char* chain, char* method, char* endpoint)
 {
     sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s", method, endpoint, BASE_URL, USER_AGENT, _token);
