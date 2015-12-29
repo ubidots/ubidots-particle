@@ -13,7 +13,6 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n) {
   coll->variable_ids = (char **) malloc(sizeof(char*) * n);
   coll->values = (float *) malloc(sizeof(float) * n);
   coll->_ids = (char *) malloc(sizeof(char*) * n);
-
   return coll;
 }
 /**
@@ -24,13 +23,10 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n) {
  */
 void ubidots::ubidots_collection_add(UbidotsCollection *coll, char* name, double value) {
   int i = coll->i;
-
   int len = sizeof(char) * strlen(name);
   coll->variable_ids[i] = (char* ) malloc(len + 1);
   strcpy(coll->variable_ids[i], name);
-
   coll->values[i] = value;
-
   coll->i++;
 }
 /**
@@ -58,7 +54,9 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll) {
           sprintf(data, "%s, ",data);
       }
   }
+  #ifdef DEBUG_UBIDOTS
   Serial.println(data);
+  #endif
   assemble_with_data("POST", chain, endpoint, data);
   if(!send_with_reconect(chain, status, body)){
         Serial.print("Connection error");
@@ -68,7 +66,6 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll) {
 }
 void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll) {
   int i, n = coll->n;
-
   for (i = 0; i < n; i++) {
     free(coll->variable_ids[i]);
   }
