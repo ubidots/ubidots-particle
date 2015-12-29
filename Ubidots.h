@@ -6,6 +6,7 @@
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
+#include <stdarg.h>
 
 #define USER_AGENT  "Ubidots/v1 Particle/1.0"
 #define BASE_URL  "things.ubidots.com"
@@ -32,6 +33,8 @@ class ubidots {
         void ubidots_collection_add(UbidotsCollection *coll, char *name, double value);
         int ubidots_collection_save(UbidotsCollection *coll);
         void ubidots_collection_cleanup(UbidotsCollection *coll);
+        
+        bool send_ubidots(int number, ... );
         
         char* _token;
 

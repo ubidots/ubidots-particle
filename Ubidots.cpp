@@ -15,6 +15,54 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n) {
   coll->_ids = (char *) malloc(sizeof(char*) * n);
   return coll;
 }
+
+bool ubidots::send_ubidots( int number, ... ){
+   char*  pch = get_or_create_datasource();
+   if(pch==NULL){
+           return false;
+       }
+   char chain[700];
+   char endpoint[100];
+   char status[3];
+   char body[200];
+   memset(chain, 0, sizeof(chain));
+   memset(endpoint, 0, sizeof(endpoint));
+   sprintf(endpoint, "collections/values");
+   va_list vl;
+   int i;
+   char * data = (char *) malloc(sizeof(char) * number*50);
+   //  szTypes is the last argument specified; you must access 
+   //  all others using the variable-argument macros.
+   va_start( vl, number );
+   sprintf(data, "[");
+   // Step through the list.
+   for( i = 0; i< number; ++i ) {
+       char* name = (char *) malloc(sizeof(char) *20);
+       name = va_arg( vl, char* );
+       float value = va_arg( vl, double );
+       char* pch2 = get_or_create_variable(pch, name);
+       if(pch2==NULL){
+           return false;
+       }
+       sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, pch2, value);
+       if((i+2)>number){
+          sprintf(data, "%s]",data);
+        }else{
+          sprintf(data, "%s, ",data);
+        }
+      
+   }
+   #ifdef DEBUG_UBIDOTS
+   Serial.println(data);
+   #endif
+   va_end( vl );
+   assemble_with_data("POST", chain, endpoint, data);
+   if(!send_with_reconect(chain, status, body)){
+        Serial.print("Connection error");
+        return false;
+    }
+    return true;
+}
 /**
  * Add a value to a collection.
  * @arg coll         Pointer to the collection made by ubidots_collection_init().
