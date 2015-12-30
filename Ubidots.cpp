@@ -1,6 +1,12 @@
 #include "Ubidots.h"
 static const uint16_t TIMEOUT = 2000;
 /**
+ * Constructor.
+ */
+ubidots::ubidots(char* token){
+    _token = token;
+}
+/**
  * Instantiate a collection.
  * @arg n  Number of values in this collection.
  * @return A pointer to a collection.
@@ -14,13 +20,12 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n){
   coll->_ids = (char *) malloc(sizeof(char*) * n);
   return coll;
 }
-/* This function is to know the existence of variable
-   in the API
-   
-   @arg ID This array contains the datasource ID
-   @arg variableName  This contains the variable name 
-   @return variable ID or NULL in bad connection
-*/
+/** 
+ * This function is to save infinite values in the API
+ * @arg ID This array contains the datasource ID
+ * @arg variableName  This contains the variable name 
+ * @return variable ID or NULL in bad connection
+ */
 bool ubidots::send_ubidots( int number, ... ){
    char*  pch = get_or_create_datasource();
    if(pch==NULL){
@@ -110,13 +115,10 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll){
     }
   return 0;
 }
-/* This function is to know the existence of variable
-   in the API
-   
-   @arg ID This array contains the datasource ID
-   @arg variableName  This contains the variable name 
-   @return variable ID or NULL in bad connection
-*/
+/**
+ * Cleanup a collection when after it is no longer being used.
+ * @arg coll Pointer to the collection made by ubidots_collection_init().
+ */
 void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
   int i, n = coll->n;
   for (i = 0; i < n; i++){
@@ -126,18 +128,11 @@ void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
   free(coll->values);
   free(coll);
 }
-/**
-* Constructor.
-*/
-ubidots::ubidots(char* token){
-    _token = token;
-}
-/* This function is to assemble the data to send to Ubidots
-   
-   @arg chain This array is to save all data to send to the API 
-   @arg method   This array contains GET or POST method
-   @arg endpoint  This array contains the endpoint to send to the API
-   
+/** 
+ * This function is to assemble the data to send to Ubidots
+ * @arg chain This array is to save all data to send to the API 
+ * @arg method   This array contains GET or POST method
+ * @arg endpoint  This array contains the endpoint to send to the API
 */
 void ubidots::assemble(char* chain, char* method, char* endpoint){
     sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s", method, endpoint, BASE_URL, USER_AGENT, _token);
@@ -145,14 +140,13 @@ void ubidots::assemble(char* chain, char* method, char* endpoint){
     Serial.println(chain);
     #endif
 }
-/* This function is to assemble the data with length and value of variable
-   to send to Ubidots
-   
-   @arg chain This array is to save all data to send to the API 
-   @arg method   This array contains GET or POST method
-   @arg endpoint  This array contains the endpoint to send to the API
-   @arg data  This array contains the value to POST to the Ubidots API
-   
+/** 
+ * This function is to assemble the data with length and value of variable
+ * to send to Ubidots
+ * @arg chain This array is to save all data to send to the API 
+ * @arg method   This array contains GET or POST method
+ * @arg endpoint  This array contains the endpoint to send to the API
+ * @arg data  This array contains the value to POST to the Ubidots API
 */
 void ubidots::assemble_with_data(char* method, char* chain, char* endpoint, char* data){
     assemble(chain, method, endpoint);
@@ -161,10 +155,10 @@ void ubidots::assemble_with_data(char* method, char* chain, char* endpoint, char
     Serial.println(chain);
     #endif
 }
-/* This function is to get or post datasource
-   
-   @return false when the connection fails
-*/
+/**
+ * This function is to get or post datasource
+ * @return false when the connection fails
+ */
 char* ubidots::get_or_create_datasource(){
     char* chain = (char *) malloc(sizeof(char) * 700);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
@@ -191,13 +185,13 @@ char* ubidots::get_or_create_datasource(){
     }
     return datasource;
 }
-/* This function is to know the existence of variable
-   in the API
-   
-   @arg ID This array contains the datasource ID
-   @arg variableName  This contains the variable name 
-   @return variable ID or NULL in bad connection
-*/
+/**
+ * This function is to know the existence of variable
+ * in the API
+ * @arg ID This array contains the datasource ID
+ * @arg variableName  This contains the variable name 
+ * @return variable ID or NULL in bad connection
+ */
 char* ubidots::get_or_create_variable(char* ID, char* variableName){
     char* chain = (char *) malloc(sizeof(char) * 700);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
@@ -222,15 +216,15 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
     }
     return variable;   
 }
-/* This function is to know if there is spark ID
-   datasource in the API
-   
-   @arg Status This array contains the connection status of
-               the API 
-   @arg body   This array contains the body of the API
-   @arg datasource  This array is to save the ID of the API response 
-   @return true if there is created ID, false if there is not created ID
-*/
+/**
+ * This function is to know if there is spark ID
+ * datasource in the API
+ * @arg Status This array contains the connection status of
+ * the API 
+ * @arg body   This array contains the body of the API
+ * @arg datasource  This array is to save the ID of the API response 
+ * @return true if there is created ID, false if there is not created ID
+ */
 char* ubidots::parser_id(char* status, char* body){
     String raw_response(body);
     char* ID = (char *) malloc(sizeof(char) * 24);
@@ -245,14 +239,14 @@ char* ubidots::parser_id(char* status, char* body){
         return NULL;
     }
 }
-/* This function is verify the connection with the Ubidots server
-   
-   @arg chain  This array contain the all data to send to Ubidots
-   @arg status This array is to save the status value of the connection
-               confirm the connection status, example 200, 201 or wathever.
-   @arg body  This array is to save the body that you get.
-   @return true upon success, false upon i>ATTEMPS
-*/
+/**
+ * This function is verify the connection with the Ubidots server
+ * @arg chain  This array contain the all data to send to Ubidots
+ * @arg status This array is to save the status value of the connection
+ * confirm the connection status, example 200, 201 or wathever.
+ * @arg body  This array is to save the body that you get.
+ * @return true upon success, false upon i>ATTEMPS
+ */
 bool ubidots::send_with_reconect(char* chain, char* status, char* body){
     int i = 0;
     while(!send(chain, status, body)){
@@ -264,13 +258,12 @@ bool ubidots::send_with_reconect(char* chain, char* status, char* body){
     return true;
 }
 /* This function is to connect to the Ubidots API, and this one 
-   saves the data that the API send you 
-   
-   @arg status This array is to save the information to
-               confirm the connection status, example 200, 201 or wathever.
-   @arg body  This array is to save the body that you get.
-   @return true upon success, false upon error
-*/
+ * saves the data that the API send you 
+ * @arg status This array is to save the information to
+ * confirm the connection status, example 200, 201 or wathever.
+ * @arg body  This array is to save the body that you get.
+ * @return true upon success, false upon error
+ */
 boolean ubidots::send(char* chain, char* status, char* body){
     TCPClient client;
     int len_result = 2048;
