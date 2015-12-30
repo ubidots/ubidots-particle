@@ -26,7 +26,7 @@ class ubidots {
         char* get_or_create_datasource();
         char* get_or_create_variable(char* ID, char* variableName);
         bool send(char* chain, char* status, char* body);
-        bool check(char* status, char* body, char* datasource);
+        char* parser_id(char* status, char* body);
         bool send_with_reconect(char* chain, char* status, char* body);
         
         UbidotsCollection* ubidots_collection_init(int n);
