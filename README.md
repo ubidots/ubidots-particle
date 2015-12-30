@@ -13,13 +13,17 @@ void setup() {
     Serial.begin(115200);                          // initialize serial of Particle
 }
 void loop() {
-                                                   // the first value 3, is the number of variables that you will send
-                                                   // Temperature is the name of the first variable that you will send
-                                                   // 2.3 is the value of the first variable that you will send
-                                                   // Servo is the name of the second variable that you will send
-                                                   // 3.2 is the value of the second variable that you will send
-                                                   // Humedity is the name of the third variable that you will send
-                                                   // 4.2 is the value of the third variable that you will send
+/**
+ * Ubidots.send_ubidots()
+ *
+ * the first value 3, is the number of variables that you will send
+ * Temperature is the name of the first variable that you will send
+ * 2.3 is the value of the first variable that you will send
+ * Servo is the name of the second variable that you will send
+ * 3.2 is the value of the second variable that you will send
+ * Humedity is the name of the third variable that you will send
+ * 4.2 is the value of the third variable that you will send
+ */
     Ubidots.send_ubidots( 3, "Temperature",2.3,"Servo", 3.2, "Humedity", 4.2 ); 
 }
 ```
