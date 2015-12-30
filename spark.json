@@ -1,0 +1,7 @@
+{
+"name": "Ubidots",
+"version": "0.0.1",
+"author": "Mateo Velez - Metavix <mateo@ubidots.com>",
+"license": "Choose a license",
+"description": "A elaborated Ubidots library for Particle, with this one you can post variable to Ubidots and get variable from Ubidots."
+}
