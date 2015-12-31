@@ -7,7 +7,7 @@ ubidots::ubidots(char* token){
     _token = token;
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
-    pch = get_or_create_datasource();
+    
 }
 Value * ubidots::init_value(char* name, double value, char * id){
    Value * new_value = (Value *)malloc(sizeof(Value));
@@ -15,6 +15,7 @@ Value * ubidots::init_value(char* name, double value, char * id){
     new_value->value = value;
     if (id == NULL){
         char* pch2 = get_or_create_variable(pch, name);
+        Serial.println(pch2);
         new_value->id = pch2;
         
     }else{
@@ -74,11 +75,13 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
  */
 bool ubidots::send_ubidots( int number, ... ){
 
-   
+   pch = get_or_create_datasource();
+   Serial.println(pch);
    va_list vl;
    int i;
    char * data = (char *) malloc(sizeof(char) * number*50);
    va_start( vl, number );
+   Serial.println("holiiiiiiii");
    sprintf(data, "[");
    for( i = 0; i< number; ++i ){
        char* name = (char *) malloc(sizeof(char) *20);
@@ -104,7 +107,6 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     char* body = (char *) malloc(sizeof(char) * 200);;
     sprintf(endpoint, "collections/values");
     sprintf(data, "[");
-    
     Value *nod = cache->first;
     while(nod->next) {
     sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, nod->id , nod->value);
