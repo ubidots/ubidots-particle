@@ -74,11 +74,7 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
  */
 bool ubidots::send_ubidots( int number, ... ){
 
-   char* chain = (char *) malloc(sizeof(char) * 700);
-   char* endpoint= (char *) malloc(sizeof(char) * 100);
-   char* status = (char *) malloc(sizeof(char) * 3);
-   char* body = (char *) malloc(sizeof(char) * 200);
-   sprintf(endpoint, "collections/values");
+   
    va_list vl;
    int i;
    char * data = (char *) malloc(sizeof(char) * number*50);
@@ -89,22 +85,9 @@ bool ubidots::send_ubidots( int number, ... ){
        name = va_arg( vl, char* );
        float value = va_arg( vl, double );
        add_value_with_name(cache, name, value);
-       //sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, , );
-       if((i+2)>number){
-          sprintf(data, "%s]",data);
-       }else{
-          sprintf(data, "%s, ",data);
-       }      
+       
    }
-   #ifdef DEBUG_UBIDOTS
-   Serial.println(data);
-   #endif
-   va_end( vl );
-   assemble_with_data("POST", chain, endpoint, data);
-   if(!send_with_reconect(chain, status, body)){
-        Serial.print("Connection error");
-        return false;
-   }
+   ubidots_collection_save(cache);
     return true;
 }
 
@@ -123,18 +106,13 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     sprintf(data, "[");
     
     Value *nod = cache->first;
-        while(nod->next) {
-            sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, nod->id , nod->value);
-            nod = nod->next;
-            }
-  /*for (i = 0; i < n; i++){
-      //sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, coll->id[i], coll->values[i]);
-      if((i+2)>n){
-          sprintf(data, "%s]",data);
-      }else{
-          sprintf(data, "%s, ",data);
-      }
-  }*/
+    while(nod->next) {
+    sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, nod->id , nod->value);
+    nod = nod->next;
+    sprintf(data, "%s, ",data);
+    }
+    sprintf(data, "%s, ",data);
+  
   #ifdef DEBUG_UBIDOTS
   Serial.println(data);
   #endif
