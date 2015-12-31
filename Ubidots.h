@@ -26,13 +26,13 @@ typedef struct UbidotsCollection {
 typedef struct Value {
    char *name;
    float value;
-   char *_id;
-   struct Value *next;
+   char *id;
+   Value *next;
 } Value;
 
 
 typedef struct UbidotsCollection {
-  struct Value  *first;
+  Value *first;
 } UbidotsCollection;
 
 
@@ -47,19 +47,19 @@ class ubidots {
         bool send(char* chain, char* status, char* body);
         char* parser_id(char* status, char* body);
         bool send_with_reconect(char* chain, char* status, char* body);
+        Value * init_value(char* name, double value, char * id);
         
-        UbidotsCollection* ubidots_collection_init(int n);
-        void ubidots_collection_add(UbidotsCollection *coll, char *name, double value);
-        int ubidots_collection_save(UbidotsCollection *coll);
-        void ubidots_collection_cleanup(UbidotsCollection *coll);
+        int ubidots_collection_save(UbidotsCollection *collection);
+        void ubidots_collection_cleanup(UbidotsCollection *collection);
         
-        void Insertar(Lista *l, char* name, double value, char* id);
-        void MostrarLista(Lista l);
-        int ListaVacia(Lista l);
+        void add_value_with_name(UbidotsCollection *collection, char * name, double value);
+        void add_value(UbidotsCollection *collection, char * variable_id, double value);
+        
         
         bool send_ubidots(int number, ... );
         
         char* _token;
+        char*  pch;
 
     private:
         void assemble(char* chain, char* method, char* endpoint);

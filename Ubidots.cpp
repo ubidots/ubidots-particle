@@ -7,18 +7,21 @@ ubidots::ubidots(char* token){
     _token = token;
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
+    pch = get_or_create_datasource();
 }
 Value * ubidots::init_value(char* name, double value, char * id){
    Value * new_value = (Value *)malloc(sizeof(Value));
     new_value->name = name;
     new_value->value = value;
     if (id == NULL){
-        // TODO: llamar get_or_create_variable
+        char* pch2 = get_or_create_variable(pch, name);
+        new_value->id = pch2;
+        
     }else{
         new_value->id = id;
     }
     
-    return new_value
+    return new_value;
 }
 void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, double value){
    /* Si la lista está vacía */
@@ -27,7 +30,7 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
       cache->first = init_value(name, value, NULL); 
       /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
    }else{
-       Value nod = cache->first;
+       Value * nod = cache->first;
         while(nod->next || name == nod->name) {
             if (name == nod->name){
                 nod->value = value;
@@ -36,7 +39,7 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
             nod = nod->next;
         }
         
-        nod->next = init_value(name, value, NULL);
+        nod->next = init_value(name, value, nod->id);
         
    }
 }
@@ -50,9 +53,9 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
       cache->first = init_value(NULL, value, variable_id); 
       /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
    }else{
-       Value nod = cache->first;
-        while(nod->next || id == nod->variable_id) {
-            if (name == nod->variable_id){
+       Value *nod = cache->first;
+        while(nod->next || variable_id == nod->id) {
+            if (variable_id == nod->id){
                 nod->value = value;
                 return;
             }
@@ -63,22 +66,6 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
         
    }
 }
-
-
-/**
- * Instantiate a collection.
- * @arg n  Number of values in this collection.
- * @return A pointer to a collection.
- */
-UbidotsCollection* ubidots::ubidots_collection_init(int n){
-  UbidotsCollection* coll = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
-  coll->n = n;
-  coll->i = 0;
-  coll->variable_ids = (char **) malloc(sizeof(char*) * n);
-  coll->values = (float *) malloc(sizeof(float) * n);
-  coll->_ids = (char *) malloc(sizeof(char*) * n);
-  return coll;
-}
 /** 
  * This function is to save infinite values in the API
  * @arg ID This array contains the datasource ID
@@ -86,16 +73,11 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n){
  * @return variable ID or NULL in bad connection
  */
 bool ubidots::send_ubidots( int number, ... ){
-   char*  pch = get_or_create_datasource();
-   if(pch==NULL){
-           return false;
-   }
-   char chain[700];
-   char endpoint[100];
-   char status[3];
-   char body[200];
-   memset(chain, 0, sizeof(chain));
-   memset(endpoint, 0, sizeof(endpoint));
+
+   char* chain = (char *) malloc(sizeof(char) * 700);
+   char* endpoint= (char *) malloc(sizeof(char) * 100);
+   char* status = (char *) malloc(sizeof(char) * 3);
+   char* body = (char *) malloc(sizeof(char) * 200);
    sprintf(endpoint, "collections/values");
    va_list vl;
    int i;
@@ -106,11 +88,8 @@ bool ubidots::send_ubidots( int number, ... ){
        char* name = (char *) malloc(sizeof(char) *20);
        name = va_arg( vl, char* );
        float value = va_arg( vl, double );
-       char* pch2 = get_or_create_variable(pch, name);
-       if(pch2==NULL){
-           return false;
-       }
-       sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, pch2, value);
+       add_value_with_name(cache, name, value);
+       //sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, , );
        if((i+2)>number){
           sprintf(data, "%s]",data);
        }else{
@@ -128,27 +107,13 @@ bool ubidots::send_ubidots( int number, ... ){
    }
     return true;
 }
-/**
- * Add a value to a collection.
- * @arg coll         Pointer to the collection made by ubidots_collection_init().
- * @arg variable_id  The ID of the variable this value is associated with.
- * @arg value        The value.
- */
-void ubidots::ubidots_collection_add(UbidotsCollection *coll, char* name, double value){
-  int i = coll->i;
-  int len = sizeof(char) * strlen(name);
-  coll->variable_ids[i] = (char* ) malloc(len + 1);
-  strcpy(coll->variable_ids[i], name);
-  coll->values[i] = value;
-  coll->i++;
-}
+
 /**
  * Save a collection.
  * @arg coll Collection to save.
  * @reutrn Zero upon success, non-zero upon error.
  */
-int ubidots::ubidots_collection_save(UbidotsCollection *coll){
-    int i, n = coll->n;
+int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     char* chain = (char *) malloc(sizeof(char) * 700);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
@@ -156,14 +121,20 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll){
     char* body = (char *) malloc(sizeof(char) * 200);;
     sprintf(endpoint, "collections/values");
     sprintf(data, "[");
-  for (i = 0; i < n; i++){
-      sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, coll->variable_ids[i], coll->values[i]);
+    
+    Value *nod = cache->first;
+        while(nod->next) {
+            sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, nod->id , nod->value);
+            nod = nod->next;
+            }
+  /*for (i = 0; i < n; i++){
+      //sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, coll->id[i], coll->values[i]);
       if((i+2)>n){
           sprintf(data, "%s]",data);
       }else{
           sprintf(data, "%s, ",data);
       }
-  }
+  }*/
   #ifdef DEBUG_UBIDOTS
   Serial.println(data);
   #endif
@@ -179,13 +150,12 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll){
  * @arg coll Pointer to the collection made by ubidots_collection_init().
  */
 void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
-  int i, n = coll->n;
-  for (i = 0; i < n; i++){
-    free(coll->variable_ids[i]);
+  /*for (i = 0; i < n; i++){
+    free(coll->id[i]);
   }
-  free(coll->variable_ids);
+  free(coll->id);
   free(coll->values);
-  free(coll);
+  free(coll);*/
 }
 /** 
  * This function is to assemble the data to send to Ubidots
