@@ -12,6 +12,8 @@
 #define BASE_URL  "things.ubidots.com"
 #define ATTEMPS  6
 
+
+/*
 typedef struct UbidotsCollection {
   int n;
   int i;
@@ -19,12 +21,25 @@ typedef struct UbidotsCollection {
   float *values;
   char  *_ids;
 } UbidotsCollection;
+*/
+
+typedef struct Value {
+   char *name;
+   float value;
+   char *_id;
+   struct Value *next;
+} Value;
+
+
+typedef struct UbidotsCollection {
+  struct Value  *first;
+} UbidotsCollection;
+
+
+//typedef tipoNodo *pNodo;
+//typedef tipoNodo *Lista;
 
 class ubidots {
-    private:
-        void assemble(char* chain, char* method, char* endpoint);
-        void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
-
     public:
         ubidots(char* token);
         char* get_or_create_datasource();
@@ -38,8 +53,20 @@ class ubidots {
         int ubidots_collection_save(UbidotsCollection *coll);
         void ubidots_collection_cleanup(UbidotsCollection *coll);
         
+        void Insertar(Lista *l, char* name, double value, char* id);
+        void MostrarLista(Lista l);
+        int ListaVacia(Lista l);
+        
         bool send_ubidots(int number, ... );
         
-        char* _token;   
+        char* _token;
+
+    private:
+        void assemble(char* chain, char* method, char* endpoint);
+        void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
+        int number_cache;
+        UbidotsCollection * cache;
+        
+
 };
 #endif
