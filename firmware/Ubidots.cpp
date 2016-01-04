@@ -1,5 +1,5 @@
 #include "Ubidots.h"
-static const uint16_t TIMEOUT = 2000;
+static const uint16_t TIMEOUT = 10000;
 /**
  * Constructor.
  */
@@ -161,7 +161,7 @@ void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
  * @arg endpoint  This array contains the endpoint to send to the API
  */
 void ubidots::assemble(char* chain, char* method, char* endpoint){
-    sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s", method, endpoint, BASE_URL, USER_AGENT, _token);
+    sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s\nConnection: close", method, endpoint, BASE_URL, USER_AGENT, _token);
 #ifdef DEBUG_UBIDOTS
     Serial.println(chain);
 #endif
@@ -302,9 +302,11 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
         client.print("\n\n");
         client.flush();
         do {
+            delay(200);
             while (client.available()){
                 char c = client.read();
                 lastRead = millis();
+                Serial.print(c);
                 if (c == -1){
                     error = true;
                     Serial.println("HttpClient>\tError: No data available.");
@@ -321,9 +323,6 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
             timeout = millis() - lastRead > TIMEOUT;
             // Unless there has been an error or timeout wait 200ms to allow server
             // to respond or close connection.
-            if (!error && !timeout){
-                delay(200);
-            }
         }
         while (client.connected() && !timeout && !error);
         client.stop();
