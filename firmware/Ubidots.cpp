@@ -7,15 +7,20 @@ ubidots::ubidots(char* token){
     _token = token;
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
-    
+    cache->id_datasource_default = NULL;
 }
-Value * ubidots::init_value(char* name, double value, char * id){
+Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, double value, char * id){
     Value * new_value = (Value *)malloc(sizeof(Value));
     new_value->name = name;
     new_value->value = value;
     new_value->next = NULL;
+    
+    
     if (id == NULL){
-        new_value->id = get_or_create_variable(pch, name);
+        if(collection->id_datasource_default==NULL){
+            collection->id_datasource_default = get_or_create_datasource();
+        }
+        new_value->id = get_or_create_variable(collection->id_datasource_default, name);
         Serial.println(new_value->id);
         
     }else{
@@ -33,7 +38,7 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
     
     if(cache->first == NULL){
         /* Añadimos la lista a continuación del nuevo nodo */
-        cache->first = init_value(name, value, NULL); 
+        cache->first = check_init_value(collection, name, value, NULL); 
         /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
     }else{
         Value * nod = cache->first;
@@ -55,7 +60,7 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
             
         }
         Serial.println("sali");
-        nod->next = init_value(name, value, NULL);
+        nod->next = check_init_value(collection, name, value, NULL);
         
     }
 }
@@ -64,7 +69,7 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
      /* Si la lista está vacía */
     if(cache->first == NULL){
         /* Añadimos la lista a continuación del nuevo nodo */
-        cache->first = init_value(NULL, value, variable_id); 
+        cache->first = check_init_value(collection, NULL, value, variable_id); 
         /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
     }else{
         Value *nod = cache->first;
@@ -75,7 +80,7 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
             }
             nod = nod->next;
         }
-        nod->next = init_value(NULL, value, variable_id);
+        nod->next = check_init_value(collection, NULL, value, variable_id);
         
         
     }
@@ -87,9 +92,6 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
  * @return variable ID or NULL in bad connection
  */
 bool ubidots::send_ubidots( int number, ... ){
-    
-    pch = get_or_create_datasource();
-    Serial.println(pch);
     va_list vl;
     int i;
     va_start( vl, number );
@@ -127,7 +129,7 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     
     nod->value = NULL;
     //sprintf(endpoint, "collections/values");
-    assemble_with_data("POST", chain, "collections/values", data);
+    assemble_with_data("POST", chain, "collections/values/?force=true", data);
 #ifdef DEBUG_UBIDOTS
     Serial.println(data);
 #endif
@@ -205,6 +207,7 @@ char* ubidots::get_or_create_datasource(){
         sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", ID);
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body, 190);
+        datasource = parser_id(status, body);
     }
     return datasource;
 }
@@ -235,6 +238,7 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         sprintf(data, "{\"name\": \"%s\",\"tags\":[\"%s\"]}", variableName, variableName);
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body, 190);
+        variable = parser_id(status, body);
     }
     return variable;   
 }
@@ -251,7 +255,7 @@ char* ubidots::parser_id(char* status, char* body){
     String raw_response(body);
     char* ID = (char *) malloc(sizeof(char) * 24);
     int bodyPos = raw_response.indexOf("\"id\": ");
-    if(strstr(status, "200")!=NULL && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
+    if((strstr(status, "200")!=NULL || strstr(status, "201")!=NULL) && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
         raw_response.substring(bodyPos+7).toCharArray(ID, 25);
 #ifdef DEBUG_UBIDOTS
         Serial.println(ID);

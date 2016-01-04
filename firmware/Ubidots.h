@@ -33,6 +33,7 @@ typedef struct Value {
 
 
 typedef struct UbidotsCollection {
+    char * id_datasource_default;
     Value *first;
 } UbidotsCollection;
 
@@ -48,7 +49,7 @@ class ubidots {
     bool send(char* chain, char* status, char* body, unsigned int size);
     char* parser_id(char* status, char* body);
     bool send_with_reconect(char* chain, char* status, char* body, unsigned int size);
-    Value * init_value(char* name, double value, char * id);
+    
         
     int ubidots_collection_save(UbidotsCollection *collection);
     void ubidots_collection_cleanup(UbidotsCollection *collection);
@@ -63,8 +64,8 @@ class ubidots {
  private:
     void assemble(char* chain, char* method, char* endpoint);
     void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
+    Value * check_init_value(UbidotsCollection *collection, char* name, double value, char * id);
     UbidotsCollection * cache;
-    char* pch;
         
 
 };
