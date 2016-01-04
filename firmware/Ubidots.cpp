@@ -184,10 +184,8 @@ char* ubidots::get_or_create_datasource(){
         return NULL;
     }
     return body;
-    memset(chain, 0, sizeof(chain));
     datasource = parser_id(status, body);
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
-        memset(data, 0, sizeof(data));
         sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", ID);
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body, 190);
@@ -218,7 +216,6 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
     }
     variable = parser_id(status, body);
     if(variable==NULL && strstr(body,"\"count\": 0")!=NULL){
-        memset(data, 0, sizeof(data));
         sprintf(data, "{\"name\": \"%s\",\"tags\":[\"%s\"]}", variableName, variableName);
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body, 190);
