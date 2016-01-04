@@ -5,20 +5,67 @@ static const uint16_t TIMEOUT = 2000;
  */
 ubidots::ubidots(char* token){
     _token = token;
+    cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
+    cache->first = NULL;
+    
 }
-/**
- * Instantiate a collection.
- * @arg n  Number of values in this collection.
- * @return A pointer to a collection.
- */
-UbidotsCollection* ubidots::ubidots_collection_init(int n){
-  UbidotsCollection* coll = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
-  coll->n = n;
-  coll->i = 0;
-  coll->variable_ids = (char **) malloc(sizeof(char*) * n);
-  coll->values = (float *) malloc(sizeof(float) * n);
-  coll->_ids = (char *) malloc(sizeof(char*) * n);
-  return coll;
+Value * ubidots::init_value(char* name, double value, char * id){
+   Value * new_value = (Value *)malloc(sizeof(Value));
+    new_value->name = name;
+    new_value->value = value;
+    if (id == NULL){
+        char* pch2 = get_or_create_variable(pch, name);
+        Serial.println(pch2);
+        new_value->id = pch2;
+        
+    }else{
+        new_value->id = id;
+    }
+    
+    return new_value;
+}
+void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, double value){
+   /* Si la lista está vacía */
+   if(cache->first == NULL){
+      /* Añadimos la lista a continuación del nuevo nodo */
+      cache->first = init_value(name, value, NULL); 
+      /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
+   }else{
+       Value * nod = cache->first;
+        while(nod->next || name == nod->name) {
+            if (name == nod->name){
+                nod->value = value;
+                return;
+            }
+            nod = nod->next;
+        }
+        
+        nod->next = init_value(name, value, nod->id);
+        
+   }
+}
+
+void ubidots::add_value(UbidotsCollection *collection, char * variable_id, double value){
+ 
+   
+   /* Si la lista está vacía */
+   if(cache->first == NULL){
+      /* Añadimos la lista a continuación del nuevo nodo */
+      cache->first = init_value(NULL, value, variable_id); 
+      /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
+   }else{
+       Value *nod = cache->first;
+        while(nod->next || variable_id == nod->id) {
+            if (variable_id == nod->id){
+                nod->value = value;
+                return;
+            }
+            nod = nod->next;
+        }
+        nod->next = init_value(NULL, value, variable_id);
+        
+        
+   }
 }
 /** 
  * This function is to save infinite values in the API
@@ -27,69 +74,31 @@ UbidotsCollection* ubidots::ubidots_collection_init(int n){
  * @return variable ID or NULL in bad connection
  */
 bool ubidots::send_ubidots( int number, ... ){
-   char*  pch = get_or_create_datasource();
-   if(pch==NULL){
-           return false;
-   }
-   char chain[700];
-   char endpoint[100];
-   char status[3];
-   char body[200];
-   memset(chain, 0, sizeof(chain));
-   memset(endpoint, 0, sizeof(endpoint));
-   sprintf(endpoint, "collections/values");
+    
+    pch = get_or_create_datasource();
+    Serial.println(pch);
+    return true;
    va_list vl;
    int i;
-   char * data = (char *) malloc(sizeof(char) * number*50);
    va_start( vl, number );
-   sprintf(data, "[");
+   Serial.println("holiiiiiiii");
    for( i = 0; i< number; ++i ){
        char* name = (char *) malloc(sizeof(char) *20);
        name = va_arg( vl, char* );
        float value = va_arg( vl, double );
-       char* pch2 = get_or_create_variable(pch, name);
-       if(pch2==NULL){
-           return false;
-       }
-       sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, pch2, value);
-       if((i+2)>number){
-          sprintf(data, "%s]",data);
-       }else{
-          sprintf(data, "%s, ",data);
-       }      
+       //add_value_with_name(cache, name, value);
+       
    }
-   #ifdef DEBUG_UBIDOTS
-   Serial.println(data);
-   #endif
-   va_end( vl );
-   assemble_with_data("POST", chain, endpoint, data);
-   if(!send_with_reconect(chain, status, body)){
-        Serial.print("Connection error");
-        return false;
-   }
+   //ubidots_collection_save(cache);
     return true;
 }
-/**
- * Add a value to a collection.
- * @arg coll         Pointer to the collection made by ubidots_collection_init().
- * @arg variable_id  The ID of the variable this value is associated with.
- * @arg value        The value.
- */
-void ubidots::ubidots_collection_add(UbidotsCollection *coll, char* name, double value){
-  int i = coll->i;
-  int len = sizeof(char) * strlen(name);
-  coll->variable_ids[i] = (char* ) malloc(len + 1);
-  strcpy(coll->variable_ids[i], name);
-  coll->values[i] = value;
-  coll->i++;
-}
+
 /**
  * Save a collection.
  * @arg coll Collection to save.
  * @reutrn Zero upon success, non-zero upon error.
  */
-int ubidots::ubidots_collection_save(UbidotsCollection *coll){
-    int i, n = coll->n;
+int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     char* chain = (char *) malloc(sizeof(char) * 700);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
@@ -97,22 +106,32 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll){
     char* body = (char *) malloc(sizeof(char) * 200);;
     sprintf(endpoint, "collections/values");
     sprintf(data, "[");
-  for (i = 0; i < n; i++){
-      sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, coll->variable_ids[i], coll->values[i]);
-      if((i+2)>n){
-          sprintf(data, "%s]",data);
-      }else{
-          sprintf(data, "%s, ",data);
-      }
-  }
+    Value *nod = cache->first;
+    while(nod->next) {
+    sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}", data, nod->id , nod->value);
+    nod = nod->next;
+    sprintf(data, "%s, ",data);
+    }
+    sprintf(data, "%s, ",data);
+  
   #ifdef DEBUG_UBIDOTS
   Serial.println(data);
   #endif
   assemble_with_data("POST", chain, endpoint, data);
   if(!send_with_reconect(chain, status, body)){
         Serial.print("Connection error");
+        free(chain);
+        free(endpoint);
+        free(data);
+        free(status);
+        free(body);
         return 1;
     }
+    free(chain);
+    free(endpoint);
+    free(data);
+    free(status);
+    free(body);
   return 0;
 }
 /**
@@ -120,13 +139,12 @@ int ubidots::ubidots_collection_save(UbidotsCollection *coll){
  * @arg coll Pointer to the collection made by ubidots_collection_init().
  */
 void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
-  int i, n = coll->n;
-  for (i = 0; i < n; i++){
-    free(coll->variable_ids[i]);
+  /*for (i = 0; i < n; i++){
+    free(coll->id[i]);
   }
-  free(coll->variable_ids);
+  free(coll->id);
   free(coll->values);
-  free(coll);
+  free(coll);*/
 }
 /** 
  * This function is to assemble the data to send to Ubidots
@@ -171,10 +189,12 @@ char* ubidots::get_or_create_datasource(){
     particleid.toCharArray(ID, particleid.length());
     sprintf(endpoint, "datasources/?tag=%s", ID);
     assemble((char *) chain, (char *)"GET",(char *) endpoint); // send core id and check if it is living
+    
     if(!send_with_reconect(chain, status, body)){
         Serial.print("Connection error");
         return NULL;
     }
+    return body;
     memset(chain, 0, sizeof(chain));
     datasource = parser_id(status, body);
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
@@ -205,6 +225,11 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         #ifdef DEBUG_UBIDOTS
         Serial.print("Connection error");
         #endif
+        free(chain);
+        free(endpoint);
+        free(data);
+        free(status);
+        free(body);
         return NULL;
     }
     variable = parser_id(status, body);
@@ -214,6 +239,11 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body);
     }
+    free(chain);
+    free(endpoint);
+    free(data);
+    free(status);
+    free(body);
     return variable;   
 }
 /**
@@ -264,9 +294,9 @@ bool ubidots::send_with_reconect(char* chain, char* status, char* body){
  * @arg body  This array is to save the body that you get.
  * @return true upon success, false upon error
  */
-boolean ubidots::send(char* chain, char* status, char* body){
+bool ubidots::send(char* chain, char* status, char* body){
     TCPClient client;
-    int len_result = 2048;
+    int len_result = 2500;
     char result[len_result];
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();
@@ -289,9 +319,14 @@ boolean ubidots::send(char* chain, char* status, char* body){
                 // Check that received character fits in buffer before storing.
                 if (bufferPosition < sizeof(result)-1){
                     result[bufferPosition] = c;
+                    bufferPosition++;
                 } 
-                bufferPosition++;
             }
+            Serial.println("aaaa");
+            Serial.println(bufferPosition);
+            Serial.println(sizeof(result));
+            Serial.println("bbbb");
+            
             result[bufferPosition] = '\0'; // Null-terminate buffer
             // Check that there hasn't been more than 5s since last read.
             timeout = millis() - lastRead > TIMEOUT;
@@ -314,11 +349,12 @@ boolean ubidots::send(char* chain, char* status, char* body){
         // Not super elegant way of finding the status code, but it works.
         raw_response.substring(9,12).toCharArray(status, 4);
         int bodyPos = raw_response.indexOf("\r\n\r\n");
-        raw_response.substring(bodyPos+4).toCharArray(body, sizeof(int[200]));
+        raw_response.substring(bodyPos+4).toCharArray(body, 200);
         #ifdef DEBUG_UBIDOTS
         Serial.println(body);
         Serial.println(status);
         #endif
+        free(result);
         return true;
     }
 

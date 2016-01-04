@@ -12,6 +12,8 @@
 #define BASE_URL  "things.ubidots.com"
 #define ATTEMPS  6
 
+
+/*
 typedef struct UbidotsCollection {
   int n;
   int i;
@@ -19,6 +21,23 @@ typedef struct UbidotsCollection {
   float *values;
   char  *_ids;
 } UbidotsCollection;
+*/
+
+typedef struct Value {
+   char *name;
+   float value;
+   char *id;
+   Value *next;
+} Value;
+
+
+typedef struct UbidotsCollection {
+  Value *first;
+} UbidotsCollection;
+
+
+//typedef tipoNodo *pNodo;
+//typedef tipoNodo *Lista;
 
 class ubidots {
     public:
@@ -28,19 +47,24 @@ class ubidots {
         bool send(char* chain, char* status, char* body);
         char* parser_id(char* status, char* body);
         bool send_with_reconect(char* chain, char* status, char* body);
+        Value * init_value(char* name, double value, char * id);
         
-        UbidotsCollection* ubidots_collection_init(int n);
-        void ubidots_collection_add(UbidotsCollection *coll, char *name, double value);
-        int ubidots_collection_save(UbidotsCollection *coll);
-        void ubidots_collection_cleanup(UbidotsCollection *coll);
+        int ubidots_collection_save(UbidotsCollection *collection);
+        void ubidots_collection_cleanup(UbidotsCollection *collection);
+        
+        void add_value_with_name(UbidotsCollection *collection, char * name, double value);
+        void add_value(UbidotsCollection *collection, char * variable_id, double value);
+        
         
         bool send_ubidots(int number, ... );
-        
         char* _token;
 
     private:
         void assemble(char* chain, char* method, char* endpoint);
         void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
+        int number_cache;
+        UbidotsCollection * cache;
+        char* pch;
         
 
 };
