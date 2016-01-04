@@ -11,6 +11,7 @@
 #define USER_AGENT  "Ubidots/v1 Particle/1.0"
 #define BASE_URL  "things.ubidots.com"
 #define ATTEMPS  6
+#define BUFFER_HTTP_SIZE 1500
 
 
 /*
@@ -44,9 +45,9 @@ class ubidots {
     ubidots(char* token);
     char* get_or_create_datasource();
     char* get_or_create_variable(char* ID, char* variableName);
-    bool send(char* chain, char* status, char* body);
+    bool send(char* chain, char* status, char* body, unsigned int size);
     char* parser_id(char* status, char* body);
-    bool send_with_reconect(char* chain, char* status, char* body);
+    bool send_with_reconect(char* chain, char* status, char* body, unsigned int size);
     Value * init_value(char* name, double value, char * id);
         
     int ubidots_collection_save(UbidotsCollection *collection);
@@ -62,7 +63,6 @@ class ubidots {
  private:
     void assemble(char* chain, char* method, char* endpoint);
     void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
-    int number_cache;
     UbidotsCollection * cache;
     char* pch;
         
