@@ -14,25 +14,25 @@
 
 
 /*
-typedef struct UbidotsCollection {
+  typedef struct UbidotsCollection {
   int n;
   int i;
   char  **variable_ids;
   float *values;
   char  *_ids;
-} UbidotsCollection;
+  } UbidotsCollection;
 */
 
 typedef struct Value {
-   char *name;
-   float value;
-   char *id;
-   Value *next;
+    char *name;
+    float value;
+    char *id;
+    Value *next;
 } Value;
 
 
 typedef struct UbidotsCollection {
-  Value *first;
+    Value *first;
 } UbidotsCollection;
 
 
@@ -40,31 +40,31 @@ typedef struct UbidotsCollection {
 //typedef tipoNodo *Lista;
 
 class ubidots {
-    public:
-        ubidots(char* token);
-        char* get_or_create_datasource();
-        char* get_or_create_variable(char* ID, char* variableName);
-        bool send(char* chain, char* status, char* body);
-        char* parser_id(char* status, char* body);
-        bool send_with_reconect(char* chain, char* status, char* body);
-        Value * init_value(char* name, double value, char * id);
+ public:
+    ubidots(char* token);
+    char* get_or_create_datasource();
+    char* get_or_create_variable(char* ID, char* variableName);
+    bool send(char* chain, char* status, char* body);
+    char* parser_id(char* status, char* body);
+    bool send_with_reconect(char* chain, char* status, char* body);
+    Value * init_value(char* name, double value, char * id);
         
-        int ubidots_collection_save(UbidotsCollection *collection);
-        void ubidots_collection_cleanup(UbidotsCollection *collection);
+    int ubidots_collection_save(UbidotsCollection *collection);
+    void ubidots_collection_cleanup(UbidotsCollection *collection);
         
-        void add_value_with_name(UbidotsCollection *collection, char * name, double value);
-        void add_value(UbidotsCollection *collection, char * variable_id, double value);
+    void add_value_with_name(UbidotsCollection *collection, char * name, double value);
+    void add_value(UbidotsCollection *collection, char * variable_id, double value);
         
         
-        bool send_ubidots(int number, ... );
-        char* _token;
+    bool send_ubidots(int number, ... );
+    char* _token;
 
-    private:
-        void assemble(char* chain, char* method, char* endpoint);
-        void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
-        int number_cache;
-        UbidotsCollection * cache;
-        char* pch;
+ private:
+    void assemble(char* chain, char* method, char* endpoint);
+    void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
+    int number_cache;
+    UbidotsCollection * cache;
+    char* pch;
         
 
 };
