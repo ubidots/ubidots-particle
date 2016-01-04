@@ -113,11 +113,19 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     char* body = (char *) malloc(sizeof(char) * 200);
     sprintf(data, "[");
     Value *nod = cache->first;
-    while(nod->next) {
-        sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}, ", data, nod->id , nod->value);
+    int count = 0;
+    while(nod) {
+        if(nod->value){
+            sprintf(data, "%s%s{\"variable\": \"%s\", \"value\":\"%f\"} ", data, (count>0) ? "," : " ", nod->id , nod->value);
+            count++;
+        }
+        nod->value = NULL;
         nod = nod->next;
+        
     }
-    sprintf(data, "%s{\"variable\": \"%s\", \"value\":\"%f\"}]", data, nod->id , nod->value);
+    sprintf(data, "%s]", data);
+    
+    nod->value = NULL;
     //sprintf(endpoint, "collections/values");
     assemble_with_data("POST", chain, "collections/values", data);
 #ifdef DEBUG_UBIDOTS
