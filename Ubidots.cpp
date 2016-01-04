@@ -74,23 +74,22 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
  * @return variable ID or NULL in bad connection
  */
 bool ubidots::send_ubidots( int number, ... ){
-
-   pch = get_or_create_datasource();
-   Serial.println(pch);
+    
+    pch = get_or_create_datasource();
+    Serial.println(pch);
+    return true;
    va_list vl;
    int i;
-   char * data = (char *) malloc(sizeof(char) * number*50);
    va_start( vl, number );
    Serial.println("holiiiiiiii");
-   sprintf(data, "[");
    for( i = 0; i< number; ++i ){
        char* name = (char *) malloc(sizeof(char) *20);
        name = va_arg( vl, char* );
        float value = va_arg( vl, double );
-       add_value_with_name(cache, name, value);
+       //add_value_with_name(cache, name, value);
        
    }
-   ubidots_collection_save(cache);
+   //ubidots_collection_save(cache);
     return true;
 }
 
@@ -121,8 +120,18 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
   assemble_with_data("POST", chain, endpoint, data);
   if(!send_with_reconect(chain, status, body)){
         Serial.print("Connection error");
+        free(chain);
+        free(endpoint);
+        free(data);
+        free(status);
+        free(body);
         return 1;
     }
+    free(chain);
+    free(endpoint);
+    free(data);
+    free(status);
+    free(body);
   return 0;
 }
 /**
@@ -180,10 +189,12 @@ char* ubidots::get_or_create_datasource(){
     particleid.toCharArray(ID, particleid.length());
     sprintf(endpoint, "datasources/?tag=%s", ID);
     assemble((char *) chain, (char *)"GET",(char *) endpoint); // send core id and check if it is living
+    
     if(!send_with_reconect(chain, status, body)){
         Serial.print("Connection error");
         return NULL;
     }
+    return body;
     memset(chain, 0, sizeof(chain));
     datasource = parser_id(status, body);
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
@@ -214,6 +225,11 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         #ifdef DEBUG_UBIDOTS
         Serial.print("Connection error");
         #endif
+        free(chain);
+        free(endpoint);
+        free(data);
+        free(status);
+        free(body);
         return NULL;
     }
     variable = parser_id(status, body);
@@ -223,6 +239,11 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         assemble_with_data("POST", chain, endpoint, data);
         send_with_reconect(chain, status, body);
     }
+    free(chain);
+    free(endpoint);
+    free(data);
+    free(status);
+    free(body);
     return variable;   
 }
 /**
@@ -273,9 +294,9 @@ bool ubidots::send_with_reconect(char* chain, char* status, char* body){
  * @arg body  This array is to save the body that you get.
  * @return true upon success, false upon error
  */
-boolean ubidots::send(char* chain, char* status, char* body){
+bool ubidots::send(char* chain, char* status, char* body){
     TCPClient client;
-    int len_result = 2048;
+    int len_result = 2500;
     char result[len_result];
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();
@@ -298,9 +319,14 @@ boolean ubidots::send(char* chain, char* status, char* body){
                 // Check that received character fits in buffer before storing.
                 if (bufferPosition < sizeof(result)-1){
                     result[bufferPosition] = c;
+                    bufferPosition++;
                 } 
-                bufferPosition++;
             }
+            Serial.println("aaaa");
+            Serial.println(bufferPosition);
+            Serial.println(sizeof(result));
+            Serial.println("bbbb");
+            
             result[bufferPosition] = '\0'; // Null-terminate buffer
             // Check that there hasn't been more than 5s since last read.
             timeout = millis() - lastRead > TIMEOUT;
@@ -323,11 +349,12 @@ boolean ubidots::send(char* chain, char* status, char* body){
         // Not super elegant way of finding the status code, but it works.
         raw_response.substring(9,12).toCharArray(status, 4);
         int bodyPos = raw_response.indexOf("\r\n\r\n");
-        raw_response.substring(bodyPos+4).toCharArray(body, sizeof(int[200]));
+        raw_response.substring(bodyPos+4).toCharArray(body, 200);
         #ifdef DEBUG_UBIDOTS
         Serial.println(body);
         Serial.println(status);
         #endif
+        free(result);
         return true;
     }
 

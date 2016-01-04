@@ -57,15 +57,14 @@ class ubidots {
         
         
         bool send_ubidots(int number, ... );
-        
         char* _token;
-        char*  pch;
 
     private:
         void assemble(char* chain, char* method, char* endpoint);
         void assemble_with_data(char* chain, char* method, char* endpoint, char* data);
         int number_cache;
         UbidotsCollection * cache;
+        char* pch;
         
 
 };
