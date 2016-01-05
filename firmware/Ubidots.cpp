@@ -93,7 +93,6 @@ bool ubidots::send_ubidots( int number, ... ){
     va_list vl;
     int i;
     va_start( vl, number );
-    Serial.println("holiiiiiiii");
     for( i = 0; i< number; ++i ){
         add_value_with_name(cache, va_arg( vl, char* ), va_arg( vl, double ));
     }
@@ -162,6 +161,7 @@ char* ubidots::assemble(char* method, char* endpoint){
     Serial.println("Assemble chain: ");
     Serial.println(chain);
 #endif
+return chain;
 }
 /** 
  * This function is to assemble the data with length and value of variable
@@ -312,6 +312,7 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
     bool error = false;
     bool timeout = false;
     if (client.connect("things.ubidots.com", 80)){        // Connect to the server    
+        Serial.println(chain);
         client.print(chain);
         client.print("\n\n");
         client.flush();
@@ -341,7 +342,7 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
         client.stop();
         if(result[0]=='\0'){
 #ifdef DEBUG_UBIDOTS
-            Serial.println("Error when particle recive the data\n array of content of c is NULL");
+            Serial.println("Error when particle recive the data\narray of content of c is NULL");
 #endif
             return false;
         }
