@@ -9,13 +9,18 @@ ubidots::ubidots(char* token){
     cache->first = NULL;
     cache->id_datasource_default = NULL;
 }
+/** 
+ * This function is to initialize the cache 
+ * @arg collection, is the cache struct
+ * @arg name is the name of the variable that you will save
+ * @arg value is the value of the variable that you will save
+ * @arg id is the id of the variable that you will add 
+ */
 Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, double value, char * id){
     Value * new_value = (Value *)malloc(sizeof(Value));
     new_value->name = name;
     new_value->value = value;
     new_value->next = NULL;
-    
-    
     if (id == NULL){
         if(collection->id_datasource_default==NULL){
             collection->id_datasource_default = get_or_create_datasource();
@@ -32,21 +37,19 @@ Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, dou
 #endif
     return new_value;
 }
+/** 
+ * This function is add value with name to the cache (for normal users) 
+ * @arg collection, is the cache struct
+ * @arg name is the name of the variable that you will save
+ * @arg value is the value of the variable that you will save
+ */
 void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, double value){
-    /* Si la lista está vacía */
-    Serial.println("\n\n init:w");
-    
     if(cache->first == NULL){
-        /* Añadimos la lista a continuación del nuevo nodo */
         cache->first = check_init_value(collection, name, value, NULL); 
-        /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
     }else{
         Value * nod = cache->first;
-        
         Serial.println(nod->name);
         Serial.println(name);
-        
-        
         int cmp = strcmp(name, nod->name);
         Serial.println(cmp);
         while(nod->next || cmp == 0) {
@@ -54,23 +57,21 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
                 nod->value = value;
                 return;
             }
-            Serial.println("sizeof(nod->next)");
             nod = nod->next;
             cmp = strcmp(name, nod->name);
-            
         }
-        Serial.println("sali");
         nod->next = check_init_value(collection, name, value, NULL);
-        
     }
 }
-
+/** 
+ * This function is add value to the cache (for experts users with ID) 
+ * @arg collection, is the cache struct
+ * @arg variable_id is the id of the variable that you will add
+ * @arg value is the value of the variable that you will save
+ */
 void ubidots::add_value(UbidotsCollection *collection, char * variable_id, double value){
-     /* Si la lista está vacía */
     if(cache->first == NULL){
-        /* Añadimos la lista a continuación del nuevo nodo */
         cache->first = check_init_value(collection, NULL, value, variable_id); 
-        /* Ahora, el comienzo de nuestra lista es en nuevo nodo */
     }else{
         Value *nod = cache->first;
         while(nod->next || strcmp(variable_id, nod->id) == 0) {
@@ -81,15 +82,12 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
             nod = nod->next;
         }
         nod->next = check_init_value(collection, NULL, value, variable_id);
-        
-        
     }
 }
 /** 
- * This function is to save infinite values in the API
- * @arg ID This array contains the datasource ID
- * @arg variableName  This contains the variable name 
- * @return variable ID or NULL in bad connection
+ * This function is to send infinite variables to the API (photon only support 10 variables)
+ * @arg number is the quantity of variables that you will send
+ * @return true upon success
  */
 bool ubidots::send_ubidots( int number, ... ){
     va_list vl;
@@ -102,10 +100,9 @@ bool ubidots::send_ubidots( int number, ... ){
     ubidots_collection_save(cache);
     return true;
 }
-
 /**
- * Save a collection.
- * @arg coll Collection to save.
+ * This function is to assemble the collection data
+ * @arg collection is the Collection to save.
  * @reutrn Zero upon success, non-zero upon error.
  */
 int ubidots::ubidots_collection_save(UbidotsCollection *collection){
@@ -123,21 +120,19 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
         }
         nod->value = NULL;
         nod = nod->next;
-        
     }
     sprintf(data, "%s]", data);
-    
     nod->value = NULL;
-    //sprintf(endpoint, "collections/values");
-    assemble_with_data("POST", chain, "collections/values/?force=true", data);
+    chain = assemble_with_data("POST", "collections/values/?force=true", data);
 #ifdef DEBUG_UBIDOTS
+    Serial.print("Your data of bady that you will send to ubidots is:\n");
     Serial.println(data);
 #endif
-    
-    if(!send_with_reconect(chain, status, body, 190)){
+    if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("Connection error");
-#endif DEBUG_UBIDOTS
+        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+#endif
+        System.reset();
         return 1;
     }
     return 0;
@@ -146,7 +141,7 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
  * Cleanup a collection when after it is no longer being used.
  * @arg coll Pointer to the collection made by ubidots_collection_init().
  */
-void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
+void ubidots::ubidots_collection_cleanup(UbidotsCollection *collection){
     /*for (i = 0; i < n; i++){
       free(coll->id[i]);
       }
@@ -160,9 +155,11 @@ void ubidots::ubidots_collection_cleanup(UbidotsCollection *coll){
  * @arg method   This array contains GET or POST method
  * @arg endpoint  This array contains the endpoint to send to the API
  */
-void ubidots::assemble(char* chain, char* method, char* endpoint){
+char* ubidots::assemble(char* method, char* endpoint){
+    char* chain = (char *) malloc(sizeof(char) * 700);
     sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s\nConnection: close", method, endpoint, BASE_URL, USER_AGENT, _token);
 #ifdef DEBUG_UBIDOTS
+    Serial.println("Assemble chain: ");
     Serial.println(chain);
 #endif
 }
@@ -174,16 +171,19 @@ void ubidots::assemble(char* chain, char* method, char* endpoint){
  * @arg endpoint  This array contains the endpoint to send to the API
  * @arg data  This array contains the value to POST to the Ubidots API
  */
-void ubidots::assemble_with_data(char* method, char* chain, char* endpoint, char* data){
-    assemble(chain, method, endpoint);
+char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
+    char* chain = (char *) malloc(sizeof(char) * 700);
+    chain = assemble(method, endpoint);
     sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", chain, strlen(data), data);
 #ifdef DEBUG_UBIDOTS
+    Serial.println("Assemble_with_data chain: ");
     Serial.println(chain);
 #endif
+    return chain;
 }
 /**
  * This function is to get or post datasource
- * @return false when the connection fails
+ * @return datasource ID upon succes or NULL in bad connection
  */
 char* ubidots::get_or_create_datasource(){
     char* chain = (char *) malloc(sizeof(char) * 700);
@@ -196,17 +196,25 @@ char* ubidots::get_or_create_datasource(){
     String particleid = Particle.deviceID();
     particleid.toCharArray(ID, particleid.length());
     sprintf(endpoint, "datasources/?tag=%s", ID);
-    assemble((char *) chain, (char *)"GET",(char *) endpoint); // send core id and check if it is living
-    
-    if(!send_with_reconect(chain, status, body, 190)){
-        Serial.print("Connection error");
+    chain = assemble((char *)"GET",(char *) endpoint);
+    if(!send_with_reconnect(chain, status, body, 190)){
+#ifdef DEBUG_UBIDOTS
+        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+#endif
+        System.reset();
         return NULL;
     }
     datasource = parser_id(status, body);
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
         sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", ID);
-        assemble_with_data("POST", chain, endpoint, data);
-        send_with_reconect(chain, status, body, 190);
+        chain = assemble_with_data("POST", endpoint, data);
+        if(!send_with_reconnect(chain, status, body, 190)){
+#ifdef DEBUG_UBIDOTS
+        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+#endif
+        System.reset();
+        return NULL;
+        }
         datasource = parser_id(status, body);
     }
     return datasource;
@@ -226,30 +234,35 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
     char* body = (char *) malloc(sizeof(char) * 200);
     char* variable = (char *) malloc(sizeof(char) * 24);
     sprintf(endpoint, "datasources/%s/variables/?tag=%s", ID, variableName);
-    assemble((char *) chain, (char *)"GET",(char *) endpoint); // send core id and check if it is living
-    if(!send_with_reconect(chain, status, body, 190)){
+    chain = assemble((char *)"GET",(char *) endpoint); // send core id and check if it is living
+    if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("Connection error");
+        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
 #endif
+        System.reset();
         return NULL;
     }
     variable = parser_id(status, body);
     if(variable==NULL && strstr(body,"\"count\": 0")!=NULL){
         sprintf(data, "{\"name\": \"%s\",\"tags\":[\"%s\"]}", variableName, variableName);
-        assemble_with_data("POST", chain, endpoint, data);
-        send_with_reconect(chain, status, body, 190);
+        chain = assemble_with_data("POST", endpoint, data);
+        if(!send_with_reconnect(chain, status, body, 190)){
+#ifdef DEBUG_UBIDOTS
+        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+#endif
+        System.reset();
+        return NULL;
+        }
         variable = parser_id(status, body);
     }
     return variable;   
 }
 /**
- * This function is to know if there is spark ID
- * datasource in the API
+ * This function is to parser IDs of datasource or variables
  * @arg Status This array contains the connection status of
  * the API 
  * @arg body   This array contains the body of the API
- * @arg datasource  This array is to save the ID of the API response 
- * @return true if there is created ID, false if there is not created ID
+ * @return the ID upon succes or NULL when it's fail
  */
 char* ubidots::parser_id(char* status, char* body){
     String raw_response(body);
@@ -258,6 +271,7 @@ char* ubidots::parser_id(char* status, char* body){
     if((strstr(status, "200")!=NULL || strstr(status, "201")!=NULL) && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
         raw_response.substring(bodyPos+7).toCharArray(ID, 25);
 #ifdef DEBUG_UBIDOTS
+        Serial.print("Your id to return in paser_id is: ");
         Serial.println(ID);
 #endif
         return ID;
@@ -273,7 +287,7 @@ char* ubidots::parser_id(char* status, char* body){
  * @arg body  This array is to save the body that you get.
  * @return true upon success, false upon i>ATTEMPS
  */
-bool ubidots::send_with_reconect(char* chain, char* status, char* body, unsigned int size){
+bool ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigned int size){
     int i = 0;
     while(!send(chain, status, body, size)){
         if(i > ATTEMPS){
@@ -306,7 +320,6 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
             while (client.available()){
                 char c = client.read();
                 lastRead = millis();
-                Serial.print(c);
                 if (c == -1){
                     error = true;
                     Serial.println("HttpClient>\tError: No data available.");
@@ -326,23 +339,25 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
         }
         while (client.connected() && !timeout && !error);
         client.stop();
-        // If result doesnt have any thing, return false
         if(result[0]=='\0'){
 #ifdef DEBUG_UBIDOTS
-            Serial.println("Error when particle recive the data");
+            Serial.println("Error when particle recive the data\n array of content of c is NULL");
 #endif
             return false;
         }
         String raw_response(result);
-        // Not super elegant way of finding the status code, but it works.
         raw_response.substring(9,12).toCharArray(status, 4);
         int bodyPos = raw_response.indexOf("\r\n\r\n");
         raw_response.substring(bodyPos+4).toCharArray(body, size);
 #ifdef DEBUG_UBIDOTS
+        Serial.println("Your body is: --------------------body-----------------");
         Serial.println(body);
+        Serial.println("--------------------body END---------------------------");
+        Serial.println("Your status code is: --------------------status code-----------------");
         Serial.println(status);
+        Serial.println("--------------------------status code END----------------------------");
 #endif
-        free(result);
+        delete [] result;
         return true;
     }
 
