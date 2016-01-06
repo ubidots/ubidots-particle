@@ -29,13 +29,15 @@ typedef struct UbidotsCollection {
 
 class ubidots {
  private:
+    TCPClient _client;
     Value * check_init_value(UbidotsCollection *collection, char* name, double value, char * id);
     UbidotsCollection * cache;
     char* assemble(char* method, char* endpoint);
     char* assemble_with_data(char* method, char* endpoint, char* data);
-    String particle_id;
+    char* p_id;
     char* _token; 
-    TCPClient _client;
+    
+    
     
  public:
     ubidots();
