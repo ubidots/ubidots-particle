@@ -9,11 +9,9 @@ ubidots::ubidots(char* token){
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
     cache->id_datasource_default = NULL;
-    String particleid;
-    particleid = Particle.deviceID();
-    char IDs[particleid.length()];
-    particleid.toCharArray(IDs, particleid.length()+1);
-    particle_id = particleid.c_str();
+
+    
+    particle_id = Particle.deviceID();
 }
 
 /** 
@@ -197,15 +195,18 @@ char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
  * @return datasource ID upon succes or NULL in bad connection
  */
 char* ubidots::get_or_create_datasource(){
-    Serial.println(particle_id);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
     char* body = (char *) malloc(sizeof(char) * 200);
     char *datasource;
     char *chain;
+    char p_id[particle_id.length()];
+    particle_id.toCharArray(p_id, particle_id.length()+1);
+    Serial.println(particle_id);
+    Serial.println(p_id);
     
-    sprintf(endpoint, "datasources/?tag=%s", particle_id);
+    sprintf(endpoint, "datasources/?tag=%s", p_id);
     //chain = NULL;
     //tres
     chain = assemble("GET", endpoint);
@@ -228,7 +229,7 @@ char* ubidots::get_or_create_datasource(){
 
 
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
-        sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", particle_id);
+        sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", p_id);
         chain = assemble_with_data("POST", endpoint, data);
         datasource = parser_id(status, body);
     
@@ -335,8 +336,6 @@ bool ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigne
  * @return true upon success, false upon error
  */
 bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
-    TCPClient _client;
-    return true;
     char* result = (char *) malloc(sizeof(char) * BUFFER_HTTP_SIZE);
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();

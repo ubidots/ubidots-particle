@@ -33,8 +33,9 @@ class ubidots {
     UbidotsCollection * cache;
     char* assemble(char* method, char* endpoint);
     char* assemble_with_data(char* method, char* endpoint, char* data);
-    const char * particle_id;
+    String particle_id;
     char* _token; 
+    TCPClient _client;
     
  public:
     ubidots();
