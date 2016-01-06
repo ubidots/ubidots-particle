@@ -10,8 +10,9 @@
 
 #define USER_AGENT  "Ubidots/v1 Particle/1.0"
 #define BASE_URL  "things.ubidots.com"
-#define ATTEMPS  10
+#define ATTEMPS  3
 #define BUFFER_HTTP_SIZE 1500
+
 
 typedef struct Value {
     char *name;
@@ -25,8 +26,18 @@ typedef struct UbidotsCollection {
     Value *first;
 } UbidotsCollection;
 
+
 class ubidots {
+ private:
+    Value * check_init_value(UbidotsCollection *collection, char* name, double value, char * id);
+    UbidotsCollection * cache;
+    char* assemble(char* method, char* endpoint);
+    char* assemble_with_data(char* method, char* endpoint, char* data);
+    const char * particle_id;
+    char* _token; 
+    
  public:
+    ubidots();
     ubidots(char* token);
     char* get_or_create_datasource();
     char* get_or_create_variable(char* ID, char* variableName);
@@ -42,15 +53,7 @@ class ubidots {
     void add_value(UbidotsCollection *collection, char * variable_id, double value);
         
         
-    bool send_ubidots(int number, ... );
-    char* _token;
-
- private:
-    char* assemble(char* method, char* endpoint);
-    char* assemble_with_data(char* method, char* endpoint, char* data);
-    Value * check_init_value(UbidotsCollection *collection, char* name, double value, char * id);
-    UbidotsCollection * cache;
-        
-
+    bool send_ubidots(int number, ... );  
+    
 };
 #endif

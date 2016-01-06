@@ -3,12 +3,19 @@ static const uint16_t TIMEOUT = 10000;
 /**
  * Constructor.
  */
+ 
 ubidots::ubidots(char* token){
     _token = token;
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
     cache->id_datasource_default = NULL;
+    String particleid;
+    particleid = Particle.deviceID();
+    char IDs[particleid.length()];
+    particleid.toCharArray(IDs, particleid.length()+1);
+    particle_id = particleid.c_str();
 }
+
 /** 
  * This function is to initialize the cache 
  * @arg collection, is the cache struct
@@ -24,8 +31,10 @@ Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, dou
     if (id == NULL){
         if(collection->id_datasource_default==NULL){
             collection->id_datasource_default = get_or_create_datasource();
+            //uno
         }
         new_value->id = get_or_create_variable(collection->id_datasource_default, name);
+        //dos
         Serial.println(new_value->id);
         
     }else{
@@ -131,9 +140,12 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
 #endif
-        System.reset();
         return 1;
     }
+    delete [] chain;
+    delete [] data;
+    delete [] status;
+    delete [] body;
     return 0;
 }
 /**
@@ -155,7 +167,7 @@ void ubidots::ubidots_collection_cleanup(UbidotsCollection *collection){
  * @arg endpoint  This array contains the endpoint to send to the API
  */
 char* ubidots::assemble(char* method, char* endpoint){
-    char* chain = (char *) malloc(sizeof(char) * 700);
+    char* chain = (char *) malloc(sizeof(char) * 300);
     sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s\nConnection: close", method, endpoint, BASE_URL, USER_AGENT, _token);
 #ifdef DEBUG_UBIDOTS
     Serial.println("Assemble chain: ");
@@ -172,9 +184,8 @@ return chain;
  * @arg data  This array contains the value to POST to the Ubidots API
  */
 char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
-    char* chain = (char *) malloc(sizeof(char) * 700);
-    chain = assemble(method, endpoint);
-    sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", chain, strlen(data), data);
+    char* chain; 
+    sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n", assemble(method, endpoint), strlen(data), data);
 #ifdef DEBUG_UBIDOTS
     Serial.println("Assemble_with_data chain: ");
     Serial.println(chain);
@@ -186,35 +197,49 @@ char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
  * @return datasource ID upon succes or NULL in bad connection
  */
 char* ubidots::get_or_create_datasource(){
-    char* chain = (char *) malloc(sizeof(char) * 700);
+    Serial.println(particle_id);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
     char* body = (char *) malloc(sizeof(char) * 200);
-    char * datasource = (char *) malloc(sizeof(char) * 24);
-    char ID[24];
-    String particleid = Particle.deviceID();
-    particleid.toCharArray(ID, particleid.length());
-    sprintf(endpoint, "datasources/?tag=%s", ID);
-    chain = assemble((char *)"GET",(char *) endpoint);
+    char *datasource;
+    char *chain;
+    
+    sprintf(endpoint, "datasources/?tag=%s", particle_id);
+    //chain = NULL;
+    //tres
+    chain = assemble("GET", endpoint);
+    
+    
     if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
 #endif
-        System.reset();
         return NULL;
     }
-    datasource = parser_id(status, body);
+    free(chain);
+    free(endpoint);
+    free(data);
+    free(status);
+    free(body);
+    return datasource;
+    
+  
+
+
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
-        sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", ID);
+        sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", particle_id);
         chain = assemble_with_data("POST", endpoint, data);
+        datasource = parser_id(status, body);
+    
+        
         if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
 #endif
-        System.reset();
         return NULL;
         }
+        
         datasource = parser_id(status, body);
     }
     return datasource;
@@ -227,6 +252,7 @@ char* ubidots::get_or_create_datasource(){
  * @return variable ID or NULL in bad connection
  */
 char* ubidots::get_or_create_variable(char* ID, char* variableName){
+
     char* chain = (char *) malloc(sizeof(char) * 700);
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
@@ -239,7 +265,6 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
 #endif
-        System.reset();
         return NULL;
     }
     variable = parser_id(status, body);
@@ -249,12 +274,16 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
-#endif
-        System.reset();
+#endif  
         return NULL;
         }
         variable = parser_id(status, body);
     }
+    free(chain);
+    free(endpoint);
+    free(data);
+    free(status);
+    free(body);
     return variable;   
 }
 /**
@@ -266,9 +295,10 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
  */
 char* ubidots::parser_id(char* status, char* body){
     String raw_response(body);
-    char* ID = (char *) malloc(sizeof(char) * 24);
     int bodyPos = raw_response.indexOf("\"id\": ");
+    
     if((strstr(status, "200")!=NULL || strstr(status, "201")!=NULL) && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
+        char* ID = (char *) malloc(sizeof(char) * 24);
         raw_response.substring(bodyPos+7).toCharArray(ID, 25);
 #ifdef DEBUG_UBIDOTS
         Serial.print("Your id to return in paser_id is: ");
@@ -305,45 +335,85 @@ bool ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigne
  * @return true upon success, false upon error
  */
 bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
-    TCPClient client;
+    TCPClient _client;
+    return true;
     char* result = (char *) malloc(sizeof(char) * BUFFER_HTTP_SIZE);
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();
     bool error = false;
     bool timeout = false;
-    if (client.connect("things.ubidots.com", 80)){        // Connect to the server    
-        Serial.println(chain);
-        client.print(chain);
-        client.print("\n\n");
-        client.flush();
+    int i = 0;
+    while(!_client.connected() && i<6){
+        i++;
+        _client.stop();
+        _client.connect("things.ubidots.com", 80);
+    }
+    if (_client.connected()){        // Connect to the server    
+        _client.stop();
+        free (result);
+        return true;
+        _client.print(chain);
+        _client.print("\n\n");
+        _client.flush();
+        
         do {
-            delay(200);
-            while (client.available()){
-                char c = client.read();
+#ifdef DEBUG_UBIDOTS
+            int bytes = _client.available();
+            if(bytes) {
+                Serial.print("\r\nHttpClient>\tReceiving TCP transaction of ");
+                Serial.print(bytes);
+                Serial.println(" bytes.");
+            }
+#endif
+            while (_client.available()){
+                char c = _client.read();
+#ifdef DEBUG_UBIDOTS
+                Serial.print(c);
+#endif
                 lastRead = millis();
+                
                 if (c == -1){
                     error = true;
                     Serial.println("HttpClient>\tError: No data available.");
                     break;
-                }    
+                }  
                 // Check that received character fits in buffer before storing.
-                if (bufferPosition < BUFFER_HTTP_SIZE-1){
+                if (bufferPosition < BUFFER_HTTP_SIZE-1) {
                     result[bufferPosition] = c;
-                    bufferPosition++;
+                } else if ((bufferPosition == BUFFER_HTTP_SIZE-1)) {
+                    result[bufferPosition] = '\0'; // Null-terminate buffer
+                    _client.stop();
+                    error = true;
+    
+#ifdef DEBUG_UBIDOTS
+                    Serial.println("HttpClient>\tError: Response body larger than buffer.");
+#endif
                 }
+                bufferPosition++;
             }
             result[bufferPosition] = '\0'; // Null-terminate buffer
+    
+#ifdef DEBUG_UBIDOTS
+            if (bytes) {
+                Serial.print("\r\nHttpClient>\tEnd of TCP transaction.");
+            }
+#endif
             // Check that there hasn't been more than 5s since last read.
             timeout = millis() - lastRead > TIMEOUT;
             // Unless there has been an error or timeout wait 200ms to allow server
             // to respond or close connection.
+            if (!error && !timeout){
+            delay(200);
+            }   
         }
-        while (client.connected() && !timeout && !error);
-        client.stop();
+        while (_client.connected() && !timeout && !error);
+        delay(200);
+        _client.stop();
         if(result[0]=='\0'){
 #ifdef DEBUG_UBIDOTS
             Serial.println("Error when particle recive the data\narray of content of c is NULL");
 #endif
+            free(result);
             return false;
         }
         String raw_response(result);
@@ -358,7 +428,8 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
         Serial.println(status);
         Serial.println("--------------------------status code END----------------------------");
 #endif
-        delete [] result;
+        free(result);
+        delay(10);
         return true;
     }
 
