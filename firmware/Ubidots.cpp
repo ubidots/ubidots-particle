@@ -29,11 +29,9 @@ Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, dou
     new_value->next = NULL;
     if (id == NULL){
         if(collection->id_datasource_default==NULL){
-            collection->id_datasource_default = get_or_create_datasource();
-            //uno
+            collection->id_datasource_default = get_or_create_datasource(NULL);
         }
         new_value->id = get_or_create_variable(collection->id_datasource_default, name);
-        //dos
         Serial.println(new_value->id);
         
     }else{
@@ -62,9 +60,6 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
                 nod->value = value;
                 return;
             }
-            Serial.println(cmp);
-            Serial.println(nod->name);
-            Serial.println(name);
             nod = nod->next;
             cmp = strcmp(name, nod->name);
         }
@@ -104,7 +99,6 @@ bool ubidots::send_ubidots( int number, ... ){
     for( i = 0; i< number; ++i ){
         add_value_with_name(cache, va_arg( vl, char* ), va_arg( vl, double ));
     }
-    //return true;
     ubidots_collection_save(cache);
     return true;
 }
@@ -122,16 +116,11 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
     sprintf(data, "[");
     Value *nod = cache->first;
     int count = 0;
-    
     while(nod) {
-        Serial.println(nod->id);
         if(nod->value){
-            
             sprintf(data, "%s%s{\"variable\": \"%s\", \"value\":\"%f\"} ", data, (count>0) ? "," : " ", nod->id , nod->value);
             count++;
-            
         }
-        
         nod->value = NULL;
         nod = nod->next;
     }
@@ -210,21 +199,20 @@ char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
  * This function is to get or post datasource
  * @return datasource ID upon succes or NULL in bad connection
  */
-char* ubidots::get_or_create_datasource(){
-    
+char* ubidots::get_or_create_datasource(char* ds_name){
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
     char* body = (char *) malloc(sizeof(char) * 200);
     char *datasource;
     char *chain;
-    Serial.println(p_id);
-    sprintf(endpoint, "datasources/?tag=%s", p_id);
-    //tres
+    if(ds_name!= NULL){
+        sprintf(endpoint, "datasources/?tag=%s", ds_name);
+    }else{
+        sprintf(endpoint, "datasources/?tag=%s", p_id);
+    }
     
     chain = assemble("GET", endpoint);
-    
-    
     if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
@@ -238,15 +226,9 @@ char* ubidots::get_or_create_datasource(){
         return NULL;
     }
     datasource = parser_id(status, body);
-  
-
-
     if(datasource==NULL && strstr(body,"\"count\": 0")!=NULL){
         sprintf(data, "{\"name\": \"Particle\",\"tags\":[\"%s\"]}", p_id);
         chain = assemble_with_data("POST", endpoint, data);
-        datasource = parser_id(status, body);
-    
-        
         if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
         Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
@@ -259,6 +241,7 @@ char* ubidots::get_or_create_datasource(){
         free(body);
         return NULL;
         }
+        datasource = parser_id(status, body);
     }
     free(chain);
     free(endpoint);
@@ -275,7 +258,6 @@ char* ubidots::get_or_create_datasource(){
  * @return variable ID or NULL in bad connection
  */
 char* ubidots::get_or_create_variable(char* ID, char* variableName){
-
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
@@ -331,7 +313,6 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
 char* ubidots::parser_id(char* status, char* body){
     String raw_response(body);
     int bodyPos = raw_response.indexOf("\"id\": ");
-    
     if((strstr(status, "200")!=NULL || strstr(status, "201")!=NULL) && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
         char* ID = (char *) malloc(sizeof(char) * 24);
         raw_response.substring(bodyPos+7).toCharArray(ID, 25);
@@ -356,7 +337,6 @@ bool ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigne
     int i = 0;
     while(!send(chain, status, body, size)){
         if(i > ATTEMPS){
-            System.reset();
             return false;
         }
         i++;
@@ -377,7 +357,6 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
     bool error = false;
     bool timeout = false;
     int i = 0;
-    
     while(!_client.connected() && i<6){
         i++;
         _client.stop();
@@ -390,13 +369,10 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
         _client.write(chain);
         _client.print("\n\n");
         _client.flush();
-        
-        
         do {
             while (_client.available()){
                 char c = _client.read();
                 lastRead = millis();
-                
                 if (c == -1){
                     error = true;
                     Serial.println("HttpClient>\tError: No data available.");
@@ -446,5 +422,4 @@ bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
         delay(10);
         return true;
     }
-
 }

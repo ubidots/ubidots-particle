@@ -42,7 +42,7 @@ class ubidots {
  public:
     ubidots();
     ubidots(char* token);
-    char* get_or_create_datasource();
+    char* get_or_create_datasource(char* ds_name);
     char* get_or_create_variable(char* ID, char* variableName);
     bool send(char* chain, char* status, char* body, unsigned int size);
     char* parser_id(char* status, char* body);
