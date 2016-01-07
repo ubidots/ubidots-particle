@@ -15,14 +15,14 @@ Pay attention to the next example, in this example we send 3 variables:
 ``` cpp
 # "Ubidots.h"
 
-ubidots Ubidots("CCN8FrVulRYGulATkbaiR9Myx8qN2o"); // change this for your token
+Ubidots ubidots("CCN8FrVulGRBulATkbaiR9Myx8qN2o"); // change this for your token
 
 void setup() {
     Serial.begin(115200);   // initialize serial of Particle
 }
 void loop() {
 
-    Ubidots.send_ubidots( 3, "Temperature",2.3,"Servo", 3.2, "Humedity", 4.2 ); 
+    ubidots.send_ubidots( 3, "Temperature",2.3,"Servo", 3.2, "Humedity", 4.2 ); 
 }
 ```
 Note: You can put more variables in send function, rember you put first the name of your variable, and next of this one you put the value of the variable
