@@ -12,7 +12,6 @@ ubidots::ubidots(char* token){
     String str = Particle.deviceID();
     p_id = new char [str.length()+1];
     strcpy (p_id, str.c_str());
-    //particle_id = Particle.deviceID();
 }
 
 /** 
@@ -215,7 +214,7 @@ char* ubidots::get_or_create_datasource(char* ds_name){
     chain = assemble("GET", endpoint);
     if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+        Serial.print("send_with_reconnect fail 3 times, probably\n\r you have connection problem with your internet");
 #endif
         free(datasource);
         free(chain);
@@ -231,7 +230,7 @@ char* ubidots::get_or_create_datasource(char* ds_name){
         chain = assemble_with_data("POST", endpoint, data);
         if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+        Serial.print("send_with_reconnect fail 3 times, probably\n\r you have connection problem with your internet");
 #endif  
         free(datasource);
         free(chain);
@@ -268,7 +267,7 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
     chain = assemble((char *)"GET",(char *) endpoint); // send core id and check if it is living
     if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+        Serial.print("send_with_reconnect fail 3 times, probably\n\r you have connection problem with your internet");
 #endif
         free(variable);
         free(chain);
@@ -284,7 +283,7 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
         chain = assemble_with_data("POST", endpoint, data);
         if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("send_with_reconnect fail 6 times, probably\n you have connection problem with your internet");
+        Serial.print("send_with_reconnect fail 3 times, probably\n\r you have connection problem with your internet");
 #endif  
         free(variable);
         free(chain);
