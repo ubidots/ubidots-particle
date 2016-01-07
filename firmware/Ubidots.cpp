@@ -4,7 +4,7 @@ static const uint16_t TIMEOUT = 10000;
  * Constructor.
  */
  
-ubidots::ubidots(char* token){
+Ubidots::Ubidots(char* token){
     _token = token;
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
@@ -21,7 +21,7 @@ ubidots::ubidots(char* token){
  * @arg value is the value of the variable that you will save
  * @arg id is the id of the variable that you will add 
  */
-Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, double value, char * id){
+Value * Ubidots::check_init_value(UbidotsCollection *collection, char* name, double value, char * id){
     Value * new_value = (Value *)malloc(sizeof(Value));
     new_value->name = name;
     new_value->value = value;
@@ -48,7 +48,7 @@ Value * ubidots::check_init_value(UbidotsCollection *collection, char* name, dou
  * @arg name is the name of the variable that you will save
  * @arg value is the value of the variable that you will save
  */
-void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, double value){
+void Ubidots::add_value_with_name(UbidotsCollection *collection, char * name, double value){
     if(cache->first == NULL){
         cache->first = check_init_value(collection, name, value, NULL); 
     }else{
@@ -71,7 +71,7 @@ void ubidots::add_value_with_name(UbidotsCollection *collection, char * name, do
  * @arg variable_id is the id of the variable that you will add
  * @arg value is the value of the variable that you will save
  */
-void ubidots::add_value(UbidotsCollection *collection, char * variable_id, double value){
+void Ubidots::add_value(UbidotsCollection *collection, char * variable_id, double value){
     if(cache->first == NULL){
         cache->first = check_init_value(collection, NULL, value, variable_id); 
     }else{
@@ -91,7 +91,7 @@ void ubidots::add_value(UbidotsCollection *collection, char * variable_id, doubl
  * @arg number is the quantity of variables that you will send
  * @return true upon success
  */
-bool ubidots::send_ubidots( int number, ... ){
+bool Ubidots::send_ubidots( int number, ... ){
     va_list vl;
     int i;
     va_start( vl, number );
@@ -106,7 +106,7 @@ bool ubidots::send_ubidots( int number, ... ){
  * @arg collection is the Collection to save.
  * @reutrn Zero upon success, non-zero upon error.
  */
-int ubidots::ubidots_collection_save(UbidotsCollection *collection){
+int Ubidots::ubidots_collection_save(UbidotsCollection *collection){
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 800);
     char* status = (char *) malloc(sizeof(char) * 3);
@@ -152,7 +152,7 @@ int ubidots::ubidots_collection_save(UbidotsCollection *collection){
  * Cleanup a collection when after it is no longer being used.
  * @arg coll Pointer to the collection made by ubidots_collection_init().
  */
-void ubidots::ubidots_collection_cleanup(UbidotsCollection *collection){
+void Ubidots::ubidots_collection_cleanup(UbidotsCollection *collection){
     /*for (i = 0; i < n; i++){
       free(coll->id[i]);
       }
@@ -166,7 +166,7 @@ void ubidots::ubidots_collection_cleanup(UbidotsCollection *collection){
  * @arg method   This array contains GET or POST method
  * @arg endpoint  This array contains the endpoint to send to the API
  */
-char* ubidots::assemble(char* method, char* endpoint){
+char* Ubidots::assemble(char* method, char* endpoint){
     char* chain = (char *) malloc(sizeof(char) * 300);
     sprintf(chain, "%s /api/v1.6/%s HTTP/1.1\nHost: %s\nUser-Agent: %s \nX-Auth-Token: %s\nConnection: close", method, endpoint, BASE_URL, USER_AGENT, _token);
 #ifdef DEBUG_UBIDOTS
@@ -183,7 +183,7 @@ return chain;
  * @arg endpoint  This array contains the endpoint to send to the API
  * @arg data  This array contains the value to POST to the Ubidots API
  */
-char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
+char* Ubidots::assemble_with_data(char* method, char* endpoint, char* data){
     char* chain = (char *) malloc(sizeof(char) * 1000);
     char* chain_dos = assemble(method, endpoint);
     sprintf(chain,"%s\nContent-Type: application/json\nContent-Length:  %d\n\n%s\n",chain_dos , strlen(data), data);
@@ -198,7 +198,7 @@ char* ubidots::assemble_with_data(char* method, char* endpoint, char* data){
  * This function is to get or post datasource
  * @return datasource ID upon succes or NULL in bad connection
  */
-char* ubidots::get_or_create_datasource(char* ds_name){
+char* Ubidots::get_or_create_datasource(char* ds_name){
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
@@ -256,7 +256,7 @@ char* ubidots::get_or_create_datasource(char* ds_name){
  * @arg variable_name  This contains the variable name 
  * @return variable ID or NULL in bad connection
  */
-char* ubidots::get_or_create_variable(char* ds_id, char* variable_name){
+char* Ubidots::get_or_create_variable(char* ds_id, char* variable_name){
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
@@ -309,7 +309,7 @@ char* ubidots::get_or_create_variable(char* ds_id, char* variable_name){
  * @arg body   This array contains the body of the API
  * @return the ID upon succes or NULL when it's fail
  */
-char* ubidots::parser_id(char* status, char* body){
+char* Ubidots::parser_id(char* status, char* body){
     String raw_response(body);
     int bodyPos = raw_response.indexOf("\"id\": ");
     if((strstr(status, "200")!=NULL || strstr(status, "201")!=NULL) && strstr(body, "\"id\": ")!=NULL && strstr(body,"\"count\": 0")==NULL){
@@ -332,7 +332,7 @@ char* ubidots::parser_id(char* status, char* body){
  * @arg body  This array is to save the body that you get.
  * @return true upon success, false upon i>ATTEMPS
  */
-bool ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigned int size){
+bool Ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigned int size){
     int i = 0;
     while(!send(chain, status, body, size)){
         if(i > ATTEMPS){
@@ -349,7 +349,7 @@ bool ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigne
  * @arg body  This array is to save the body that you get.
  * @return true upon success, false upon error
  */
-bool ubidots::send(char* chain, char* status, char* body, unsigned int size){
+bool Ubidots::send(char* chain, char* status, char* body, unsigned int size){
     char* result = (char *) malloc(sizeof(char) * BUFFER_HTTP_SIZE);
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();

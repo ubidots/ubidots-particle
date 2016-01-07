@@ -27,21 +27,20 @@ typedef struct UbidotsCollection {
 } UbidotsCollection;
 
 
-class ubidots {
+class Ubidots {
  private:
     TCPClient _client;
-    Value * check_init_value(UbidotsCollection *collection, char* name, double value, char * id);
     UbidotsCollection * cache;
+    char* p_id;
+    char* _token;
+
+    Value * check_init_value(UbidotsCollection *collection, char* name, double value, char * id);
     char* assemble(char* method, char* endpoint);
     char* assemble_with_data(char* method, char* endpoint, char* data);
-    char* parser_id(char* status, char* body);
-    char* p_id;
-    char* _token; 
-    
-    
+    char* parser_id(char* status, char* body);    
     
  public:
-    ubidots(char* token);
+    Ubidots(char* token);
     char* get_or_create_datasource(char* ds_name);
     char* get_or_create_variable(char* ds_id, char* variable_name);
     bool send(char* chain, char* status, char* body, unsigned int size);
@@ -49,9 +48,7 @@ class ubidots {
     int ubidots_collection_save(UbidotsCollection *collection);
     void ubidots_collection_cleanup(UbidotsCollection *collection);        
     void add_value_with_name(UbidotsCollection *collection, char * name, double value);
-    void add_value(UbidotsCollection *collection, char * variable_id, double value);
-        
-        
+    void add_value(UbidotsCollection *collection, char * variable_id, double value);    
     bool send_ubidots(int number, ... );  
     
 };
