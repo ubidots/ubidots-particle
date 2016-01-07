@@ -253,17 +253,17 @@ char* ubidots::get_or_create_datasource(char* ds_name){
  * This function is to know the existence of variable
  * in the API
  * @arg ID This array contains the datasource ID
- * @arg variableName  This contains the variable name 
+ * @arg variable_name  This contains the variable name 
  * @return variable ID or NULL in bad connection
  */
-char* ubidots::get_or_create_variable(char* ID, char* variableName){
+char* ubidots::get_or_create_variable(char* ds_id, char* variable_name){
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* data = (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
     char* body = (char *) malloc(sizeof(char) * 200);
     char *variable;
     char *chain;
-    sprintf(endpoint, "datasources/%s/variables/?tag=%s", ID, variableName);
+    sprintf(endpoint, "datasources/%s/variables/?tag=%s", ds_id, variable_name);
     chain = assemble((char *)"GET",(char *) endpoint); // send core id and check if it is living
     if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
@@ -279,7 +279,7 @@ char* ubidots::get_or_create_variable(char* ID, char* variableName){
     }
     variable = parser_id(status, body);
     if(variable==NULL && strstr(body,"\"count\": 0")!=NULL){
-        sprintf(data, "{\"name\": \"%s\",\"tags\":[\"%s\"]}", variableName, variableName);
+        sprintf(data, "{\"name\": \"%s\",\"tags\":[\"%s\"]}", variable_name, variable_name);
         chain = assemble_with_data("POST", endpoint, data);
         if(!send_with_reconnect(chain, status, body, 190)){
 #ifdef DEBUG_UBIDOTS
