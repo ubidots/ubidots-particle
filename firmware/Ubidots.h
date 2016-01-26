@@ -38,6 +38,7 @@ class Ubidots {
     char* assemble(char* method, char* endpoint);
     char* assemble_with_data(char* method, char* endpoint, char* data);
     char* parser_id(char* status, char* body);    
+    char* parser_value(char* status, char* body);
     
  public:
     Ubidots(char* token);
@@ -49,7 +50,8 @@ class Ubidots {
     void ubidots_collection_cleanup(UbidotsCollection *collection);        
     void add_value_with_name(UbidotsCollection *collection, char * name, double value);
     void add_value(UbidotsCollection *collection, char * variable_id, double value);    
-    bool send_ubidots(int number, ... );  
+    bool send_ubidots(int number, ... );
+    float get_ubidots(char* id);
     
 };
 #endif
