@@ -3,5 +3,5 @@
 "version": "0.0.1",
 "author": "Mateo Velez - Metavix <mateo@ubidots.com>",
 "license": "Ubidots",
-"description": "A elaborated Ubidots library for Particle, with this one you can post variable to Ubidots and get variable from Ubidots."
+"description": "A work in progress Ubidots Library for the Spark Core."
 }
