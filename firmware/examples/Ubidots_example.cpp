@@ -22,11 +22,13 @@ void setup() {
     
 }
 void loop() {
-    
+    int quantityOfVariables
     float value1 = analogRead(A0);
     float value2 = analogRead(A1);
     float value3 = analogRead(A2);
-    ubidots.send_ubidots( value1, "Temperatura", ram,"Servomotor", value2, "Humedad", value3 );
+    // First arg is to send the quantity of variables, and the next arg is the name of the first
+    // variable between first variable value
+    ubidots.send_ubidots( quantityOfVariables, "Temperatura", value1,"Servomotor", value2, "Humedad", value3 );
     float n = ubidots.get_ubidots(ID);
     Serial.println(n);
     delay(300);
