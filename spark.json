@@ -1,6 +1,6 @@
 {
 "name": "Ubidots",
-"version": "0.0.1",
+"version": "0.0.2",
 "author": "Mateo Velez - Metavix <mateo@ubidots.com>",
 "license": "Ubidots",
 "description": "A work in progress Ubidots Library for the Spark Core."
