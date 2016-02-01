@@ -50,7 +50,7 @@ class Ubidots {
     void addValueWithName(UbidotsCollection *collection, char * name, double value);
     void addValue(UbidotsCollection *collection, char * variableId, double value);    
     bool sendUbidots(int number, ... );
-    float getUbidots(char* id);
+    float getUbidotsValue(char* id);
     
 };
 #endif
