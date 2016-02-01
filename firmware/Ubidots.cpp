@@ -28,8 +28,8 @@ Value * Ubidots::check_init_value(UbidotsCollection *collection, char* name, dou
     new_value->next = NULL;
     if (id == NULL){
         if(collection->id_datasource_default==NULL){
-            collection->id_datasource_default = get_or_create_datasource(NULL);
         }
+            collection->id_datasource_default = get_or_create_datasource(NULL);
         new_value->id = get_or_create_variable(collection->id_datasource_default, name);
         Serial.println(new_value->id);
         
@@ -98,7 +98,7 @@ bool Ubidots::send_ubidots( int number, ... ){
     int i;
     va_start( vl, number );
     for( i = 0; i< number; ++i ){
-            add_value_with_name(cache, va_arg( vl, char* ), va_arg( vl, double ));
+        add_value_with_name(cache, va_arg( vl, char* ), va_arg( vl, double ));
     }
     ubidots_collection_save(cache);
     return true;
@@ -108,31 +108,31 @@ bool Ubidots::send_ubidots( int number, ... ){
  * @arg id is the quantity of variables that you will send
  * @return value float value from the API
  */
-float Ubidots::get_ubidots(char* id){
+float Ubidots::get_ubidots_value(char* id){
     char* endpoint= (char *) malloc(sizeof(char) * 100);
     char* status = (char *) malloc(sizeof(char) * 3);
     char* body = (char *) malloc(sizeof(char) * 500);
-    float value;
-    char *chain;
+    char* chain;
+    char* value; 
     sprintf(endpoint, "variables/%s/values", id);
     chain = assemble("GET", endpoint);
+    free(endpoint);
     if(!send_with_reconnect(chain, status, body, 500)){
 #ifdef DEBUG_UBIDOTS
-        Serial.print("send_with_reconnect fail 3 times, probably\n\r you have connection problem with your internet");
+        Serial.print("send_with_reconnect failure 3 times,\n\r maybe you have problem with your connection");
 #endif
         free(chain);
-        free(endpoint);
         free(status);
         free(body);
         return NULL;
     }
-    chain = parser_value(status, body);
-    value = atof(chain);
     free(chain);
-    free(endpoint);
     free(status);
     free(body);
-    return value;
+    value = parser_value(status, body);
+    free(value);
+    float n = atof(chain);
+    return n;
 }
 /**
  * This function is to assemble the collection data
@@ -324,7 +324,7 @@ char* Ubidots::get_or_create_variable(char* ds_id, char* variable_name){
         free(body);
         return NULL;
         }
-        variable = parser_value(status, body);
+        variable = parser_id(status, body);
     }
     free(chain);
     free(endpoint);
@@ -390,6 +390,7 @@ bool Ubidots::send_with_reconnect(char* chain, char* status, char* body, unsigne
     int i = 0;
     while(!send(chain, status, body, size)){
         if(i > ATTEMPS){
+            System.reset();
             return false;
         }
         i++;
