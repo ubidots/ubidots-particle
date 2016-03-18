@@ -12,7 +12,7 @@ To use the library you will need:
 Here's a quick example of how to use the library to send 3 values:
 
 ``` cpp
-# "Ubidots.h"
+#include "Ubidots.h"
 
 Ubidots ubidots("CCN8FrVulGRBulATkbaiR9Myx8qN2o"); // change this with your token
 
