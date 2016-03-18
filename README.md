@@ -21,7 +21,7 @@ void setup() {
 }
 void loop() {
 
-    ubidots.send_ubidots( 3, "Temperature",2.3,"Servo", 3.2, "Humedity", 4.2 ); 
+    ubidots.sendUbidots( 3, "Temperature",2.3,"Servo", 3.2, "Humedity", 4.2 ); 
 }
 ```
 You can put more variables in the send function following the order of (..."variable_name", "value", "variable_name", "value").
