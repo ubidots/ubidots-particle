@@ -6,14 +6,14 @@
 
 Ubidots ubidots(TOKEN);
 
-
 void setup(){
-    Serial.begin(115200);
+	Serial.begin(115200);
 }
+
 void loop(){
-	int quantityOfVariables = 3; // Put here the quantity of variables that you will send
+	int var_count = 3; // Put here the amount of variables you will send
 	float value1 = analogRead(A0);
-	float value2 = analogRead(A0);
-	float value3 = analogRead(A0);    
-    ubidots.sendUbidots( quantityOfVariables, "variable_name_1",value1,"variable_name_2", value2, "variable_name_3", value3 );
+	float value2 = analogRead(A1);
+	float value3 = analogRead(A2);
+	ubidots.sendUbidots(var_count, "variable_name_1", value1, "variable_name_2", value2, "variable_name_3", value3);
 }
