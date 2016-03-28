@@ -3,12 +3,17 @@ static const uint16_t TIMEOUT = 10000;
 /**
  * Constructor.
  */
- 
+
 Ubidots::Ubidots(char* token){
+    Ubidots(token, NULL);
+}
+ 
+Ubidots::Ubidots(char* token, char* datasourceName){
     _token = token;
     cache = (UbidotsCollection *) malloc(sizeof(UbidotsCollection));
     cache->first = NULL;
-    cache->idDatasourceDefault = NULL;    
+    cache->idDatasourceDefault = NULL;
+    dsName = datasourceName;    
     String str = Particle.deviceID();
     pId = new char [str.length()+1];
     strcpy (pId, str.c_str());
@@ -29,7 +34,7 @@ Value * Ubidots::checkInitValue(UbidotsCollection *collection, char* name, doubl
     if (id == NULL){
         if(collection->idDatasourceDefault==NULL){
         }
-            collection->idDatasourceDefault = getOrCreateDatasource(NULL);
+            collection->idDatasourceDefault = getOrCreateDatasource(dsName);
         newValue->id = getOrCreateVariable(collection->idDatasourceDefault, name);
         Serial.println(newValue->id);
         

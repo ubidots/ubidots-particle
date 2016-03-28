@@ -33,6 +33,7 @@ class Ubidots {
     UbidotsCollection * cache;
     char* pId;
     char* _token;
+    char* dsName;
 
     Value * checkInitValue(UbidotsCollection *collection, char* name, double value, char * id);
     char* assemble(char* method, char* endpoint);
@@ -42,6 +43,7 @@ class Ubidots {
     
  public:
     Ubidots(char* token);
+    Ubidots(char* token, char* datasourceName);
     char* getOrCreateDatasource(char* ds_name);
     char* getOrCreateVariable(char* dsId, char* variableName);
     bool send(char* chain, char* status, char* body, unsigned int size);
