@@ -82,6 +82,7 @@ void loop() {
     float value;
     value = ubidots.getValueWithDatasource(DATASOURCENAME, "Name_of_your_variable");
     ubidots.getUbidotsValue(ID);
+    delay(60000);  // Delay of one minute
 }
 
 ```
