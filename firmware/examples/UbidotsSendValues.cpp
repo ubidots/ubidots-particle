@@ -4,9 +4,9 @@
 
 
 #define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
-#define DATASOURCENAME "Your_datasource_name"  // Put here your Ubidots datasource name
+#define DATASOURCE_NAME "Your_datasource_name"  // Put here your Ubidots datasource name
 
-Ubidots ubidots(TOKEN, DATASOURCENAME);
+Ubidots ubidots(TOKEN, DATASOURCE_NAME);
 
 void setup() {
     Serial.begin(115200);
