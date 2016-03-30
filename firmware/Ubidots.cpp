@@ -27,8 +27,8 @@ float Ubidots::getValueWithDatasource(char* dsName, char* idName) {
     if (_client.connected()) {  // Connect to the server
 #ifdef DEBUG_UBIDOTS
         Serial.println("Client connected");
-#endif
         Serial.println(allData);
+#endif
         _client.println(allData);
         _client.flush();
     }
@@ -103,7 +103,9 @@ bool Ubidots::sendAll() {
         }
     }
     sprintf(allData, "%s|end", allData);
+#ifdef DEBUG_UBIDOTS
     Serial.println(allData);
+#endif
     while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -112,7 +114,6 @@ bool Ubidots::sendAll() {
 #ifdef DEBUG_UBIDOTS
         Serial.println("Client connected");
 #endif
-        Serial.println(allData);
         _client.println(allData);
         _client.flush();
     }
@@ -122,7 +123,9 @@ bool Ubidots::sendAll() {
     }
     while (_client.available()) {
         char c = _client.read();
+#ifdef DEBUG_UBIDOTS
         Serial.write(c);
+#endif
     }
     currentValue = 0;
     _client.stop();
