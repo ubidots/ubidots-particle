@@ -17,7 +17,7 @@ typedef struct Value {
 } Value;
 
 class Ubidots {
-   public:
+ public:
       Ubidots(char* token);
       bool sendAll();
       bool sendAll(char* dsName);
@@ -26,8 +26,8 @@ class Ubidots {
       void add(char *variable_id, double value, char *ctext1);
       void add(char *variable_id, double value, char *ctext1, char *ctext2);
       float getValueWithDatasource(char* dsName, char* idName);
-   
-   private:
+
+ private:
       TCPClient _client;
       char* _token;
       uint8_t maxValues;
@@ -35,4 +35,4 @@ class Ubidots {
       Value * val;
 };
 
-#endif
+#endif  // _Ubidots_H_
