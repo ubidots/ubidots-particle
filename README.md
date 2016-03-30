@@ -1,6 +1,5 @@
-# Particle Photon
+# Particle
 
-The Particle Photon is the succesor of the original Spark Core. While it's small form factor and price are quite appealing, what we mostly like about it is its friendly developer experience, which includes a cloud IDE, ready to use and easy to install libraries, as well as an active community. 
 Here you will learn how to send multiple values to the Ubidots API, you just need the name and the value that you want to send. In addition you are able to get the last value from a variable of your Ubidots account.
 
 ## Requirements

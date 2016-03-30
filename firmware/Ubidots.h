@@ -8,6 +8,7 @@
 
 #define SERVER "translate.ubidots.com"
 #define PORT 9010
+#define MAXVALUES 10
 
 typedef struct Value {
   char  *idName;
@@ -18,18 +19,17 @@ typedef struct Value {
 
 class Ubidots {
  public:
-      Ubidots(char* token);
+      Ubidots(char* token, char* dsName);
       bool sendAll();
-      bool sendAll(char* dsName);
       float getValue(char* id);
       void add(char *variable_id, double value);
       void add(char *variable_id, double value, char *ctext1);
       void add(char *variable_id, double value, char *ctext1, char *ctext2);
       float getValueWithDatasource(char* dsName, char* idName);
-
  private:
       TCPClient _client;
       char* _token;
+      char* _dsName;
       uint8_t maxValues;
       uint8_t currentValue;
       Value * val;

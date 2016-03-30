@@ -2,13 +2,13 @@
 /**
  * Constructor.
  */
-Ubidots::Ubidots(char* token){
+Ubidots::Ubidots(char* token, char* dsName) {
     _token = token;
-    maxValues = 10;
     currentValue = 0;
-    val = (Value *)malloc(maxValues*sizeof(Value));
+    val = (Value *)malloc(MAXVALUES*sizeof(Value));
+    _dsName = dsName;
 }
-/**
+/** 
  * This function is to get value from the Ubidots API
  * @arg id the id where you will get the data
  * @return num the data that you get from the Ubidots API
@@ -19,12 +19,12 @@ float Ubidots::getValueWithDatasource(char* dsName, char* idName) {
   char* allData = (char *) malloc(sizeof(char) * 300);
   String response;
   uint8_t bodyPosinit;
-  sprintf(allData, "Particle|LV|%s|%s:%s|end", _token, dsName, idName);
+  sprintf(allData, "Particle|LV|%s|%s:%s|end", _token, _dsName, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
     }
-    if (_client.connected()) {        // Connect to the server
+    if (_client.connected()) {  // Connect to the server
 #ifdef DEBUG_UBIDOTS
         Serial.println("Client connected");
 #endif
@@ -76,11 +76,9 @@ void Ubidots::add(char *variable_id, double value, char *ctext1, char *ctext2) {
   (val+currentValue)->contextOne = ctext1;
   (val+currentValue)->contextTwo = ctext2;
   currentValue++;
-  if (currentValue > maxValues) {
-        Serial.println(F("You are sending more than 10"));
-        Serial.println(F("consecutives variables,"));
-        Serial.println(F("you just could send 5 variables"));
-        currentValue = maxValues;
+  if (currentValue > MAXVALUES) {
+        Serial.println(F("You are sending more than 10 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
+        currentValue = MAXVALUES;
   }
 }
 /**
@@ -88,21 +86,10 @@ void Ubidots::add(char *variable_id, double value, char *ctext1, char *ctext2) {
  * @reutrn true upon success, false upon error.
  */
 bool Ubidots::sendAll() {
-    return sendAll(NULL);
-}
-/**
- * Send all data of all variables that you saved
- * @reutrn true upon success, false upon error.
- */
-bool Ubidots::sendAll(char* dsName) {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    if (dsName == NULL) {
-        sprintf(allData, "Particle|POST|%s|Particle,", _token);
-    } else {
-        sprintf(allData, "Particle|POST|%s|%s,", _token, dsName);
-    }
-    for ( i = 0; i < currentValue; ) {
+    sprintf(allData, "Particle|POST|%s|%s,", _token, _dsName);
+    for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
             sprintf(allData, "%s#%s", allData, (val + i)->contextOne);
