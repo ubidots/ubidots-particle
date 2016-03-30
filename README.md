@@ -15,13 +15,9 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
     * [Connecting it to your computer over USB](https://docs.particle.io/guide/getting-started/connect/core/).
 2. After claiming your Photon and setting up your Ubidots account, let's go to [Particle's Web IDE](https://build.particle.io/build).
     * In the Particle's Web IDE create a new app and set the name.
-    <img class="imgBody" src ="../images/devices/set_name_myapp.png" />
     * Go to the library tab.
-    <img class="imgBody" src ="../images/devices/press_library_button.png" />
     * In contributed library write Ubidots and select the Ubidots library.
-    <img class="imgBody" src ="../images/devices/particle_search_library.png" />
     * Click on **INCLUDE IN APP**. And return to "MYAPP.ino"
-    <img class="imgBody" src ="../images/devices/particle_finished.png" />
 
 <aside class="notice">
     While method #1 is faster, we like method #2 because it will install a Particle driver in your computer, which is very useful for firmware upgrades, creating webhooks or changing the owner of your Photon.
@@ -80,7 +76,7 @@ void setup() {
 void loop() {    
     float value;
     value = ubidots.getValueWithDatasource(DATASOURCENAME, "Name_of_your_variable");
-    ubidots.getUbidotsValue(ID);
+    Serial.println(value);
     delay(60000);  // Delay of one minute
 }
 

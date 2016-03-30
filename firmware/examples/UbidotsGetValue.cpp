@@ -13,5 +13,6 @@ void setup() {
 void loop() {
     float value;
     value = ubidots.getValueWithDatasource(DATASOURCENAME, "Name_of_your_variable");
-    ubidots.getUbidotsValue(ID);
+    Serial.println(value);
+    Delay(60000);  // Delay of one minute
 }

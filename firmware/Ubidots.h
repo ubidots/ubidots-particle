@@ -6,9 +6,10 @@
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
+
 #define SERVER "translate.ubidots.com"
 #define PORT 9010
-#define MAXVALUES 10
+#define MAX_VALUES 10
 
 typedef struct Value {
   char  *idName;

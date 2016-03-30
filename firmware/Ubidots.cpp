@@ -5,7 +5,7 @@
 Ubidots::Ubidots(char* token, char* dsName) {
     _token = token;
     currentValue = 0;
-    val = (Value *)malloc(MAXVALUES*sizeof(Value));
+    val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     _dsName = dsName;
 }
 /** 
@@ -76,9 +76,9 @@ void Ubidots::add(char *variable_id, double value, char *ctext1, char *ctext2) {
   (val+currentValue)->contextOne = ctext1;
   (val+currentValue)->contextTwo = ctext2;
   currentValue++;
-  if (currentValue > MAXVALUES) {
+  if (currentValue > MAX_VALUES) {
         Serial.println(F("You are sending more than 10 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
-        currentValue = MAXVALUES;
+        currentValue = MAX_VALUES;
   }
 }
 /**
