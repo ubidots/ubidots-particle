@@ -14,7 +14,6 @@
 typedef struct Value {
   char  *idName;
   char  *contextOne;
-  char  *contextTwo;
   float idValue;
 } Value;
 
@@ -25,7 +24,6 @@ class Ubidots {
       float getValue(char* id);
       void add(char *variable_id, double value);
       void add(char *variable_id, double value, char *ctext1);
-      void add(char *variable_id, double value, char *ctext1, char *ctext2);
       float getValueWithDatasource(char* dsName, char* idName);
  private:
       TCPClient _client;

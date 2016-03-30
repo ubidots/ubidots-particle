@@ -55,7 +55,7 @@ float Ubidots::getValueWithDatasource(char* dsName, char* idName) {
  * @arg value variable value to save in a struct
  */
 void Ubidots::add(char *variable_id, double value) {
-  add(variable_id, value, NULL, NULL);
+  add(variable_id, value, NULL);
 }
 /**
  * Add a value of variable to save
@@ -63,18 +63,9 @@ void Ubidots::add(char *variable_id, double value) {
  * @arg value variable value to save in a struct
  */
 void Ubidots::add(char *variable_id, double value, char *ctext1) {
-  add(variable_id, value, ctext1, NULL);
-}
-/**
- * Add a value of variable to save
- * @arg variable_id variable id to save in a struct
- * @arg value variable value to save in a struct
- */
-void Ubidots::add(char *variable_id, double value, char *ctext1, char *ctext2) {
   (val+currentValue)->idName = variable_id;
   (val+currentValue)->idValue = value;
   (val+currentValue)->contextOne = ctext1;
-  (val+currentValue)->contextTwo = ctext2;
   currentValue++;
   if (currentValue > MAX_VALUES) {
         Serial.println(F("You are sending more than 10 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
@@ -88,14 +79,11 @@ void Ubidots::add(char *variable_id, double value, char *ctext1, char *ctext2) {
 bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    sprintf(allData, "Particle|POST|%s|%s,", _token, _dsName);
+    sprintf(allData, "Particle|POST|%s|%s=>", _token, _dsName);
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
-            sprintf(allData, "%s#%s", allData, (val + i)->contextOne);
-        }
-        if ((val + i)->contextTwo != NULL) {
-            sprintf(allData, "%s#%s", allData, (val + i)->contextTwo);
+            sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
         }
         i++;
         if (i < currentValue) {

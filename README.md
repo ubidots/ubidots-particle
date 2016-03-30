@@ -107,8 +107,8 @@ void loop(){
     float value2 = analogRead(A1);
     float value3 = analogRead(A2); 
     ubidots.add("Variable_name_one", value1);  // Change for your variable name
-        ubidots.add("Variable_name_two", value2);
-        ubidots.add("Variable_name_three", value3);
+    ubidots.add("Variable_name_two", value2);
+    ubidots.add("Variable_name_three", value3);
     ubidots.sendAll();
     delay(60000);  // Delay of one minute
 }
