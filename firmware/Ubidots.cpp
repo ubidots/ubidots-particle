@@ -68,7 +68,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
   (val+currentValue)->contextOne = ctext1;
   currentValue++;
   if (currentValue > MAX_VALUES) {
-        Serial.println(F("You are sending more than 10 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
+        Serial.println(F("You are sending more than the maximum of consecutive variables"));
         currentValue = MAX_VALUES;
   }
 }
@@ -79,7 +79,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
 bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    sprintf(allData, "Particle|POST|%s|%s=>", _token, _dsName);
+    sprintf(allData, "Particle/1.0|POST|%s|%s=>", _token, _dsName);
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
