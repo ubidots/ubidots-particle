@@ -19,7 +19,7 @@ typedef struct Value {
 
 class Ubidots {
  public:
-      Ubidots(char* token, char* dsName);
+      Ubidots(char* token);
       bool sendAll();
       float getValue(char* id);
       void add(char *variable_id, double value);
@@ -28,8 +28,6 @@ class Ubidots {
  private:
       TCPClient _client;
       char* _token;
-      char* _dsName;
-      uint8_t maxValues;
       uint8_t currentValue;
       Value * val;
       char* pId;
