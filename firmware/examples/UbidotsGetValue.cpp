@@ -3,9 +3,8 @@
 #include "Ubidots.h"
 
 #define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
-#define DATASOURCE_NAME "Your_datasource_name"  // Put here your Ubidots datasource name
 
-Ubidots ubidots(TOKEN, DATASOURCE_NAME);
+Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);

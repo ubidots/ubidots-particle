@@ -2,11 +2,17 @@
 /**
  * Constructor.
  */
-Ubidots::Ubidots(char* token, char* dsName) {
+Ubidots::Ubidots(char* token) {
     _token = token;
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
-    _dsName = dsName;
+    String str = Particle.deviceID();
+    _pId = new char [str.length()+1];
+    strcpy (_pId, str.c_str());
+}
+bool Ubidots::setDatasourceName(char* dsName) {
+    _pId = dsName;
+    return true;
 }
 /** 
  * This function is to get value from the Ubidots API
@@ -19,7 +25,7 @@ float Ubidots::getValueWithDatasource(char* dsName, char* idName) {
   char* allData = (char *) malloc(sizeof(char) * 300);
   String response;
   uint8_t bodyPosinit;
-  sprintf(allData, "Particle|LV|%s|%s:%s|end", _token, _dsName, idName);
+  sprintf(allData, "Particle|LV|%s|%s:%s|end", _token, _pId, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -79,7 +85,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
 bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    sprintf(allData, "Particle/1.0|POST|%s|%s=>", _token, _dsName);
+    sprintf(allData, "Particle/1.0|POST|%s|%s=>", _token, _pId);
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
