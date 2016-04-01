@@ -7,6 +7,9 @@ Ubidots::Ubidots(char* token, char* dsName) {
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     _dsName = dsName;
+    String str = Particle.deviceID();
+    pId = new char[str.length() + 1];
+    strcpy(pId, str.c_str());
 }
 /** 
  * This function is to get value from the Ubidots API

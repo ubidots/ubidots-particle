@@ -32,6 +32,7 @@ class Ubidots {
       uint8_t maxValues;
       uint8_t currentValue;
       Value * val;
+      char* pId;
 };
 
 #endif  // _Ubidots_H_
