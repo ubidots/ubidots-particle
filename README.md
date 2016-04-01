@@ -23,8 +23,12 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
     While method #1 is faster, we like method #2 because it will install a Particle driver in your computer, which is very useful for firmware upgrades, creating webhooks or changing the owner of your Photon.
 </aside>
 <aside class="notice">
-To use this library, put your Ubidots token where indicated.
+To use this library, put your Ubidots token, datasource name and variable name where indicated.
 Upload the code, open the Serial monitor to check the results. If no response is seen, try reset your Particle Photon. Make sure the baud rate of the Serial monitor is set to the same one specified in your code.
+</aside>
+
+<aside class="warning">
+This library create a datasource with Particle name, you can change it if you want in the Ubidots API.
 </aside>
 
 
@@ -39,8 +43,8 @@ To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS**
 
 
 #define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
-#define DATASOURCE_NAME "Your_datasource_name"  // Put here your Ubidots datasource name 
-Ubidots ubidots(TOKEN, DATASOURCE_NAME); // A data source with this name will be created in your Ubidots account
+
+Ubidots ubidots(TOKEN); // A data source with particle name will be created in your Ubidots account
 
 void setup(){
     Serial.begin(115200);
@@ -92,9 +96,8 @@ To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS**
 
 
 #define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
-#define DATASOURCE_NAME "Your_datasource_name"  // Put here your Ubidots datasource name 
 
-Ubidots ubidots(TOKEN, DATASOURCE_NAME); // A data source with this name will be created in your Ubidots account
+Ubidots ubidots(TOKEN); // A data source with particle name will be created in your Ubidots account
 
 void setup(){
     Serial.begin(115200);
