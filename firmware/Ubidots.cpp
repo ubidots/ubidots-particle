@@ -1,31 +1,56 @@
+/*
+ISC License
+
+Copyright (c) 2016, Mateo Velez Rodriguez - Metavix
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+*/
+
 #include "Ubidots.h"
 /**
  * Constructor.
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
+    _dsName = "Particle";
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = Particle.deviceID();
-    _pId = new char [str.length()+1];
+    _pId = new char[str.length() + 1];
     strcpy (_pId, str.c_str());
 }
 bool Ubidots::setDatasourceName(char* dsName) {
-    _pId = dsName;
+    _dsName = dsName;
     return true;
 }
+bool Ubidots::setDatasourceTag(char* dsTag) {
+    _pId = dsTag;
+    return true;
+}
+
 /** 
  * This function is to get value from the Ubidots API
  * @arg id the id where you will get the data
  * @return num the data that you get from the Ubidots API
  */
-float Ubidots::getValueWithDatasource(char* dsName, char* idName) {
+float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
   char* allData = (char *) malloc(sizeof(char) * 300);
   String response;
   uint8_t bodyPosinit;
-  sprintf(allData, "Particle|LV|%s|%s:%s|end", _token, _pId, idName);
+  sprintf(allData, "Particle/1.0|LV|%s|%s:%s|end", _token, dsTag, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -85,7 +110,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
 bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    sprintf(allData, "Particle/1.0|POST|%s|%s=>", _token, _pId);
+    sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
