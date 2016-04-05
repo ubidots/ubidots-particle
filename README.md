@@ -28,7 +28,7 @@ Upload the code, open the Serial monitor to check the results. If no response is
 </aside>
 
 <aside class="warning">
-This library create a datasource with Particle name, you can change it if you want in the Ubidots API.
+You only could change the datasource name in the first iteration of code or in the Ubidots API, this code will put "Particle" in your datasource name and your particle core ID in the Tag ID of datasource by default.
 </aside>
 
 
@@ -48,6 +48,7 @@ Ubidots ubidots(TOKEN); // A data source with particle name will be created in y
 
 void setup(){
     Serial.begin(115200);
+    //ubidots.setDatasourceName("Datasource_Name_here"); // Uncomment this line to change the datasource Name.
 }
 
 void loop(){
@@ -71,7 +72,7 @@ To get the last value of a variable from Ubidots,  go to **Included Libraries** 
 #define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
 #define DATASOURCE_NAME "Your_datasource_name"  // Put here your Ubidots datasource name 
 
-Ubidots ubidots(TOKEN, DATASOURCE_NAME);
+Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
@@ -101,6 +102,7 @@ Ubidots ubidots(TOKEN); // A data source with particle name will be created in y
 
 void setup(){
     Serial.begin(115200);
+    //ubidots.setDatasourceName("Datasource_Name_here"); // Uncomment this line to change the datasource Name.
 }
 
 void loop(){
