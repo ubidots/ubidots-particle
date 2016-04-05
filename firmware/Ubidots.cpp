@@ -110,7 +110,11 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
 bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+    if (_dsName == "Particle") {
+        sprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
+    } else {
+        sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+    }
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
