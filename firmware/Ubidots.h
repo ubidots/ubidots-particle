@@ -27,7 +27,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 #define SERVER "translate.ubidots.com"
-#define USER_AGENT "Particle/1.0"
+#define USER_AGENT "Particle/1.1"
 #define PORT 9010
 #define MAX_VALUES 10
 
