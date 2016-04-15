@@ -47,6 +47,7 @@ class Ubidots {
       Ubidots(char* token);
       bool setDatasourceName(char* dsName);
       bool setDatasourceTag(char* dsTag);
+      void setMethod(char* method = "TCP");  // Default TCP
       bool sendAll();
       float getValue(char* id);
       void add(char *variable_id, double value);
@@ -54,12 +55,17 @@ class Ubidots {
       float getValueWithDatasource(char* dsName, char* idName);
  private:
       TCPClient _client;
+      UDP _clientUDP;
+      char* _method;
       char* _token;
       char* _pId;
       char* _dsName;
       uint8_t maxValues;
       uint8_t currentValue;
       Value * val;
+      bool sendAllUDP();
+      bool sendAllTCP();
+      bool sendAllSMS();
 };
 
 #endif  // _Ubidots_H_

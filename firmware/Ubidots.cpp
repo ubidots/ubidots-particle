@@ -28,12 +28,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
+    _method = NULL;
     _dsName = "Particle";
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = Particle.deviceID();
     _pId = new char[str.length() + 1];
     strcpy (_pId, str.c_str());
+}
+void Ubidots::setMethod(char* method) {
+    if (method == "SMS") {
+        _method = "SMS";
+    }
+    if (method == "TCP") {
+        _method = "TCP";
+    }
+    if (method == "UDP") {
+        _method = "UDP";
+    } 
 }
 bool Ubidots::setDatasourceName(char* dsName) {
     _dsName = dsName;
@@ -109,10 +121,28 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
   }
 }
 /**
- * Send all data of all variables that you saved
+ * Send all data of all variables that you saved by TCP method
  * @reutrn true upon success, false upon error.
  */
 bool Ubidots::sendAll() {
+    if (_method == "TCP") {
+        return sendAllTCP();
+    }
+    if (_method == "UDP") {
+        return sendAllUDP();
+    }
+    if (_method == "SMS") {
+        return sendAllSMS();
+    }
+}
+bool Ubidots::sendAllUDP() {
+    return true;
+}
+bool Ubidots::sendAllSMS() {
+    return true;
+}
+ 
+bool Ubidots::sendAllTCP() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
     if (_dsName == "Particle") {
