@@ -20,6 +20,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Made by Mateo Velez - Metavix for Ubidots Inc
+
 */
 
 #include "Ubidots.h"
@@ -28,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
-    _method = NULL;
+    _method = "TCP";
     _dsName = "Particle";
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
@@ -125,24 +127,6 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
  * @reutrn true upon success, false upon error.
  */
 bool Ubidots::sendAll() {
-    if (_method == "TCP") {
-        return sendAllTCP();
-    }
-    if (_method == "UDP") {
-        return sendAllUDP();
-    }
-    if (_method == "SMS") {
-        return sendAllSMS();
-    }
-}
-bool Ubidots::sendAllUDP() {
-    return true;
-}
-bool Ubidots::sendAllSMS() {
-    return true;
-}
- 
-bool Ubidots::sendAllTCP() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
     if (_dsName == "Particle") {
@@ -164,6 +148,40 @@ bool Ubidots::sendAllTCP() {
 #ifdef DEBUG_UBIDOTS
     Serial.println(allData);
 #endif
+    if (_method == "TCP") {
+        return sendAllTCP(allData);
+    }
+    if (_method == "UDP") {
+        return sendAllUDP(allData);
+    }
+    if (_method == "SMS") {
+        return sendAllSMS(allData);
+    }
+}
+bool Ubidots::sendAllUDP(char* buffer) {
+    int size;
+    _clientUDP.begin(8888);
+    if (_clientUDP.sendPacket(buffer, sizeof(buffer), IPAddress(50,23,144,66), PORT) < 0) {
+        Serial.println("ERROR");
+    }
+    delay(500);
+    size = _clientUDP.parsePacket();
+    while (_clientUDP.available() > 0) {
+        #ifdef DEBUG_UBIDOTS
+        Serial.write(c);
+#endif
+    }
+    currentValue = 0;
+    _clientUDP.stop();
+    free(buffer);
+    return true;
+}
+bool Ubidots::sendAllSMS(char* buffer) {
+    return true;
+}
+ 
+bool Ubidots::sendAllTCP(char* buffer) {
+    int i = 0;
     while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -172,14 +190,11 @@ bool Ubidots::sendAllTCP() {
 #ifdef DEBUG_UBIDOTS
         Serial.println("Client connected");
 #endif
-        _client.println(allData);
+        _client.println(buffer);
         _client.flush();
     }
-    i = 50000;
-    while (!_client.available() || i == 0) {
-        i--;
-    }
-    while (_client.available()) {
+    delay(200);
+    while (_client.available() > 0) {
         char c = _client.read();
 #ifdef DEBUG_UBIDOTS
         Serial.write(c);
@@ -187,6 +202,6 @@ bool Ubidots::sendAllTCP() {
     }
     currentValue = 0;
     _client.stop();
-    free(allData);
+    free(buffer);
     return true;
 }

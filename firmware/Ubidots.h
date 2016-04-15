@@ -20,6 +20,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Made by Mateo Velez - Metavix for Ubidots Inc
 */
 
 #ifndef _Ubidots_H_
@@ -34,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"
 #define PORT 9010
+#define REMOTE_IP "50.23.124.66"
 #define MAX_VALUES 10
 
 typedef struct Value {
@@ -47,7 +49,7 @@ class Ubidots {
       Ubidots(char* token);
       bool setDatasourceName(char* dsName);
       bool setDatasourceTag(char* dsTag);
-      void setMethod(char* method = "TCP");  // Default TCP
+      void setMethod(char* method);  // Default TCP
       bool sendAll();
       float getValue(char* id);
       void add(char *variable_id, double value);
@@ -63,9 +65,9 @@ class Ubidots {
       uint8_t maxValues;
       uint8_t currentValue;
       Value * val;
-      bool sendAllUDP();
-      bool sendAllTCP();
-      bool sendAllSMS();
+      bool sendAllUDP(char* buffer);
+      bool sendAllTCP(char* buffer);
+      bool sendAllSMS(char* buffer);
 };
 
 #endif  // _Ubidots_H_
