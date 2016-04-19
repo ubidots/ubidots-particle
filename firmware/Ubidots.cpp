@@ -30,7 +30,7 @@ Made by Mateo Velez - Metavix for Ubidots Inc
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
-    _method = "TCP";
+    _method = TYPE_TCP;
     _dsName = "Particle";
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
@@ -38,16 +38,10 @@ Ubidots::Ubidots(char* token) {
     _pId = new char[str.length() + 1];
     strcpy (_pId, str.c_str());
 }
-void Ubidots::setMethod(char* method) {
-    if (method == "SMS") {
-        _method = "SMS";
+void Ubidots::setMethod(uint8_t method) {
+    if (method >= 0 && method <= 2) {
+        _method = method;
     }
-    if (method == "TCP") {
-        _method = "TCP";
-    }
-    if (method == "UDP") {
-        _method = "UDP";
-    } 
 }
 bool Ubidots::setDatasourceName(char* dsName) {
     _dsName = dsName;
@@ -148,26 +142,31 @@ bool Ubidots::sendAll() {
 #ifdef DEBUG_UBIDOTS
     Serial.println(allData);
 #endif
-    if (_method == "TCP") {
+    if (_method == TYPE_TCP) {
         return sendAllTCP(allData);
     }
-    if (_method == "UDP") {
+    if (_method == TYPE_UDP) {
         return sendAllUDP(allData);
     }
-    if (_method == "SMS") {
+    if (_method == TYPE_SMS) {
         return sendAllSMS(allData);
     }
 }
 bool Ubidots::sendAllUDP(char* buffer) {
     int size;
+    IPAddress remoteIP2(50,23,124,66);
+    Serial.println("entre");
+    Serial.println(buffer);
+    Serial.println(strlen(buffer));
     _clientUDP.begin(8888);
-    if (_clientUDP.sendPacket(buffer, sizeof(buffer), IPAddress(50,23,144,66), PORT) < 0) {
+    while (_clientUDP.sendPacket(buffer, strlen(buffer), remoteIP2, PORT) <= 0) {
         Serial.println("ERROR");
     }
     delay(500);
     size = _clientUDP.parsePacket();
+    Serial.println(size);
     while (_clientUDP.available() > 0) {
-        #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
         Serial.write(c);
 #endif
     }

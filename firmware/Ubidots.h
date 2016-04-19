@@ -30,13 +30,17 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
-
+#include <vector>
 
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"
 #define PORT 9010
 #define REMOTE_IP "50.23.124.66"
 #define MAX_VALUES 10
+#define TYPE_SMS 0
+#define TYPE_TCP 1
+#define TYPE_UDP 2
+
 
 typedef struct Value {
   char  *idName;
@@ -49,7 +53,7 @@ class Ubidots {
       Ubidots(char* token);
       bool setDatasourceName(char* dsName);
       bool setDatasourceTag(char* dsTag);
-      void setMethod(char* method);  // Default TCP
+      void setMethod(uint8_t method);  // Default TCP
       bool sendAll();
       float getValue(char* id);
       void add(char *variable_id, double value);
@@ -58,7 +62,7 @@ class Ubidots {
  private:
       TCPClient _client;
       UDP _clientUDP;
-      char* _method;
+      uint8_t _method;
       char* _token;
       char* _pId;
       char* _dsName;
