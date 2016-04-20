@@ -3,7 +3,7 @@
 #include "Ubidots.h"
 
 #define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_NAME "Your_Data_Source_Name"  // Put here your data source name
+#define DATA_SOURCE_TAG "Your_Data_Source_Name"  // Put here your data source name
 
 Ubidots ubidots(TOKEN);
 
@@ -12,6 +12,6 @@ void setup() {
 }
 void loop() {
     float value;
-    value = ubidots.getValueWithDatasource(DATA_SOURCE_NAME, "Name_of_your_variable");
+    value = ubidots.getValueWithDatasource(DATA_SOURCE_TAG, "Variable_name_two");
     Serial.println(value);
 }
