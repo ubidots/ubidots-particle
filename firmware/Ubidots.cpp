@@ -154,17 +154,12 @@ bool Ubidots::sendAll() {
 }
 bool Ubidots::sendAllUDP(char* buffer) {
     int size;
-    IPAddress remoteIP2(50,23,124,66);
-    Serial.println("entre");
-    Serial.println(buffer);
-    Serial.println(strlen(buffer));
     _clientUDP.begin(8888);
-    while (_clientUDP.sendPacket(buffer, strlen(buffer), remoteIP2, PORT) <= 0) {
+    while (_clientUDP.sendPacket(buffer, strlen(buffer), REMOTE_IP, PORT) <= 0) {
         Serial.println("ERROR");
     }
     delay(500);
     size = _clientUDP.parsePacket();
-    Serial.println(size);
     while (_clientUDP.available() > 0) {
 #ifdef DEBUG_UBIDOTS
         Serial.write(c);
