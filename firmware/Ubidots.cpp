@@ -60,7 +60,7 @@ bool Ubidots::setDatasourceTag(char* dsTag) {
 float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
-  char* allData = (char *) malloc(sizeof(char) * 300);
+  char* allData = (char *) malloc(sizeof(char) * 400);
   String response;
   uint8_t bodyPosinit;
   sprintf(allData, "Particle/1.0|LV|%s|%s:%s|end", _token, dsTag, idName);
@@ -76,21 +76,19 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         _client.println(allData);
         _client.flush();
     }
-    i = 50000;
-    while (!_client.available()|| i == 0) {
-        i--;
-    }
-    while (_client.available()) {
+    while(_client.available()<=0);
+    while (_client.available()>0) {
         char c = _client.read();
-        response += c;
+        response = response + c;
+        //sprintf(allData,"%s%s", allData, c);
+        Serial.print(c);
     }
+    _client.stop();
     bodyPosinit = 3 + response.indexOf("OK|");
     response = response.substring(bodyPosinit);
     num = response.toFloat();
     currentValue = 0;
-    _client.stop();
     free(allData);
-    _client.stop();
     return num;
 }
 /**
@@ -161,9 +159,6 @@ bool Ubidots::sendAllUDP(char* buffer) {
     delay(500);
     size = _clientUDP.parsePacket();
     while (_clientUDP.available() > 0) {
-#ifdef DEBUG_UBIDOTS
-        Serial.write(c);
-#endif
     }
     currentValue = 0;
     _clientUDP.stop();

@@ -20,5 +20,4 @@ void loop() {
     ubidots.add("Variable_name_two", value2);
     ubidots.add("Variable_name_three", value3);
     ubidots.sendAll();
-    delay(60000);  // Delay of one minute
 }
