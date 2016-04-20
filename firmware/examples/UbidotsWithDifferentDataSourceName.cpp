@@ -1,4 +1,4 @@
-// This example is to save multiple variables to the Ubidots API
+// This example is to save values with a setted data source name
 
 #include "Ubidots.h"
 
@@ -11,12 +11,6 @@ Ubidots ubidots(TOKEN);
 void setup() {	
 	Serial.begin(115200);
 	ubidots.setDatasourceName(DATA_SOURCE_NAME);
-	/* 
-	TYPE_UDP for UDB method and TYPE_TCP for tcp method, 
-	if you don't call this function, the library automatically 
-	set as TCP
-	*/
-	ubidots.setMethod(TYPE_UDP); 
 }
 void loop() {
     float value1 = analogRead(A0);

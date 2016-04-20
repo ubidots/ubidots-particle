@@ -1,4 +1,4 @@
-// This example is to save multiple variables to the Ubidots API
+// This example allow send data using UDP protocol
 
 #include "Ubidots.h"
 
@@ -10,7 +10,7 @@ Ubidots ubidots(TOKEN);
 void setup() {	
 	Serial.begin(115200);
 	/* 
-	TYPE_UDP for UDB method and TYPE_TCP for tcp method, 
+	TYPE_UDP is used to send data using UDP method
 	if you don't call this function, the library automatically 
 	set as TCP
 	*/

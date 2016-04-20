@@ -30,7 +30,6 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
-#include <vector>
 
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"

@@ -1,4 +1,4 @@
-// This example is to save multiple variables to the Ubidots API
+// This example is to save multiple variables to the Ubidots API with TCP method
 
 #include "Ubidots.h"
 
