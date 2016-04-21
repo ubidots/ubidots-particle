@@ -20,6 +20,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Made by Mateo Velez - Metavix for Ubidots Inc
+
 */
 
 #include "Ubidots.h"
@@ -28,12 +30,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
+    _method = TYPE_TCP;
     _dsName = "Particle";
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = Particle.deviceID();
     _pId = new char[str.length() + 1];
     strcpy (_pId, str.c_str());
+}
+void Ubidots::setMethod(uint8_t method) {
+    if (method >= 0 && method <= 2) {
+        _method = method;
+    }
 }
 bool Ubidots::setDatasourceName(char* dsName) {
     _dsName = dsName;
@@ -52,7 +60,7 @@ bool Ubidots::setDatasourceTag(char* dsTag) {
 float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
-  char* allData = (char *) malloc(sizeof(char) * 300);
+  char* allData = (char *) malloc(sizeof(char) * 400);
   String response;
   uint8_t bodyPosinit;
   sprintf(allData, "Particle/1.0|LV|%s|%s:%s|end", _token, dsTag, idName);
@@ -68,21 +76,18 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         _client.println(allData);
         _client.flush();
     }
-    i = 50000;
-    while (!_client.available()|| i == 0) {
-        i--;
-    }
-    while (_client.available()) {
+    while (_client.available() > 0) {
         char c = _client.read();
-        response += c;
+        response = response + c;
+        //sprintf(allData,"%s%s", allData, c);
+        Serial.print(c);
     }
+    _client.stop();
     bodyPosinit = 3 + response.indexOf("OK|");
     response = response.substring(bodyPosinit);
     num = response.toFloat();
     currentValue = 0;
-    _client.stop();
     free(allData);
-    _client.stop();
     return num;
 }
 /**
@@ -109,7 +114,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext1) {
   }
 }
 /**
- * Send all data of all variables that you saved
+ * Send all data of all variables that you saved by TCP method
  * @reutrn true upon success, false upon error.
  */
 bool Ubidots::sendAll() {
@@ -134,6 +139,36 @@ bool Ubidots::sendAll() {
 #ifdef DEBUG_UBIDOTS
     Serial.println(allData);
 #endif
+    if (_method == TYPE_TCP) {
+        return sendAllTCP(allData);
+    }
+    if (_method == TYPE_UDP) {
+        return sendAllUDP(allData);
+    }
+    if (_method == TYPE_SMS) {
+        return sendAllSMS(allData);
+    }
+}
+bool Ubidots::sendAllUDP(char* buffer) {
+    int size;
+    _clientUDP.begin(8888);
+    while (_clientUDP.sendPacket(buffer, strlen(buffer), REMOTE_IP, PORT) <= 0) {
+        Serial.println("ERROR");
+    }
+    delay(500);
+    size = _clientUDP.parsePacket();
+    while (_clientUDP.available() > 0) {
+    }
+    currentValue = 0;
+    _clientUDP.stop();
+    free(buffer);
+    return true;
+}
+bool Ubidots::sendAllSMS(char* buffer) {
+    return true;
+}
+bool Ubidots::sendAllTCP(char* buffer) {
+    int i = 0;
     while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -142,14 +177,11 @@ bool Ubidots::sendAll() {
 #ifdef DEBUG_UBIDOTS
         Serial.println("Client connected");
 #endif
-        _client.println(allData);
+        _client.println(buffer);
         _client.flush();
     }
-    i = 50000;
-    while (!_client.available() || i == 0) {
-        i--;
-    }
-    while (_client.available()) {
+    delay(200);
+    while (_client.available() > 0) {
         char c = _client.read();
 #ifdef DEBUG_UBIDOTS
         Serial.write(c);
@@ -157,6 +189,6 @@ bool Ubidots::sendAll() {
     }
     currentValue = 0;
     _client.stop();
-    free(allData);
+    free(buffer);
     return true;
 }

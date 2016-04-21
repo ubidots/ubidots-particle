@@ -20,6 +20,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+Made by Mateo Velez - Metavix for Ubidots Inc
 */
 
 #ifndef _Ubidots_H_
@@ -30,36 +31,46 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
-
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"
 #define PORT 9010
+#define REMOTE_IP  {50,23,124,66}
 #define MAX_VALUES 10
+#define TYPE_SMS 0
+#define TYPE_TCP 1
+#define TYPE_UDP 2
+
 
 typedef struct Value {
-  char  *idName;
-  char  *contextOne;
-  float idValue;
+    char  *idName;
+    char  *contextOne;
+    float idValue;
 } Value;
 
 class Ubidots {
  public:
-      Ubidots(char* token);
-      bool setDatasourceName(char* dsName);
-      bool setDatasourceTag(char* dsTag);
-      bool sendAll();
-      float getValue(char* id);
-      void add(char *variable_id, double value);
-      void add(char *variable_id, double value, char *ctext1);
-      float getValueWithDatasource(char* dsName, char* idName);
+    Ubidots(char* token);
+    bool setDatasourceName(char* dsName);
+    bool setDatasourceTag(char* dsTag);
+    void setMethod(uint8_t method);  // Default TCP
+    bool sendAll();
+    float getValue(char* id);
+    void add(char *variable_id, double value);
+    void add(char *variable_id, double value, char *ctext1);
+    float getValueWithDatasource(char* dsName, char* idName);
  private:
-      TCPClient _client;
-      char* _token;
-      char* _pId;
-      char* _dsName;
-      uint8_t maxValues;
-      uint8_t currentValue;
-      Value * val;
+    TCPClient _client;
+    UDP _clientUDP;
+    uint8_t _method;
+    char* _token;
+    char* _pId;
+    char* _dsName;
+    uint8_t maxValues;
+    uint8_t currentValue;
+    Value * val;
+    bool sendAllUDP(char* buffer);
+    bool sendAllTCP(char* buffer);
+    bool sendAllSMS(char* buffer);
 };
 
 #endif  // _Ubidots_H_
