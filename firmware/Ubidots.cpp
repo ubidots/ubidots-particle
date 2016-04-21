@@ -167,7 +167,6 @@ bool Ubidots::sendAllUDP(char* buffer) {
 bool Ubidots::sendAllSMS(char* buffer) {
     return true;
 }
- 
 bool Ubidots::sendAllTCP(char* buffer) {
     int i = 0;
     while (!_client.connected() && i < 6) {

@@ -8,9 +8,9 @@
 
 Ubidots ubidots(TOKEN);
 
-void setup() {	
-	Serial.begin(115200);
-	ubidots.setDatasourceName(DATA_SOURCE_NAME);
+void setup() {  
+    Serial.begin(115200);
+    ubidots.setDatasourceName(DATA_SOURCE_NAME);
 }
 void loop() {
     float value1 = analogRead(A0);

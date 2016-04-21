@@ -42,35 +42,35 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 
 
 typedef struct Value {
-  char  *idName;
-  char  *contextOne;
-  float idValue;
+    char  *idName;
+    char  *contextOne;
+    float idValue;
 } Value;
 
 class Ubidots {
  public:
-      Ubidots(char* token);
-      bool setDatasourceName(char* dsName);
-      bool setDatasourceTag(char* dsTag);
-      void setMethod(uint8_t method);  // Default TCP
-      bool sendAll();
-      float getValue(char* id);
-      void add(char *variable_id, double value);
-      void add(char *variable_id, double value, char *ctext1);
-      float getValueWithDatasource(char* dsName, char* idName);
+    Ubidots(char* token);
+    bool setDatasourceName(char* dsName);
+    bool setDatasourceTag(char* dsTag);
+    void setMethod(uint8_t method);  // Default TCP
+    bool sendAll();
+    float getValue(char* id);
+    void add(char *variable_id, double value);
+    void add(char *variable_id, double value, char *ctext1);
+    float getValueWithDatasource(char* dsName, char* idName);
  private:
-      TCPClient _client;
-      UDP _clientUDP;
-      uint8_t _method;
-      char* _token;
-      char* _pId;
-      char* _dsName;
-      uint8_t maxValues;
-      uint8_t currentValue;
-      Value * val;
-      bool sendAllUDP(char* buffer);
-      bool sendAllTCP(char* buffer);
-      bool sendAllSMS(char* buffer);
+    TCPClient _client;
+    UDP _clientUDP;
+    uint8_t _method;
+    char* _token;
+    char* _pId;
+    char* _dsName;
+    uint8_t maxValues;
+    uint8_t currentValue;
+    Value * val;
+    bool sendAllUDP(char* buffer);
+    bool sendAllTCP(char* buffer);
+    bool sendAllSMS(char* buffer);
 };
 
 #endif  // _Ubidots_H_

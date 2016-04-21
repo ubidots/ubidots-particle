@@ -14,4 +14,5 @@ void loop() {
     float value;
     value = ubidots.getValueWithDatasource(DATA_SOURCE_TAG, "Variable_Name");
     Serial.println(value);
+    delay(5000);
 }
