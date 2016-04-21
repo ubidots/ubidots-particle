@@ -76,8 +76,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         _client.println(allData);
         _client.flush();
     }
-    while(_client.available()<=0);
-    while (_client.available()>0) {
+    while (_client.available() > 0) {
         char c = _client.read();
         response = response + c;
         //sprintf(allData,"%s%s", allData, c);
