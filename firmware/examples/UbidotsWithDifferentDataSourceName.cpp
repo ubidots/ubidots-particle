@@ -1,6 +1,6 @@
 // This example is to save values with a setted data source name
 
-#include "Ubidots.h"
+#include "Ubidots/Ubidots.h"
 
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
