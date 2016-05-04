@@ -25,7 +25,7 @@ void loop() {
     // You can send multiple context in one variable, to send it you must add a "$" symbol between every context
     ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2, context_2);
-    ubidots.add("Variable_Name_Three", context_3);
+    ubidots.add("Variable_Name_Three", value3,  context_3);
     ubidots.sendAll();
     delay(5000);
 }
