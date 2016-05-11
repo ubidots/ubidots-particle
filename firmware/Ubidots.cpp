@@ -60,7 +60,7 @@ bool Ubidots::setDatasourceTag(char* dsTag) {
 float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
-  char buffer[50];
+  char buffer[500];
   char* allData = (char *) malloc(sizeof(char) * 500);
   uint8_t bodyPosinit;
   sprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);

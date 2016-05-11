@@ -33,12 +33,14 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"
-#define PORT 9010
+#define PORT 9910
 #define REMOTE_IP  {50,23,124,66}
 #define MAX_VALUES 10
 #define TYPE_SMS 0
 #define TYPE_TCP 1
 #define TYPE_UDP 2
+#define DEBUG_UBIDOTS
+#define TIMEOUT 3000
 
 
 typedef struct Value {
