@@ -60,10 +60,10 @@ bool Ubidots::setDatasourceTag(char* dsTag) {
 float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
-  char* allData = (char *) malloc(sizeof(char) * 400);
-  String response;
+  char buffer[50];
+  char* allData = (char *) malloc(sizeof(char) * 500);
   uint8_t bodyPosinit;
-  sprintf(allData, "Particle/1.0|LV|%s|%s:%s|end", _token, dsTag, idName);
+  sprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -73,19 +73,85 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         Serial.println("Client connected");
         Serial.println(allData);
 #endif
+        
         _client.println(allData);
+        _client.println();
         _client.flush();
     }
-    while (_client.available() > 0) {
-        char c = _client.read();
-        response = response + c;
-        //sprintf(allData,"%s%s", allData, c);
-        Serial.print(c);
-    }
+    unsigned int bufferPosition = 0;
+    unsigned long lastRead = millis();
+    unsigned long firstRead = millis();
+    bool error = false;
+    bool timeout = false;
+    do {
+        #ifdef DEBUG_UBIDOTS
+        int bytes = _client.available();
+        if(bytes) {
+            Serial.print("Receiving TCP transaction of ");
+            Serial.print(bytes);
+            Serial.println(" bytes.");
+        }
+        #endif
+
+        while (_client.available()) {
+            char c = _client.read();
+            #ifdef DEBUG_UBIDOTS
+            Serial.print(c);
+            #endif
+            lastRead = millis();
+
+            if (c == -1) {
+                error = true;
+
+                #ifdef DEBUG_UBIDOTS
+                Serial.println("Error: No data available.");
+                #endif
+
+                break;
+            }
+
+            // Check that received character fits in buffer before storing.
+            if (bufferPosition < sizeof(buffer)-1) {
+                buffer[bufferPosition] = c;
+            } else if ((bufferPosition == sizeof(buffer)-1)) {
+                buffer[bufferPosition] = '\0'; // Null-terminate buffer
+                _client.stop();
+                error = true;
+
+                #ifdef DEBUG_UBIDOTS
+                Serial.println("Error: Response body larger than buffer.");
+                #endif
+            }
+            bufferPosition++;
+        }
+        buffer[bufferPosition] = '\0'; // Null-terminate buffer
+        if (bytes) {
+            Serial.print("End of TCP transaction.");
+            _client.stop();
+        }
+
+        // Check that there hasn't been more than 5s since last read.
+        timeout = millis() - lastRead > TIMEOUT;
+
+        // Unless there has been an error or timeout wait 200ms to allow server
+        // to respond or close connection.
+        if (!error && !timeout) {
+            delay(200);
+        }
+    } while (_client.connected() && !timeout && !error);
+
+    #ifdef DEBUG_UBIDOTS
+    
+    Serial.print("End of TCP Response (");
+    Serial.print(millis() - firstRead);
+    Serial.println("ms).");
+    #endif
     _client.stop();
-    bodyPosinit = 3 + response.indexOf("OK|");
-    response = response.substring(bodyPosinit);
-    num = response.toFloat();
+
+    String raw_response(buffer);
+    bodyPosinit = 3 + raw_response.indexOf("OK|");
+    raw_response = raw_response.substring(bodyPosinit);
+    num = raw_response.toFloat();
     currentValue = 0;
     free(allData);
     return num;
@@ -157,8 +223,6 @@ bool Ubidots::sendAllUDP(char* buffer) {
     }
     delay(500);
     size = _clientUDP.parsePacket();
-    while (_clientUDP.available() > 0) {
-    }
     currentValue = 0;
     _clientUDP.stop();
     free(buffer);
@@ -181,12 +245,6 @@ bool Ubidots::sendAllTCP(char* buffer) {
         _client.flush();
     }
     delay(200);
-    while (_client.available() > 0) {
-        char c = _client.read();
-#ifdef DEBUG_UBIDOTS
-        Serial.write(c);
-#endif
-    }
     currentValue = 0;
     _client.stop();
     free(buffer);
