@@ -33,7 +33,7 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"
-#define PORT 9910
+#define PORT 9010
 #define REMOTE_IP  {50,23,124,66}
 #define MAX_VALUES 10
 #define TYPE_SMS 0
