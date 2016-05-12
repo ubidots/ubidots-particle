@@ -37,25 +37,23 @@ You only could change the datasource name in the first iteration of code or in t
 To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValues.cpp**, copy it and paste to MYAPP.ino.
 
 ```c++
-// This example is to save multiple variables to the Ubidots API
+// This example is to save a value to the Ubidots API with TCP method
 
-#include "Ubidots.h"
+#include "Ubidots/Ubidots.h"
 
 
-#define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
 
-Ubidots ubidots(TOKEN); // A data source with particle name will be created in your Ubidots account
+Ubidots ubidots(TOKEN);
 
-void setup(){
+void setup() {
     Serial.begin(115200);
-    //ubidots.setDatasourceName("Datasource_Name_here"); // Uncomment this line to change the datasource Name.
 }
-
-void loop(){
-    float value1 = analogRead(A0); 
-    ubidots.add("Variable_name_one", value1);  // Change for your variable name
+void loop() {
+    float value1 = analogRead(A0);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
     ubidots.sendAll();
-    delay(60000);  // Delay of one minute
+    delay(5000);
 }
 ```
 
@@ -67,23 +65,22 @@ To get the last value of a variable from Ubidots,  go to **Included Libraries** 
 ```c++
 // This example is to get the last value of variable from the Ubidots API
 
-#include "Ubidots.h"
+#include "Ubidots/Ubidots.h"
 
-#define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
-#define DATASOURCE_NAME "Your_datasource_name"  // Put here your Ubidots datasource name 
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#define DATA_SOURCE_TAG "Your_Data_Source_Tag"  // Put here your data source name
 
 Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
 }
-void loop() {    
+void loop() {
     float value;
-    value = ubidots.getValueWithDatasource(DATASOURCE_NAME, "Name_of_your_variable");
+    value = ubidots.getValueWithDatasource(DATA_SOURCE_TAG, "Variable_Name");
     Serial.println(value);
-    delay(60000);  // Delay of one minute
+    delay(5000);
 }
-
 ```
 
 ## Send multiple values to Ubidots 
@@ -91,30 +88,96 @@ void loop() {
 To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValues.cpp**, copy it and paste to MYAPP.ino
 
 ```c++
-// This example is to save multiple variables to the Ubidots API
+// This example is to save multiple variables to the Ubidots API with TCP method
 
-#include "Ubidots.h"
+#include "Ubidots/Ubidots.h"
 
 
-#define TOKEN "Your_token_here"  // Put here your Ubidots TOKEN
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
 
-Ubidots ubidots(TOKEN); // A data source with particle name will be created in your Ubidots account
+Ubidots ubidots(TOKEN);
 
-void setup(){
+void setup() {
     Serial.begin(115200);
-    //ubidots.setDatasourceName("Datasource_Name_here"); // Uncomment this line to change the datasource Name.
 }
-
-void loop(){
+void loop() {
     float value1 = analogRead(A0);
     float value2 = analogRead(A1);
-    float value3 = analogRead(A2); 
-    ubidots.add("Variable_name_one", value1);  // Change for your variable name
-    ubidots.add("Variable_name_two", value2);
-    ubidots.add("Variable_name_three", value3);
+    float value3 = analogRead(A2);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2);
+    ubidots.add("Variable_Name_Three", value3);
     ubidots.sendAll();
-    delay(60000);  // Delay of one minute
+    delay(5000);
+}
+```
+
+## Send multiple values with context
+
+To send values with context you can follow our example in the library, select ***UbidotsSendValuesWithContext.cpp** or copy this code
+
+```cpp
+// This example is to save multiple variables with context to the Ubidots API with TCP method
+
+#include "Ubidots/Ubidots.h"
+
+
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+
+Ubidots ubidots(TOKEN);
+
+void setup() {
+    Serial.begin(115200);
+}
+void loop() {
+    float value1 = analogRead(A0);
+    float value2 = analogRead(A1);
+    float value3 = analogRead(A2);
+    char context[25];
+    char context_2[25];
+    char context_3[45];
+    sprintf(context, "lat=1.2343$lng=132.1233");
+    // To send latitude and longitude to Ubidots and see it in a map widget
+    sprintf(context_2, "Name_Of_Context=Value_Of_Context");
+    // The format of the context is like this, you must send it like this example
+    sprintf(context_3, "Name_Of_Context=Value_Of_Context$Name_Of_Context_2=Value_Of_Context_2$Name_Of_Context_3=Value_Of_Context_3");
+    // You can send multiple context in one variable, to send it you must add a "$" symbol between every context
+    ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2, context_2);
+    ubidots.add("Variable_Name_Three", value3,  context_3);
+    ubidots.sendAll();
+    delay(5000);
 }
 ```
 
 
+## Save values in Ubidots with diferent data source name
+
+The default name of the data source in ubidots for this library is **Particle** to save values with diferent name please follow this code or use the example **UbidotsWithDifferetDataSourceName.cpp**.
+
+```cpp
+// This example is to save values with a setted data source name
+
+#include "Ubidots/Ubidots.h"
+
+
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#define DATA_SOURCE_NAME "Your_Data_Source_Name"
+
+Ubidots ubidots(TOKEN);
+
+void setup() {  
+    Serial.begin(115200);
+    ubidots.setDatasourceName(DATA_SOURCE_NAME);
+}
+void loop() {
+    float value1 = analogRead(A0);
+    float value2 = analogRead(A1);
+    float value3 = analogRead(A2);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2);
+    ubidots.add("Variable_Name_Three", value3);
+    ubidots.sendAll();
+    delay(5000);
+}
+```

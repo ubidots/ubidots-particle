@@ -1,4 +1,4 @@
-// This example is to save multiple variables to the Ubidots API with TCP method
+// This example is to save multiple variables with context to the Ubidots API with TCP method
 
 #include "Ubidots/Ubidots.h"
 
@@ -29,3 +29,4 @@ void loop() {
     ubidots.sendAll();
     delay(5000);
 }
+```
