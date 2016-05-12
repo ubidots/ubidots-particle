@@ -29,4 +29,3 @@ void loop() {
     ubidots.sendAll();
     delay(5000);
 }
-```
