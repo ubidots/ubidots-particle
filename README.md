@@ -4,7 +4,7 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
 
 ## Requirements
 
-* [Particle Photon](https://store.particle.io/)
+* [Particle Photon, Electron, Core](https://store.particle.io/)
 * Micro USB cable
 * Internet connection
 
