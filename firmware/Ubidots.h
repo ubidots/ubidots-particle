@@ -39,7 +39,7 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #define TYPE_SMS 0
 #define TYPE_TCP 1
 #define TYPE_UDP 2
-#define DEBUG_UBIDOTS
+//#define DEBUG_UBIDOTS
 #define TIMEOUT 3000
 #define SERVER_OLD "things.ubidots.com"
 #define PORT_OLD 80

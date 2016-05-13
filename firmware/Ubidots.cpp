@@ -84,8 +84,8 @@ bool Ubidots::setDatasourceTag(char* dsTag) {
 
 float Ubidots::getValue(char* id) {
     char buffer[500];
-    uint8_t bodyPosinit;
-    uint8_t bodyPosend;
+    uint8_t bodyPosinit = 0;
+    uint8_t bodyPosend = 0;
     uint8_t i = 0;
     float num;
     while (!_client.connected() && i < 6) {
@@ -119,7 +119,6 @@ float Ubidots::getValue(char* id) {
             Serial.println(" bytes.");
         }
         #endif
-
         while (_client.available()) {
             char c = _client.read();
             #ifdef DEBUG_UBIDOTS
@@ -182,7 +181,7 @@ float Ubidots::getValue(char* id) {
     bodyPosend = 13 + raw_response.indexOf(", \"timestamp\"");
     raw_response = raw_response.substring(bodyPosinit, bodyPosend);
     num = raw_response.toFloat();
-    if (bytes == 0) {
+    if (bodyPosend < 50) {
         return lastValue;
         
     } else {
@@ -202,9 +201,9 @@ float Ubidots::getValue(char* id) {
 float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
-  char buffer[500];
+  char buffer[50];
   char* allData = (char *) malloc(sizeof(char) * 500);
-  uint8_t bodyPosinit;
+  uint8_t bodyPosinit = 0;
   sprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
   while (!_client.connected() && i < 6) {
         i++;
@@ -296,7 +295,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     raw_response = raw_response.substring(bodyPosinit);
     num = raw_response.toFloat();
     free(allData);
-    if (bytes == 0) {
+    if (bodyPosinit != 3) {
         return lastValue;
         
     } else {
