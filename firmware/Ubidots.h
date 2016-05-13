@@ -73,6 +73,7 @@ class Ubidots {
     Value * val;
     bool sendAllUDP(char* buffer);
     bool sendAllTCP(char* buffer);
+    float lastValue;
     //bool sendAllSMS(char* buffer);  // Work in progress
 };
 

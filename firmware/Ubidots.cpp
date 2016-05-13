@@ -34,6 +34,7 @@ Ubidots::Ubidots(char* token) {
     _token = token;
     _method = TYPE_TCP;
     _dsName = "Particle";
+    lastValue = 0;
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = Particle.deviceID();
@@ -109,9 +110,9 @@ float Ubidots::getValue(char* id) {
     unsigned long firstRead = millis();
     bool error = false;
     bool timeout = false;
+    int bytes = _client.available();
     do {
         #ifdef DEBUG_UBIDOTS
-        int bytes = _client.available();
         if(bytes) {
             Serial.print("Receiving HTTP transaction of ");
             Serial.print(bytes);
@@ -181,7 +182,14 @@ float Ubidots::getValue(char* id) {
     bodyPosend = 13 + raw_response.indexOf(", \"timestamp\"");
     raw_response = raw_response.substring(bodyPosinit, bodyPosend);
     num = raw_response.toFloat();
-    return num;
+    if (bytes == 0) {
+        return lastValue;
+        
+    } else {
+        lastValue = num;
+        return num;
+        
+    }
 }
 
 /** 
@@ -217,9 +225,10 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     unsigned long firstRead = millis();
     bool error = false;
     bool timeout = false;
+    int bytes = _client.available();
     do {
         #ifdef DEBUG_UBIDOTS
-        int bytes = _client.available();
+        
         if(bytes) {
             Serial.print("Receiving TCP transaction of ");
             Serial.print(bytes);
@@ -287,7 +296,14 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     raw_response = raw_response.substring(bodyPosinit);
     num = raw_response.toFloat();
     free(allData);
-    return num;
+    if (bytes == 0) {
+        return lastValue;
+        
+    } else {
+        lastValue = num;
+        return num;
+        
+    }
 }
 
 /**
@@ -354,11 +370,9 @@ bool Ubidots::sendAll() {
 bool Ubidots::sendAllUDP(char* buffer) {
     int size;
     _clientUDP.begin(8888);
-    while (_clientUDP.sendPacket(buffer, strlen(buffer), REMOTE_IP, PORT) <= 0) {
+    if (_clientUDP.sendPacket(buffer, strlen(buffer), REMOTE_IP, PORT) <= 0) {
         Serial.println("ERROR");
     }
-    delay(500);
-    size = _clientUDP.parsePacket();
     currentValue = 0;
     _clientUDP.stop();
     free(buffer);
