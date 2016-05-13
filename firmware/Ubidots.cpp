@@ -340,9 +340,9 @@ bool Ubidots::sendAll() {
     if (_method == TYPE_UDP) {
         return sendAllUDP(allData);
     }
-    if (_method == TYPE_SMS) {
+    /*if (_method == TYPE_SMS) {
         return sendAllSMS(allData);
-    }
+    }*/
 }
 
 /**
