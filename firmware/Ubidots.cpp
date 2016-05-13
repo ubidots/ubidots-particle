@@ -32,7 +32,7 @@ Made by Mateo Velez - Metavix for Ubidots Inc
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
-    _method = TYPE_TCP;
+    _method = TYPE_UDP;
     _dsName = "Particle";
     lastValue = 0;
     currentValue = 0;
