@@ -41,6 +41,8 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #define TYPE_UDP 2
 #define DEBUG_UBIDOTS
 #define TIMEOUT 3000
+#define SERVER_OLD "things.ubidots.com"
+#define PORT_OLD 80
 
 
 typedef struct Value {
@@ -57,8 +59,7 @@ class Ubidots {
     void setMethod(uint8_t method);  // Default TCP
     bool sendAll();
     float getValue(char* id);
-    void add(char *variable_id, double value);
-    void add(char *variable_id, double value, char *ctext1);
+    void add(char *variable_id, double value, char *ctext1 = NULL);
     float getValueWithDatasource(char* dsName, char* idName);
  private:
     TCPClient _client;
@@ -72,7 +73,7 @@ class Ubidots {
     Value * val;
     bool sendAllUDP(char* buffer);
     bool sendAllTCP(char* buffer);
-    bool sendAllSMS(char* buffer);
+    //bool sendAllSMS(char* buffer);  // Work in progress
 };
 
 #endif  // _Ubidots_H_
