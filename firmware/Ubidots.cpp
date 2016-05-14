@@ -32,9 +32,9 @@ Made by Mateo Velez - Metavix for Ubidots Inc
  */
 Ubidots::Ubidots(char* token) {
     _token = token;
-    _method = TYPE_TCP;
+    _method = TYPE_UDP;
     _dsName = "Particle";
-    lastValue = 0;
+    lastValue = NULL;
     currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = Particle.deviceID();
@@ -181,7 +181,7 @@ float Ubidots::getValue(char* id) {
     bodyPosend = 13 + raw_response.indexOf(", \"timestamp\"");
     raw_response = raw_response.substring(bodyPosinit, bodyPosend);
     num = raw_response.toFloat();
-    if (bodyPosend < 50) {
+    if (bodyPosend < 50) {  // 50 is the min value of content of body
         return lastValue;
         
     } else {
@@ -295,7 +295,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     raw_response = raw_response.substring(bodyPosinit);
     num = raw_response.toFloat();
     free(allData);
-    if (bodyPosinit != 3) {
+    if (bodyPosinit != 3) { // 3 is the number of "OK|"
         return lastValue;
         
     } else {
