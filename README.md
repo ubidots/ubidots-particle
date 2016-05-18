@@ -150,11 +150,19 @@ void loop() {
 }
 ```
 
+## Special features
 
-## Save values in Ubidots with diferent data source name
+### Change Data Source Tag
 
-The default name of the data source in ubidots for this library is **Particle** to save values with diferent name please follow this code or use the example **UbidotsWithDifferetDataSourceName.cpp**.
+>Set data source tag Function
 
+```c
+ubidots.setDatasourceTag(DATA_SOURCE_Tag);
+```
+
+>Example using setDatasourceTag Function
+
+```c
 ```cpp
 // This example is to save values with a setted data source name
 
@@ -162,13 +170,13 @@ The default name of the data source in ubidots for this library is **Particle** 
 
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_NAME "Your_Data_Source_Name"
+#define DATA_SOURCE_Tag "Your_Data_Source_Tag"
 
 Ubidots ubidots(TOKEN);
 
 void setup() {  
     Serial.begin(115200);
-    ubidots.setDatasourceName(DATA_SOURCE_NAME);
+    ubidots.setDataSourceTag(DATA_SOURCE_Tag);
 }
 void loop() {
     float value1 = analogRead(A0);
@@ -181,3 +189,114 @@ void loop() {
     delay(5000);
 }
 ```
+Ubidots Particle library has a special function to set a Data Source Tag. This Data Source tag is where the values will be saves in Ubidots. 
+<aside class="warning">With your Particle device you can't change the tag of created data source. To do that you will do it from front end of Ubidots</aside>
+### Change Data Source Name
+
+>Set data source name Function
+
+```c
+ubidots.setDataSourceName(DATA_SOURCE_Name);
+```
+
+>Example using setDataSourceName Function
+
+```c
+```cpp
+// This example is to save values with a setted data source name
+
+#include "Ubidots/Ubidots.h"
+
+
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#define DATA_SOURCE_Name "Your_Data_Source_Name"
+
+Ubidots ubidots(TOKEN);
+
+void setup() {  
+    Serial.begin(115200);
+    ubidots.setDataSourceName(DATA_SOURCE_Name);
+}
+void loop() {
+    float value1 = analogRead(A0);
+    float value2 = analogRead(A1);
+    float value3 = analogRead(A2);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2);
+    ubidots.add("Variable_Name_Three", value3);
+    ubidots.sendAll();
+    delay(5000);
+}
+```
+Ubidots Particle library has a special function to set a Data Source name. This Data Source name is where the values will be saves in Ubidots. 
+<aside class="warning">With your Particle device you can't change the name of created data source. To do that you will do it from front end of Ubidots</aside>
+
+### Use UDP method to send values
+>Set transmission function
+
+```c
+ubidots.setMethod(TYPE_UDP);
+```
+
+>Example using setMethod Function
+
+```c
+// This example allow send data using UDP protocol
+
+#include "Ubidots/Ubidots.h"
+
+
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+
+Ubidots ubidots(TOKEN);
+
+void setup() {  
+    Serial.begin(115200);
+    /* 
+    TYPE_UDP is used to send data using UDP method
+    if you don't call this function, the library automatically 
+    set as TCP
+    */
+    ubidots.setMethod(TYPE_UDP); 
+}
+void loop() {
+    float value1 = analogRead(A0);
+    float value2 = analogRead(A1);
+    float value3 = analogRead(A2);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2);
+    ubidots.add("Variable_Name_Three", value3);
+    ubidots.sendAll();
+    delay(5000);
+}
+```
+
+Ubidots Particle library has a function to set transmission method of data, with this function you can change from TCP method to UDP method.
+
+### Change TCP Server
+
+>Example to change TCP Server
+
+```c
+// This example is to save a value to the Ubidots API with TCP method
+
+#include "Ubidots/Ubidots.h"
+
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#define NEW_SERVER "Your_Server.com"
+
+Ubidots ubidots(TOKEN, NEW_SERVER);
+
+void setup() {
+    Serial.begin(115200);
+}
+void loop() {
+    float value1 = analogRead(A0);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.sendAll();
+    delay(5000);
+}
+```
+
+With Ubidots Particle library you can change the server where you will save the data, default server is our server.
+
