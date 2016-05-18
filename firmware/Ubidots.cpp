@@ -61,7 +61,7 @@ void Ubidots::setMethod(uint8_t method) {
  * @return true uppon succes
  */
 
-bool Ubidots::setDatasourceName(char* dsName) {
+bool Ubidots::setDataSourceName(char* dsName) {
     _dsName = dsName;
     return true;
 }
@@ -72,7 +72,7 @@ bool Ubidots::setDatasourceName(char* dsName) {
  * @return true uppon succes
  */
 
-bool Ubidots::setDatasourceTag(char* dsTag) {
+bool Ubidots::setDataSourceTag(char* dsTag) {
     _pId = dsTag;
     return true;
 }
