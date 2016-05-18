@@ -30,8 +30,9 @@ Made by Mateo Velez - Metavix for Ubidots Inc
  * Default method is TCO
  * Default dsNmae is Particle
  */
-Ubidots::Ubidots(char* token) {
+Ubidots::Ubidots(char* token, char* server) {
     _token = token;
+    _server = server;
     _method = TYPE_UDP;
     _dsName = "Particle";
     lastValue = NULL;
@@ -90,7 +91,7 @@ float Ubidots::getValue(char* id) {
     float num;
     while (!_client.connected() && i < 6) {
         i++;
-        _client.connect(SERVER_OLD, PORT_OLD);
+        _client.connect(SERVERHTTP, PORTHTTP);
     }
     if (_client.connected()) {  // Connect to the server
 #ifdef DEBUG_UBIDOTS
@@ -392,9 +393,12 @@ bool Ubidots::sendAllSMS(char* buffer) {
 
 bool Ubidots::sendAllTCP(char* buffer) {
     int i = 0;
+    if (_server == NULL) {
+        _server = SERVER;
+    }
     while (!_client.connected() && i < 6) {
         i++;
-        _client.connect(SERVER, PORT);
+        _client.connect(_server, PORT);
     }
     if (_client.connected()) {        // Connect to the server
 #ifdef DEBUG_UBIDOTS

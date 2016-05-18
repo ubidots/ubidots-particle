@@ -1,6 +1,6 @@
 {
 "name": "Ubidots",
-"version": "2.1.6",
+"version": "2.1.7",
 "author": "Ubidots <devel@ubidots.com>",
 "license": "MIT",
 "description": "Ubidots library for Particle"
