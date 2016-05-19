@@ -8,10 +8,6 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
 * Micro USB cable
 * Internet connection
 
-<aside class="notice">
-The default method is UDP, if you want to change it go to the features sections and follow the example.
-</aside>
-
 ## Setup
 
 1. Set up WiFi connection to the photon. There are two ways to do this:
