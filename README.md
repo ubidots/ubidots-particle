@@ -8,6 +8,10 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
 * Micro USB cable
 * Internet connection
 
+<aside class="notice">
+The default method is UDP, if you want to change it go to the features sections and follow the example.
+</aside>
+
 ## Setup
 
 1. Set up WiFi connection to the photon. There are two ways to do this:
@@ -19,9 +23,6 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
     * In contributed library write Ubidots and select the Ubidots library.
     * Click on **INCLUDE IN APP**. And return to "MYAPP.ino"
 
-<aside class="notice">
-    While method #1 is faster, we like method #2 because it will install a Particle driver in your computer, which is very useful for firmware upgrades, creating webhooks or changing the owner of your Photon.
-</aside>
 <aside class="notice">
 To use this library, put your Ubidots token, datasource name and variable name where indicated.
 Upload the code, open the Serial monitor to check the results. If no response is seen, try reset your Particle Photon. Make sure the baud rate of the Serial monitor is set to the same one specified in your code.
