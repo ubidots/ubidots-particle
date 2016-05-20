@@ -7,7 +7,7 @@
 
 Ubidots ubidots(TOKEN);
 
-void setup() {  
+void setup() {
     Serial.begin(115200);
     /* 
     TYPE_UDP is used to send data using UDP method

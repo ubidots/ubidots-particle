@@ -167,7 +167,7 @@ ubidots.setDatasourceTag(DATA_SOURCE_Tag);
 
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_Tag "Your_Data_Source_Tag"
+#define DATA_SOURCE_TAG "Your_Data_Source_Tag"
 
 Ubidots ubidots(TOKEN);
 
@@ -206,7 +206,7 @@ ubidots.setDataSourceName(DATA_SOURCE_Name);
 
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_Name "Your_Data_Source_Name"
+#define DATA_SOURCE_NAME "Your_Data_Source_Name"
 
 Ubidots ubidots(TOKEN);
 
@@ -229,6 +229,7 @@ Ubidots Particle library has a special function to set a Data Source name. This 
 <aside class="warning">With your Particle device you can't change the name of created data source. To do that you will do it from front end of Ubidots</aside>
 
 ### Use UDP method to send values
+
 >Set transmission function
 
 ```c
@@ -269,6 +270,9 @@ void loop() {
 ```
 
 Ubidots Particle library has a function to set transmission method of data, with this function you can change from TCP method to UDP method.
+<aside class="notice">
+The default method is UDP, if you want to change it go to the features sections and follow the example.
+</aside>
 
 ### Change TCP Server
 

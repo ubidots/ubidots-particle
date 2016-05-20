@@ -40,7 +40,7 @@ Ubidots::Ubidots(char* token, char* server) {
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = Particle.deviceID();
     _pId = new char[str.length() + 1];
-    strcpy (_pId, str.c_str());
+    strcpy(_pId, str.c_str());
 }
 
 /** 
@@ -114,7 +114,7 @@ float Ubidots::getValue(char* id) {
     int bytes = _client.available();
     do {
         #ifdef DEBUG_UBIDOTS
-        if(bytes) {
+        if (bytes) {
             Serial.print("Receiving HTTP transaction of ");
             Serial.print(bytes);
             Serial.println(" bytes.");
@@ -141,7 +141,7 @@ float Ubidots::getValue(char* id) {
             if (bufferPosition < sizeof(buffer)-1) {
                 buffer[bufferPosition] = c;
             } else if ((bufferPosition == sizeof(buffer)-1)) {
-                buffer[bufferPosition] = '\0'; // Null-terminate buffer
+                buffer[bufferPosition] = '\0';  // Null-terminate buffer
                 _client.stop();
                 error = true;
 
@@ -151,7 +151,7 @@ float Ubidots::getValue(char* id) {
             }
             bufferPosition++;
         }
-        buffer[bufferPosition] = '\0'; // Null-terminate buffer
+        buffer[bufferPosition] = '\0';  // Null-terminate buffer
         if (bytes) {
             Serial.print("End of TCP transaction.");
             _client.stop();
@@ -168,7 +168,6 @@ float Ubidots::getValue(char* id) {
     } while (_client.connected() && !timeout && !error);
 
     #ifdef DEBUG_UBIDOTS
-    
     Serial.print("End of TCP Response (");
     Serial.print(millis() - firstRead);
     Serial.println("ms).");
@@ -178,17 +177,15 @@ float Ubidots::getValue(char* id) {
     String raw_response(buffer);
     bodyPosinit = 4 + raw_response.indexOf("\r\n\r\n");
     raw_response = raw_response.substring(bodyPosinit);
-    bodyPosinit = 9 + raw_response.indexOf("\"value\": "); // , \"timestamp\"
+    bodyPosinit = 9 + raw_response.indexOf("\"value\": ");
     bodyPosend = 13 + raw_response.indexOf(", \"timestamp\"");
     raw_response = raw_response.substring(bodyPosinit, bodyPosend);
     num = raw_response.toFloat();
     if (bodyPosend < 50) {  // 50 is the min value of content of body
         return lastValue;
-        
     } else {
         lastValue = num;
         return num;
-        
     }
 }
 
@@ -205,7 +202,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   char buffer[50];
   char* allData = (char *) malloc(sizeof(char) * 500);
   uint8_t bodyPosinit = 0;
-  sprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
+  snprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -215,7 +212,6 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         Serial.println("Client connected");
         Serial.println(allData);
 #endif
-        
         _client.println(allData);
         _client.println();
         _client.flush();
@@ -228,8 +224,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     int bytes = _client.available();
     do {
         #ifdef DEBUG_UBIDOTS
-        
-        if(bytes) {
+        if (bytes) {
             Serial.print("Receiving TCP transaction of ");
             Serial.print(bytes);
             Serial.println(" bytes.");
@@ -257,7 +252,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
             if (bufferPosition < sizeof(buffer)-1) {
                 buffer[bufferPosition] = c;
             } else if ((bufferPosition == sizeof(buffer)-1)) {
-                buffer[bufferPosition] = '\0'; // Null-terminate buffer
+                buffer[bufferPosition] = '\0';  // Null-terminate buffer
                 _client.stop();
                 error = true;
 
@@ -267,7 +262,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
             }
             bufferPosition++;
         }
-        buffer[bufferPosition] = '\0'; // Null-terminate buffer
+        buffer[bufferPosition] = '\0';  // Null-terminate buffer
         if (bytes) {
             Serial.print("End of TCP transaction.");
             _client.stop();
@@ -284,25 +279,21 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     } while (_client.connected() && !timeout && !error);
 
     #ifdef DEBUG_UBIDOTS
-    
     Serial.print("End of TCP Response (");
     Serial.print(millis() - firstRead);
     Serial.println("ms).");
     #endif
     _client.stop();
-
     String raw_response(buffer);
     bodyPosinit = 3 + raw_response.indexOf("OK|");
     raw_response = raw_response.substring(bodyPosinit);
     num = raw_response.toFloat();
     free(allData);
-    if (bodyPosinit != 3) { // 3 is the number of "OK|"
+    if (bodyPosinit != 3) {  // 3 is the number of "OK|"
         return lastValue;
-        
     } else {
         lastValue = num;
         return num;
-        
     }
 }
 
@@ -332,21 +323,21 @@ bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
     if (_dsName == "Particle") {
-        sprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
+        snprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
     } else {
-        sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+        snprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
     }
     for (i = 0; i < currentValue; ) {
-        sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
+        snprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->contextOne != NULL) {
-            sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
+            snprintf(allData, "%s$%s", allData, (val + i)->contextOne);
         }
         i++;
         if (i < currentValue) {
-            sprintf(allData, "%s,", allData);
+            snprintf(allData, "%s,", allData);
         }
     }
-    sprintf(allData, "%s|end", allData);
+    snprintf(allData, "%s|end", allData);
 #ifdef DEBUG_UBIDOTS
     Serial.println(allData);
 #endif
@@ -393,9 +384,6 @@ bool Ubidots::sendAllSMS(char* buffer) {
 
 bool Ubidots::sendAllTCP(char* buffer) {
     int i = 0;
-    if (_server == NULL) {
-        _server = SERVER;
-    }
     while (!_client.connected() && i < 6) {
         i++;
         _client.connect(_server, PORT);

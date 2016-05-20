@@ -53,7 +53,7 @@ typedef struct Value {
 
 class Ubidots {
  public:
-    Ubidots(char* token, char* server = NULL);
+    explicit Ubidots(char* token, char* server = SERVER);
     bool setDataSourceName(char* dsName);
     bool setDataSourceTag(char* dsTag);
     void setMethod(uint8_t method);  // Default TCP
@@ -61,6 +61,7 @@ class Ubidots {
     float getValue(char* id);
     void add(char *variable_id, double value, char *ctext1 = NULL);
     float getValueWithDatasource(char* dsName, char* idName);
+
  private:
     TCPClient _client;
     UDP _clientUDP;
