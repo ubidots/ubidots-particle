@@ -54,8 +54,8 @@ typedef struct Value {
 class Ubidots {
  public:
     explicit Ubidots(char* token, char* server = SERVER);
-    bool setDataSourceName(char* dsName);
-    bool setDataSourceTag(char* dsTag);
+    bool setDatasourceName(char* dsName);
+    bool setDatasourceTag(char* dsTag);
     void setMethod(uint8_t method);  // Default TCP
     bool sendAll();
     float getValue(char* id);

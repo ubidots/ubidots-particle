@@ -42,13 +42,11 @@ Ubidots::Ubidots(char* token, char* server) {
     _pId = new char[str.length() + 1];
     strcpy(_pId, str.c_str());
 }
-
 /** 
  * This function is to set UDP or TCP method
  * @arg method is the method that you want to use
  * @return true uppon succes
  */
-
 void Ubidots::setMethod(uint8_t method) {
     if (method >= 0 && method <= 2) {
         _method = method;
@@ -61,7 +59,7 @@ void Ubidots::setMethod(uint8_t method) {
  * @return true uppon succes
  */
 
-bool Ubidots::setDataSourceName(char* dsName) {
+bool Ubidots::setDatasourceName(char* dsName) {
     _dsName = dsName;
     return true;
 }
@@ -72,7 +70,7 @@ bool Ubidots::setDataSourceName(char* dsName) {
  * @return true uppon succes
  */
 
-bool Ubidots::setDataSourceTag(char* dsTag) {
+bool Ubidots::setDatasourceTag(char* dsTag) {
     _pId = dsTag;
     return true;
 }
