@@ -20,12 +20,12 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
     * Click on **INCLUDE IN APP**. And return to "MYAPP.ino"
 
 <aside class="notice">
-To use this library, put your Ubidots token, datasource name and variable name where indicated.
+To use this library, put your Ubidots token, data source name and variable name where indicated.
 Upload the code, open the Serial monitor to check the results. If no response is seen, try reset your Particle Photon. Make sure the baud rate of the Serial monitor is set to the same one specified in your code.
 </aside>
 
 <aside class="warning">
-You only could change the datasource name in the first iteration of code or in the Ubidots API, this code will put "Particle" in your datasource name and your particle core ID in the Tag ID of datasource by default.
+You only could change the data source name in the first iteration of code or in the Ubidots API, this code will put "Particle" in your data source name and your particle core ID in the Tag ID of data source by default.
 </aside>
 
 
@@ -173,7 +173,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {  
     Serial.begin(115200);
-    ubidots.setDataSourceTag(DATA_SOURCE_Tag);
+    ubidots.setDatasourceTag(DATA_SOURCE_Tag);
 }
 void loop() {
     float value1 = analogRead(A0);
@@ -193,10 +193,10 @@ Ubidots Particle library has a special function to set a Data Source Tag. This D
 >Set data source name Function
 
 ```c
-ubidots.setDataSourceName(DATA_SOURCE_Name);
+ubidots.setDatasourceName(DATA_SOURCE_Name);
 ```
 
->Example using setDataSourceName Function
+>Example using setDatasourceName Function
 
 ```c
 ```cpp
@@ -212,7 +212,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {  
     Serial.begin(115200);
-    ubidots.setDataSourceName(DATA_SOURCE_Name);
+    ubidots.setDatasourceName(DATA_SOURCE_Name);
 }
 void loop() {
     float value1 = analogRead(A0);

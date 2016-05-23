@@ -10,7 +10,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {  
     Serial.begin(115200);
-    ubidots.setDataSourceName(DATA_SOURCE_NAME);
+    ubidots.setDatasourceName(DATA_SOURCE_NAME);
 }
 void loop() {
     float value1 = analogRead(A0);
