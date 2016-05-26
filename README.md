@@ -22,6 +22,9 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
 <aside class="warning">
 This library create by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle Core ID.
 </aside>
+<aside class="notice">
+The default method is UDP, if you want to change it go to the features sections and follow the example.
+</aside>
 
 
 ## Send one value to Ubidots
@@ -181,8 +184,7 @@ void loop() {
     delay(5000);
 }
 ```
-Ubidots Particle library has a special function to set a Data Source Tag. This Data Source tag is where the values will be saves in Ubidots. 
-<aside class="warning">With your Particle device you can't change the tag of created data source. To do that you will do it from front end of Ubidots</aside>
+
 ### Change Data Source Name
 
 >Set data source name Function
@@ -223,7 +225,7 @@ void loop() {
 Ubidots Particle library has a special function to set a Data Source name. This Data Source name is where the values will be saves in Ubidots. 
 <aside class="warning">With your Particle device you can't change the name of created data source. To do that you will do it from front end of Ubidots</aside>
 
-### Use UDP method to send values
+### Use TCP method to send values
 
 >Set transmission function
 
@@ -246,11 +248,11 @@ Ubidots ubidots(TOKEN);
 void setup() {  
     Serial.begin(115200);
     /* 
-    TYPE_UDP is used to send data using UDP method
+    TYPE_TCP is used to send data using TCP method
     if you don't call this function, the library automatically 
-    set as TCP
+    set as UDP
     */
-    ubidots.setMethod(TYPE_UDP); 
+    ubidots.setMethod(TYPE_TCP); 
 }
 void loop() {
     float value1 = analogRead(A0);
@@ -264,10 +266,7 @@ void loop() {
 }
 ```
 
-Ubidots Particle library has a function to set transmission method of data, with this function you can change from TCP method to UDP method.
-<aside class="notice">
-The default method is UDP, if you want to change it go to the features sections and follow the example.
-</aside>
+Ubidots Particle library has a function to set transmission method of data, with this function you can change from UDP method to TCP method.
 
 ### Change TCP Server
 
