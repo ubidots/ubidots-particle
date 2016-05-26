@@ -267,31 +267,3 @@ void loop() {
 ```
 
 Ubidots Particle library has a function to set transmission method of data, with this function you can change from UDP method to TCP method.
-
-### Change TCP Server
-
->Example to change TCP Server
-
-```c
-// This example is to save a value to the Ubidots API with TCP method
-
-#include "Ubidots/Ubidots.h"
-
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define NEW_SERVER "Your_Server.com"
-
-Ubidots ubidots(TOKEN, NEW_SERVER);
-
-void setup() {
-    Serial.begin(115200);
-}
-void loop() {
-    float value1 = analogRead(A0);
-    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
-    ubidots.sendAll();
-    delay(5000);
-}
-```
-
-With Ubidots Particle library you can change the server where you will save the data, default server is our server.
-
