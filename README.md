@@ -19,13 +19,8 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
     * In contributed library write Ubidots and select the Ubidots library.
     * Click on **INCLUDE IN APP**. And return to "MYAPP.ino"
 
-<aside class="notice">
-To use this library, put your Ubidots token, data source name and variable name where indicated.
-Upload the code, open the Serial monitor to check the results. If no response is seen, try reset your Particle Photon. Make sure the baud rate of the Serial monitor is set to the same one specified in your code.
-</aside>
-
 <aside class="warning">
-You only could change the data source name in the first iteration of code or in the Ubidots API, this code will put "Particle" in your data source name and your particle core ID in the Tag ID of data source by default.
+This library create by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle Core ID.
 </aside>
 
 
