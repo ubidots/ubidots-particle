@@ -41,8 +41,8 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #define TYPE_UDP 2
 //#define DEBUG_UBIDOTS
 #define TIMEOUT 3000
-#define SERVER_OLD "things.ubidots.com"
-#define PORT_OLD 80
+#define SERVERHTTP "things.ubidots.com"
+#define PORTHTTP 80
 
 
 typedef struct Value {
@@ -53,7 +53,7 @@ typedef struct Value {
 
 class Ubidots {
  public:
-    Ubidots(char* token);
+    explicit Ubidots(char* token, char* server = SERVER);
     bool setDatasourceName(char* dsName);
     bool setDatasourceTag(char* dsTag);
     void setMethod(uint8_t method);  // Default TCP
@@ -61,10 +61,12 @@ class Ubidots {
     float getValue(char* id);
     void add(char *variable_id, double value, char *ctext1 = NULL);
     float getValueWithDatasource(char* dsName, char* idName);
+
  private:
     TCPClient _client;
     UDP _clientUDP;
     uint8_t _method;
+    char* _server;
     char* _token;
     char* _pId;
     char* _dsName;
