@@ -40,7 +40,7 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #define TYPE_TCP 1
 #define TYPE_UDP 2
 //#define DEBUG_UBIDOTS
-#define TIMEOUT 3000
+#define TIMEOUT 10000
 #define SERVERHTTP "things.ubidots.com"
 #define PORTHTTP 80
 

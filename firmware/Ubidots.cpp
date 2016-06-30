@@ -210,9 +210,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         Serial.println("Client connected");
         Serial.println(allData);
 #endif
-        _client.println(allData);
-        _client.println();
-        _client.flush();
+        _client.write(allData);
     }
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();
