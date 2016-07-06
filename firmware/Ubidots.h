@@ -32,7 +32,8 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #include "spark_wiring_usbserial.h"
 
 #define SERVER "translate.ubidots.com"
-#define USER_AGENT "Particle/1.1"
+#define USER_AGENT "Particle"
+#define VERSION "1.1"
 #define PORT 9010
 #define REMOTE_IP  {50,23,124,66}
 #define MAX_VALUES 10
