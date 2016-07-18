@@ -302,16 +302,25 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
  * @arg ctext1 is the context that you will save, default
  * is NULL
  */
-
-void Ubidots::add(char *variable_id, double value, char *ctext1) {
-  (val+currentValue)->idName = variable_id;
-  (val+currentValue)->idValue = value;
-  (val+currentValue)->contextOne = ctext1;
-  currentValue++;
-  if (currentValue > MAX_VALUES) {
-        Serial.println(F("You are sending more than the maximum of consecutive variables"));
-        currentValue = MAX_VALUES;
-  }
+void Ubidots::add(char *variable_id, float value) {
+    return add(variable_id, value, NULL, NULL);
+}
+void Ubidots::add(char *variable_id, float value, char *ctext) {
+    return add(variable_id, value, ctext, NULL);   
+}
+void Ubidots::add(char *variable_id, float value, long timestamp) {
+    return add(variable_id, value, NULL, timestamp);
+}
+void Ubidots::add(char *variable_id, float value, char *ctext, long timestamp) {
+    (val+currentValue)->id = variable_id;
+    (val+currentValue)->value_id = value;
+    (val+currentValue)->context = ctext;
+    (val+currentValue)->timestamp = timestamp;
+    currentValue++;
+    if (currentValue>maxValues) {
+        Serial.println(F("You are sending more than 5 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
+        currentValue = maxValues;
+    }
 }
 /**
  * Assamble all package to send in TCP or UDP method

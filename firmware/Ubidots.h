@@ -59,7 +59,10 @@ class Ubidots {
     void setMethod(uint8_t method);  // Default TCP
     bool sendAll();
     float getValue(char* id);
-    void add(char *variable_id, double value, char *ctext1 = NULL);
+    void add(char *variable_id, float value);
+    void add(char *variable_id, float value, char *ctext);
+    void add(char *variable_id, float value, long timestamp);
+    void add(char *variable_id, float value, char *ctext, long timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
 
  private:
