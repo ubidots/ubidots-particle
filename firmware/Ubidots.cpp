@@ -200,7 +200,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   char buffer[50];
   char* allData = (char *) malloc(sizeof(char) * 500);
   uint8_t bodyPosinit = 0;
-  snprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
+  sprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -312,9 +312,9 @@ void Ubidots::add(char *variable_id, float value, long timestamp) {
     return add(variable_id, value, NULL, timestamp);
 }
 void Ubidots::add(char *variable_id, float value, char *ctext, long timestamp) {
-    (val+currentValue)->id = variable_id;
-    (val+currentValue)->value_id = value;
-    (val+currentValue)->context = ctext;
+    (val+currentValue)->idName = variable_id;
+    (val+currentValue)->idValue = value;
+    (val+currentValue)->contextOne = ctext;
     (val+currentValue)->timestamp = timestamp;
     currentValue++;
     if (currentValue>maxValues) {
@@ -330,24 +330,24 @@ bool Ubidots::sendAll() {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
     if (_dsName == "Particle") {
-        snprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
+        sprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
     } else {
-        snprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+        sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
     }
     for (i = 0; i < currentValue; ) {
-        snprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
+        sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->timestamp != NULL) {
-            snprintf(allData, "%s@%s", allData, (val + i)->timestamp);
+            sprintf(allData, "%s@%s", allData, (val + i)->timestamp);
         }
         if ((val + i)->contextOne != NULL) {
-            snprintf(allData, "%s$%s", allData, (val + i)->contextOne);
+            sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
         }
         i++;
         if (i < currentValue) {
-            snprintf(allData, "%s,", allData);
+            sprintf(allData, "%s,", allData);
         }
     }
-    snprintf(allData, "%s|end", allData);
+    sprintf(allData, "%s|end", allData);
 #ifdef DEBUG_UBIDOTS
     Serial.println(allData);
 #endif
@@ -424,7 +424,7 @@ bool Ubidots::sendAllTCP(char* buffer) {
  * The Unix time is returned, that is, seconds from 1970-01-01T00:00.
  */
 unsigned long Ubidots::ntpUnixTime () {
-    static int udpInited = udp.begin(123); // open socket on arbitrary port
+    static int udpInited = _clientUDP.begin(123); // open socket on arbitrary port
 
     // Only the first four bytes of an outgoing NTP packet need to be set
     // appropriately, the rest can be whatever.
@@ -435,12 +435,12 @@ unsigned long Ubidots::ntpUnixTime () {
         return 0;
 
     // Clear received data from possible stray received packets
-    udp.flush();
+    _clientUDP.flush();
 
     // Send an NTP request
-    if (! (udp.beginPacket(TIME_SERVER, 123) // 123 is the NTP port
-        && udp.write((byte *)&ntpFirstFourBytes, 48) == 48
-        && udp.endPacket()))
+    if (! (_clientUDP.beginPacket(TIME_SERVER, 123) // 123 is the NTP port
+        && _clientUDP.write((byte *)&ntpFirstFourBytes, 48) == 48
+        && _clientUDP.endPacket()))
             return 0;               // sending request failed
 
     // Wait for response; check every pollIntv ms up to maxPoll times
@@ -448,7 +448,7 @@ unsigned long Ubidots::ntpUnixTime () {
     const byte maxPoll = 15;      // poll up to this many times
     int pktLen;               // received packet length
     for (byte i = 0; i < maxPoll; i++) {
-        if ((pktLen = udp.parsePacket()) == 48)
+        if ((pktLen = _clientUDP.parsePacket()) == 48)
             break;
         delay(pollIntv);
     }
@@ -459,12 +459,12 @@ unsigned long Ubidots::ntpUnixTime () {
     // Set useless to 32 for speed; set to 40 for accuracy.
     const byte useless = 40;
     for (byte i = 0; i < useless; ++i)
-        udp.read();
+        _clientUDP.read();
 
     // Read the integer part of sending time
-    unsigned long time = udp.read();  // NTP time
+    unsigned long time = _clientUDP.read();  // NTP time
     for (byte i = 1; i < 4; i++)
-        time = time << 8 | udp.read();
+        time = time << 8 | _clientUDP.read();
 
     // Round to the nearest second if we want accuracy
     // The fractionary part is the next byte divided by 256: if it is
@@ -472,8 +472,8 @@ unsigned long Ubidots::ntpUnixTime () {
     // for an assumed network delay of 50ms, and (0.5-0.05)*256=115;
     // additionally, we account for how much we delayed reading the packet
     // since its arrival, which we assume on average to be pollIntv/2.
-    time += (udp.read() > 115 - pollIntv/8);
+    time += (_clientUDP.read() > 115 - pollIntv/8);
     // Discard the rest of the packet
-    udp.flush();
+    _clientUDP.flush();
     return time - 2208988800ul;       // convert NTP time to Unix time
 }

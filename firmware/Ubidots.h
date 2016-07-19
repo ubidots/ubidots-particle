@@ -31,6 +31,8 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
+
+#define TIME_SERVER "pool.ntp.org"
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle/1.1"
 #define PORT 9010
@@ -49,6 +51,7 @@ typedef struct Value {
     char  *idName;
     char  *contextOne;
     float idValue;
+    long timestamp;
 } Value;
 
 class Ubidots {
