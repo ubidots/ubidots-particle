@@ -64,6 +64,7 @@ class Ubidots {
     void add(char *variable_id, float value, long timestamp);
     void add(char *variable_id, float value, char *ctext, long timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
+    unsigned long ntpUnixTime ();
 
  private:
     TCPClient _client;
