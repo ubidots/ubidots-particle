@@ -336,6 +336,9 @@ bool Ubidots::sendAll() {
     }
     for (i = 0; i < currentValue; ) {
         snprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
+        if ((val + i)->timestamp != NULL) {
+            snprintf(allData, "%s@%s", allData, (val + i)->timestamp);
+        }
         if ((val + i)->contextOne != NULL) {
             snprintf(allData, "%s$%s", allData, (val + i)->contextOne);
         }
