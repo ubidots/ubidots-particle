@@ -32,7 +32,8 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #include "spark_wiring_usbserial.h"
 
 #define SERVER "translate.ubidots.com"
-#define USER_AGENT "Particle/1.1"
+#define USER_AGENT "Particle"
+#define VERSION "1.1"
 #define PORT 9010
 #define REMOTE_IP  {50,23,124,66}
 #define MAX_VALUES 10
@@ -40,7 +41,7 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #define TYPE_TCP 1
 #define TYPE_UDP 2
 //#define DEBUG_UBIDOTS
-#define TIMEOUT 3000
+#define TIMEOUT 10000
 #define SERVERHTTP "things.ubidots.com"
 #define PORTHTTP 80
 
