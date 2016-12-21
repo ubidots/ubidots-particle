@@ -50,6 +50,7 @@ typedef struct Value {
     char  *idName;
     char  *contextOne;
     float idValue;
+    char *timestamp;
 } Value;
 
 class Ubidots {
