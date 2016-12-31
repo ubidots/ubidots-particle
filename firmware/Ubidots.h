@@ -50,6 +50,7 @@ typedef struct Value {
     char  *idName;
     char  *contextOne;
     float idValue;
+	char *timestamp;
 } Value;
 
 class Ubidots {
@@ -60,7 +61,9 @@ class Ubidots {
     void setMethod(uint8_t method);  // Default TCP
     bool sendAll();
     float getValue(char* id);
-    void add(char *variable_id, double value, char *ctext1 = NULL);
+    void add(char *variable_id, double value);
+    void add(char *variable_id, double value, char *ctext);
+    void add(char *variable_id, double value, char *ctext, char *timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
 
  private:

@@ -305,16 +305,26 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
  * is NULL
  */
 
-void Ubidots::add(char *variable_id, double value, char *ctext1) {
+void Ubidots::add(char *variable_id, double value) {
+  return add(variable_id, value, NULL, NULL);
+}
+
+void Ubidots::add(char *variable_id, double value, char *ctext) {
+  return add(variable_id, value, ctext, NULL);
+}
+
+void Ubidots::add(char *variable_id, double value, char *ctext, char *timestamp) {
   (val+currentValue)->idName = variable_id;
   (val+currentValue)->idValue = value;
-  (val+currentValue)->contextOne = ctext1;
+  (val+currentValue)->contextOne = ctext;
+  (val+currentValue)->contextOne = timestamp;
   currentValue++;
   if (currentValue > MAX_VALUES) {
         Serial.println(F("You are sending more than the maximum of consecutive variables"));
         currentValue = MAX_VALUES;
   }
 }
+
 /**
  * Assamble all package to send in TCP or UDP method
  * @reutrn true upon success, false upon error.
@@ -329,6 +339,9 @@ bool Ubidots::sendAll() {
     }
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
+        if ((val + i)->timestamp != NULL) {
+            sprintf(allData, "%s@%s", allData, (val + i)->timestamp);
+        }
         if ((val + i)->contextOne != NULL) {
             sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
         }
