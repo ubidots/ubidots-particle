@@ -33,6 +33,7 @@ Modified by Jose Garcia for Ubidots Inc
 #include "spark_wiring_usbserial.h"
 
 #define SERVER "translate.ubidots.com"
+#define TIME_SERVER "pool.ntp.org"
 #define USER_AGENT "Particle"
 #define VERSION "1.1"
 #define PORT 9010
@@ -66,10 +67,13 @@ class Ubidots {
     void add(char *variable_id, double value, char *ctext);
     void add(char *variable_id, double value, char *ctext, char *timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
+    char* timeToChar(long timestamp);
+    unsigned long ntpUnixTime();
 
  private:
     TCPClient _client;
     UDP _clientUDP;
+    UDP _clientTMP;
     uint8_t _method;
     char* _server;
     char* _token;

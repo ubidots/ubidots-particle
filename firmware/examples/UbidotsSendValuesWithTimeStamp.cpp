@@ -12,13 +12,10 @@ void setup() {
 }
 void loop() {
     float value1 = analogRead(A0);
-    long t = 1451518741L;
-    char* timestamp = (char *) malloc(sizeof(char) * 700);
-    sprintf(timestamp, "%d%s", t, "000");
-    Serial.print("timestamp:");
-    Serial.println(t);
+    unsigned long t = ubidots.ntpUnixTime(); // calculates your actual timestamp sending a NTP packet
+    char* timestamp = ubidots.timeToChar(t);
     ubidots.add("test", value1, NULL, timestamp);  // Change for your variable name
     ubidots.sendAll();
-    timestamp = 0L;
-    delay(10000);
+    memset(timestamp, 0, sizeof timestamp);
+    delay(3000);
 }
