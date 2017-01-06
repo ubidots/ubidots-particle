@@ -317,7 +317,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext, char *timestamp)
   (val+currentValue)->idName = variable_id;
   (val+currentValue)->idValue = value;
   (val+currentValue)->contextOne = ctext;
-  (val+currentValue)->contextOne = timestamp;
+  (val+currentValue)->timestamp = timestamp;
   currentValue++;
   if (currentValue > MAX_VALUES) {
         Serial.println(F("You are sending more than the maximum of consecutive variables"));
