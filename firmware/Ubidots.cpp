@@ -111,26 +111,26 @@ float Ubidots::getValue(char* id) {
     bool timeout = false;
     int bytes = _client.available();
     do {
-        #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
         if (bytes) {
             Serial.print("Receiving HTTP transaction of ");
             Serial.print(bytes);
             Serial.println(" bytes.");
         }
-        #endif
+#endif
         while (_client.available()) {
             char c = _client.read();
-            #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
             Serial.print(c);
-            #endif
+#endif
             lastRead = millis();
 
             if (c == -1) {
                 error = true;
 
-                #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
                 Serial.println("Error: No data available.");
-                #endif
+#endif
 
                 break;
             }
@@ -165,11 +165,11 @@ float Ubidots::getValue(char* id) {
         }
     } while (_client.connected() && !timeout && !error);
 
-    #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
     Serial.print("End of TCP Response (");
     Serial.print(millis() - firstRead);
     Serial.println("ms).");
-    #endif
+#endif
     _client.stop();
 
     String raw_response(buffer);
@@ -198,9 +198,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
   char buffer[50];
-  char* allData = (char *) malloc(sizeof(char) * 500);
   uint8_t bodyPosinit = 0;
-  sprintf(allData, "Particle/1.1|LV|%s|%s:%s|end", _token, dsTag, idName);
   while (!_client.connected() && i < 6) {
         i++;
         _client.connect(SERVER, PORT);
@@ -208,62 +206,67 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     if (_client.connected()) {  // Connect to the server
 #ifdef DEBUG_UBIDOTS
         Serial.println("Client connected");
-        Serial.println(allData);
 #endif
-        _client.println(allData);
-        _client.println();
-        _client.flush();
+        _client.print(USER_AGENT);
+        _client.print(F("/"));
+        _client.print(VERSION);
+        _client.print(F("|LV|"));
+        _client.print(_token);
+        _client.print(F("|"));
+        _client.print(dsTag);
+        _client.print(F(":"));
+        _client.print(idName);
+        _client.print(F("|end"));
+        
     }
+    _client.flush();
+    
     unsigned int bufferPosition = 0;
     unsigned long lastRead = millis();
     unsigned long firstRead = millis();
     bool error = false;
     bool timeout = false;
-    int bytes = _client.available();
+    int bytes = 0;
+    bytes = _client.available();
+    int count = 0;
+    while(!bytes && count < 10000) {
+        bytes = _client.available();
+        delay(1);
+        count++;
+    }
     do {
-        #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
         if (bytes) {
             Serial.print("Receiving TCP transaction of ");
             Serial.print(bytes);
             Serial.println(" bytes.");
         }
-        #endif
+#endif
 
         while (_client.available()) {
             char c = _client.read();
-            #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
             Serial.print(c);
-            #endif
+#endif
             lastRead = millis();
 
             if (c == -1) {
                 error = true;
 
-                #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
                 Serial.println("Error: No data available.");
-                #endif
+#endif
 
                 break;
             }
-
-            // Check that received character fits in buffer before storing.
-            if (bufferPosition < sizeof(buffer)-1) {
-                buffer[bufferPosition] = c;
-            } else if ((bufferPosition == sizeof(buffer)-1)) {
-                buffer[bufferPosition] = '\0';  // Null-terminate buffer
-                _client.stop();
-                error = true;
-
-                #ifdef DEBUG_UBIDOTS
-                Serial.println("Error: Response body larger than buffer.");
-                #endif
-            }
+            buffer[bufferPosition] = c;
             bufferPosition++;
         }
         buffer[bufferPosition] = '\0';  // Null-terminate buffer
         if (bytes) {
             Serial.print("End of TCP transaction.");
             _client.stop();
+            break;
         }
 
         // Check that there hasn't been more than 5s since last read.
@@ -274,19 +277,18 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
         if (!error && !timeout) {
             delay(200);
         }
-    } while (_client.connected() && !timeout && !error);
+    } while (bytes > 0 && !timeout && !error);
 
-    #ifdef DEBUG_UBIDOTS
+#ifdef DEBUG_UBIDOTS
     Serial.print("End of TCP Response (");
     Serial.print(millis() - firstRead);
     Serial.println("ms).");
-    #endif
+#endif
     _client.stop();
     String raw_response(buffer);
     bodyPosinit = 3 + raw_response.indexOf("OK|");
     raw_response = raw_response.substring(bodyPosinit);
     num = raw_response.toFloat();
-    free(allData);
     if (bodyPosinit != 3) {  // 3 is the number of "OK|"
         return lastValue;
     } else {
