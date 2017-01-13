@@ -407,7 +407,6 @@ bool Ubidots::sendAllTCP(char* buffer) {
         _client.println(buffer);
         _client.flush();
     }
-    delay(200);
     currentValue = 0;
     _client.stop();
     free(buffer);
