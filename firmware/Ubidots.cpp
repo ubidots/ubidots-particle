@@ -304,16 +304,25 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
  * @arg ctext1 is the context that you will save, default
  * is NULL
  */
-
-void Ubidots::add(char *variable_id, double value, char *ctext1) {
-  (val+currentValue)->idName = variable_id;
-  (val+currentValue)->idValue = value;
-  (val+currentValue)->contextOne = ctext1;
-  currentValue++;
-  if (currentValue > MAX_VALUES) {
-        Serial.println(F("You are sending more than the maximum of consecutive variables"));
-        currentValue = MAX_VALUES;
-  }
+void Ubidots::add(char *variable_id, float value) {
+    return add(variable_id, value, NULL, NULL);
+}
+void Ubidots::add(char *variable_id, float value, char *ctext) {
+    return add(variable_id, value, ctext, NULL);   
+}
+void Ubidots::add(char *variable_id, float value, long timestamp) {
+    return add(variable_id, value, NULL, timestamp);
+}
+void Ubidots::add(char *variable_id, float value, char *ctext, long timestamp) {
+    (val+currentValue)->idName = variable_id;
+    (val+currentValue)->idValue = value;
+    (val+currentValue)->contextOne = ctext;
+    (val+currentValue)->timestamp = timestamp;
+    currentValue++;
+    if (currentValue>maxValues) {
+        Serial.println(F("You are sending more than 5 consecutives variables, you just could send 5 variables. Then other variables will be deleted!"));
+        currentValue = maxValues;
+    }
 }
 /**
  * Assamble all package to send in TCP or UDP method
@@ -329,6 +338,9 @@ bool Ubidots::sendAll() {
     }
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
+        if ((val + i)->timestamp != NULL) {
+            sprintf(allData, "%s@%s", allData, (val + i)->timestamp);
+        }
         if ((val + i)->contextOne != NULL) {
             sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
         }
@@ -399,4 +411,70 @@ bool Ubidots::sendAllTCP(char* buffer) {
     _client.stop();
     free(buffer);
     return true;
+}
+
+/*
+ * © Francesco Potortì 2013 - GPLv3 - Revision: 1.13
+ *
+ * Send an NTP packet and wait for the response, return the Unix time
+ *
+ * To lower the memory footprint, no buffers are allocated for sending
+ * and receiving the NTP packets.  Four bytes of memory are allocated
+ * for transmision, the rest is random garbage collected from the data
+ * memory segment, and the received packet is read one byte at a time.
+ * The Unix time is returned, that is, seconds from 1970-01-01T00:00.
+ */
+unsigned long Ubidots::ntpUnixTime () {
+    static int udpInited = _clientUDP.begin(123); // open socket on arbitrary port
+
+    // Only the first four bytes of an outgoing NTP packet need to be set
+    // appropriately, the rest can be whatever.
+    const long ntpFirstFourBytes = 0xEC0600E3; // NTP request header
+
+    // Fail if WiFiUdp.begin() could not init a socket
+    if (! udpInited)
+        return 0;
+
+    // Clear received data from possible stray received packets
+    _clientUDP.flush();
+
+    // Send an NTP request
+    if (! (_clientUDP.beginPacket(TIME_SERVER, 123) // 123 is the NTP port
+        && _clientUDP.write((byte *)&ntpFirstFourBytes, 48) == 48
+        && _clientUDP.endPacket()))
+            return 0;               // sending request failed
+
+    // Wait for response; check every pollIntv ms up to maxPoll times
+    const int pollIntv = 150;     // poll every this many ms
+    const byte maxPoll = 15;      // poll up to this many times
+    int pktLen;               // received packet length
+    for (byte i = 0; i < maxPoll; i++) {
+        if ((pktLen = _clientUDP.parsePacket()) == 48)
+            break;
+        delay(pollIntv);
+    }
+    if (pktLen != 48)
+        return 0;               // no correct packet received
+
+    // Read and discard the first useless bytes
+    // Set useless to 32 for speed; set to 40 for accuracy.
+    const byte useless = 40;
+    for (byte i = 0; i < useless; ++i)
+        _clientUDP.read();
+
+    // Read the integer part of sending time
+    unsigned long time = _clientUDP.read();  // NTP time
+    for (byte i = 1; i < 4; i++)
+        time = time << 8 | _clientUDP.read();
+
+    // Round to the nearest second if we want accuracy
+    // The fractionary part is the next byte divided by 256: if it is
+    // greater than 500ms we round to the next second; we also account
+    // for an assumed network delay of 50ms, and (0.5-0.05)*256=115;
+    // additionally, we account for how much we delayed reading the packet
+    // since its arrival, which we assume on average to be pollIntv/2.
+    time += (_clientUDP.read() > 115 - pollIntv/8);
+    // Discard the rest of the packet
+    _clientUDP.flush();
+    return time - 2208988800ul;       // convert NTP time to Unix time
 }

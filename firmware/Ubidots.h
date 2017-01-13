@@ -31,6 +31,8 @@ Made by Mateo Velez - Metavix for Ubidots Inc
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
+
+#define TIME_SERVER "pool.ntp.org"
 #define SERVER "translate.ubidots.com"
 #define USER_AGENT "Particle"
 #define VERSION "1.1"
@@ -50,6 +52,7 @@ typedef struct Value {
     char  *idName;
     char  *contextOne;
     float idValue;
+    long timestamp;
 } Value;
 
 class Ubidots {
@@ -60,8 +63,12 @@ class Ubidots {
     void setMethod(uint8_t method);  // Default TCP
     bool sendAll();
     float getValue(char* id);
-    void add(char *variable_id, double value, char *ctext1 = NULL);
+    void add(char *variable_id, float value);
+    void add(char *variable_id, float value, char *ctext);
+    void add(char *variable_id, float value, long timestamp);
+    void add(char *variable_id, float value, char *ctext, long timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
+    unsigned long ntpUnixTime ();
 
  private:
     TCPClient _client;
