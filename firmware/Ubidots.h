@@ -52,7 +52,7 @@ typedef struct Value {
     char  *idName;
     char  *contextOne;
     float idValue;
-	char *timestamp;
+    unsigned long timestamp;
 } Value;
 
 class Ubidots {
@@ -65,7 +65,7 @@ class Ubidots {
     float getValue(char* id);
     void add(char *variable_id, double value);
     void add(char *variable_id, double value, char *ctext);
-    void add(char *variable_id, double value, char *ctext, char *timestamp);
+    void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
     char* timeToChar(long timestamp);
     unsigned long ntpUnixTime();
