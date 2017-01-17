@@ -299,7 +299,7 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
 }
 
 char* Ubidots::timeToChar(long timestamp){
-    char* t = (char *) malloc(sizeof(char) * 48);
+    char* t = (char *) malloc(sizeof(char) * 14);
     sprintf(t, "%lu%s", timestamp, "000");
     return t;
 }
@@ -320,7 +320,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext) {
   return add(variable_id, value, ctext, NULL);
 }
 
-void Ubidots::add(char *variable_id, double value, char *ctext, char *timestamp) {
+void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned timestamp) {
   (val+currentValue)->idName = variable_id;
   (val+currentValue)->idValue = value;
   (val+currentValue)->contextOne = ctext;
@@ -347,7 +347,9 @@ bool Ubidots::sendAll() {
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
         if ((val + i)->timestamp != NULL) {
-            sprintf(allData, "%s@%s", allData, (val + i)->timestamp);
+            char* timestamp = timeToChar((val + i)->timestamp);
+            sprintf(allData, "%s@%s", allData, timestamp);
+            free(timestamp);
         }
         if ((val + i)->contextOne != NULL) {
             sprintf(allData, "%s$%s", allData, (val + i)->contextOne);

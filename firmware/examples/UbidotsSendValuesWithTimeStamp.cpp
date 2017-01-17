@@ -13,9 +13,7 @@ void setup() {
 void loop() {
     float value1 = analogRead(A0);
     unsigned long t = ubidots.ntpUnixTime(); // calculates your actual timestamp sending a NTP packet
-    char* timestamp = ubidots.timeToChar(t);
-    ubidots.add("test", value1, NULL, timestamp);  // Change for your variable name
+    ubidots.add("test", value1, NULL, t);  // Change for your variable name
     ubidots.sendAll();
-    memset(timestamp, 0, sizeof timestamp);
-    delay(3000);
+    delay(5000);
 }
