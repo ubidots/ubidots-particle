@@ -38,8 +38,8 @@ void loop() {
     ubidots.add("test-2", value1, NULL, t-20000);  // Sends a value with a custom timestamp
     ubidots.add("test-3", value1);
 
-	// Sends variables 'test-1' and 'test-2' with your actual timestamp,
-	// variable 'test-2' will be send with its custom timestamp
+    // Sends variables 'test-1' and 'test-2' with your actual timestamp,
+    // variable 'test-2' will be send with its custom timestamp
     ubidots.sendAll(t);
     delay(5000);
 }
