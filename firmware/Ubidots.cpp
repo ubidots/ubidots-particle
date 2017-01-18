@@ -28,7 +28,7 @@ Modified by Jose Garcia for Ubidots Inc
 #include "Ubidots.h"
 /**
  * Constructor.
- * Default method is TCO
+ * Default method is UDP
  * Default dsNmae is Particle
  */
 Ubidots::Ubidots(char* token, char* server) {
@@ -195,6 +195,7 @@ float Ubidots::getValue(char* id) {
  * @arg idName is the Tag of the variable
  * @return num the data that you get from the Ubidots API
  */
+
 float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
   float num;
   int i = 0;
@@ -298,17 +299,12 @@ float Ubidots::getValueWithDatasource(char* dsTag, char* idName) {
     }
 }
 
-char* Ubidots::timeToChar(long timestamp){
-    char* t = (char *) malloc(sizeof(char) * 14);
-    sprintf(t, "%lu%s", timestamp, "000");
-    return t;
-}
-
 /**
  * Add a value of variable to save
  * @arg variable_id variable id or name to save in a struct
  * @arg value variable value to save in a struct
- * @arg ctext1 is the context that you will save, default
+ * @arg ctext [optional] is the context that you will save, default
+ * @arg timestamp_val [optional] is the timestamp for the actual value
  * is NULL
  */
 
@@ -320,11 +316,11 @@ void Ubidots::add(char *variable_id, double value, char *ctext) {
   return add(variable_id, value, ctext, NULL);
 }
 
-void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned timestamp) {
+void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned timestamp_val) {
   (val+currentValue)->idName = variable_id;
   (val+currentValue)->idValue = value;
   (val+currentValue)->contextOne = ctext;
-  (val+currentValue)->timestamp = timestamp;
+  (val+currentValue)->timestamp_val = timestamp_val;
   currentValue++;
   if (currentValue > MAX_VALUES) {
         Serial.println(F("You are sending more than the maximum of consecutive variables"));
@@ -334,22 +330,36 @@ void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned ti
 
 /**
  * Assamble all package to send in TCP or UDP method
- * @reutrn true upon success, false upon error.
+ * @arg timestamp_global [optional] is the timestamp for all the variables added
+ using add() method, if a timestamp_val was declared on the add() method, Ubidots
+ will take as timestamp for the val the timestamp_val instead of the timestamp_global
+ * @return true upon success, false upon error.
  */
-bool Ubidots::sendAll() {
+
+bool Ubidots::sendAll(){
+    return sendAll(NULL);
+}
+
+bool Ubidots::sendAll(unsigned long timestamp_global) {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    if (_dsName == "Particle") {
-        sprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
-    } else {
-        sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+    if( timestamp_global!=NULL){
+        if (_dsName == "Particle") {
+            sprintf(allData, "%s|POST|%s|%s@%lu%s=>", USER_AGENT, _token, _pId, timestamp_global, "000");
+        } else {
+            sprintf(allData, "%s|POST|%s|%s:%s@%lu%s=>", USER_AGENT, _token, _pId, _dsName, timestamp_global, "000");
+        }
+    }else{
+        if (_dsName == "Particle") {
+            sprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
+        } else {
+            sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+        }
     }
     for (i = 0; i < currentValue; ) {
         sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
-        if ((val + i)->timestamp != NULL) {
-            char* timestamp = timeToChar((val + i)->timestamp);
-            sprintf(allData, "%s@%s", allData, timestamp);
-            free(timestamp);
+        if ((val + i)->timestamp_val != NULL) {
+            sprintf(allData, "%s@%lu%s", allData, (val + i)->timestamp_val, "000");
         }
         if ((val + i)->contextOne != NULL) {
             sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
@@ -379,8 +389,10 @@ bool Ubidots::sendAll() {
 
 bool Ubidots::sendAllUDP(char* buffer) {
     int size;
-    _clientUDP.begin(8888);
-    if (_clientUDP.sendPacket(buffer, strlen(buffer), REMOTE_IP, PORT) <= 0) {
+    _clientUDP.begin(PORT);
+    if (! (_clientTMP.beginPacket(_server, PORT) // 123 is the NTP port
+        && _clientTMP.write(buffer)
+        && _clientTMP.endPacket())){
         Serial.println("ERROR");
     }
     currentValue = 0;
@@ -431,6 +443,7 @@ bool Ubidots::sendAllTCP(char* buffer) {
  * memory segment, and the received packet is read one byte at a time.
  * The Unix time is returned, that is, seconds from 1970-01-01T00:00.
  */
+
 unsigned long Ubidots::ntpUnixTime () {
     static int udpInited = _clientTMP.begin(123); // open socket on arbitrary port
 
