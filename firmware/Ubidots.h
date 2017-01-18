@@ -37,7 +37,6 @@ Modified by Jose Garcia for Ubidots Inc
 #define USER_AGENT "Particle"
 #define VERSION "2.1.8"
 #define PORT 9012
-#define REMOTE_IP  {50,23,124,66}
 #define MAX_VALUES 10
 #define TYPE_SMS 0
 #define TYPE_TCP 1
@@ -52,7 +51,7 @@ typedef struct Value {
     char  *idName;
     char  *contextOne;
     float idValue;
-    unsigned long timestamp;
+    unsigned long timestamp_val;
 } Value;
 
 class Ubidots {
@@ -60,14 +59,14 @@ class Ubidots {
     explicit Ubidots(char* token, char* server = SERVER);
     bool setDatasourceName(char* dsName);
     bool setDatasourceTag(char* dsTag);
-    void setMethod(uint8_t method);  // Default TCP
+    void setMethod(uint8_t method);  // Default UDP
     bool sendAll();
+    bool sendAll(unsigned long timestamp_global);
     float getValue(char* id);
     void add(char *variable_id, double value);
     void add(char *variable_id, double value, char *ctext);
     void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
     float getValueWithDatasource(char* dsName, char* idName);
-    char* timeToChar(long timestamp);
     unsigned long ntpUnixTime();
 
  private:
