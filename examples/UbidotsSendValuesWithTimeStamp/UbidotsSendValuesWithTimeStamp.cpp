@@ -2,7 +2,7 @@
  * Include Libraries
  ****************************************/
 
-#include "Ubidots/Ubidots.h"
+#include "Ubidots.h"
 
 
 /****************************************
