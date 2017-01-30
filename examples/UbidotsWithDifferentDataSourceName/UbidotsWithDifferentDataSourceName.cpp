@@ -1,12 +1,29 @@
 // This example is to save values with a setted data source name
 
+/****************************************
+ * Include Libraries
+ ****************************************/
+
 #include "Ubidots.h"
 
+/****************************************
+ * Define Constants
+ ****************************************/
 
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_NAME "Your_Data_Source_Name"
+#define TOKEN "YOUR_TOKEN"  // Put here your Ubidots TOKEN
+#define DATA_SOURCE_NAME "test"
 
 Ubidots ubidots(TOKEN);
+
+/****************************************
+ * Auxiliar Functions
+ ****************************************/
+
+//
+
+/****************************************
+ * Main Functions
+ ****************************************/
 
 void setup() {  
     Serial.begin(115200);

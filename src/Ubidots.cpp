@@ -390,9 +390,9 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
 bool Ubidots::sendAllUDP(char* buffer) {
     int size;
     _clientUDP.begin(PORT);
-    if (! (_clientTMP.beginPacket(_server, PORT) // 123 is the NTP port
-        && _clientTMP.write(buffer)
-        && _clientTMP.endPacket())){
+    if (! (_clientUDP.beginPacket(_server, PORT) // 123 is the NTP port
+        && _clientUDP.write(buffer)
+        && _clientUDP.endPacket())){
         Serial.println("ERROR");
     }
     currentValue = 0;
@@ -445,6 +445,7 @@ bool Ubidots::sendAllTCP(char* buffer) {
  */
 
 unsigned long Ubidots::ntpUnixTime () {
+
     static int udpInited = _clientTMP.begin(123); // open socket on arbitrary port
 
     // Only the first four bytes of an outgoing NTP packet need to be set

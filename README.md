@@ -7,6 +7,7 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
 * [Particle Photon, Electron, Core](https://store.particle.io/)
 * Micro USB cable
 * Internet connection
+* Note: For the last version of the library is necessary to have your electron with firmware version 0.5.3 or above.
 
 ## Setup
 
@@ -107,6 +108,58 @@ void loop() {
 }
 ```
 
+## Send values with custom different timestamp
+
+To send a value with a custom timestamp to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValuesWithTimestamp.cpp**, copy it and paste to MYAPP.ino
+
+```c++
+****************************************
+ * Include Libraries
+ ****************************************/
+
+#include "Ubidots.h"
+
+
+/****************************************
+ * Define Constants
+ ****************************************/
+
+#define TOKEN "Your Ubidots TOKEN"  // Put here your Ubidots TOKEN
+
+Ubidots ubidots(TOKEN);
+
+
+/****************************************
+ * Auxiliar Functions
+ ****************************************/
+
+//
+
+/****************************************
+ * Main Functions
+ ****************************************/
+
+
+void setup() {
+    Serial.begin(115200);
+}
+
+
+void loop() {
+    float value1 = analogRead(A0);
+    unsigned long t = ubidots.ntpUnixTime(); // calculates your actual timestamp in SECONDS
+
+    ubidots.add("test-1", value1);  // Change the first argumento for your var's label
+    ubidots.add("test-2", value1, NULL, t-20000);  // Sends a value with a custom timestamp
+    ubidots.add("test-3", value1);
+
+    // Sends variables 'test-1' and 'test-2' with your actual timestamp,
+    // variable 'test-2' will be send with its custom timestamp
+    ubidots.sendAll(t);
+    delay(5000);
+}
+```
+
 ## Send multiple values with context
 
 To send values with context you can follow our example in the library, select ***UbidotsSendValuesWithContext.cpp** or copy this code
@@ -146,6 +199,19 @@ void loop() {
 ```
 
 ## Special features
+
+## Obtain timestamp
+
+If you need to obtain the timestamp you can use the NTP server made by Francesco Potorti ported to this library, simply code something like this:
+
+>Get timestamp
+
+```c
+unsigned long timestamp = ubidots.ntpUnixTime(); // calculates your actual timestamp in SECONDS
+
+ubidots.add("test-1", 1);
+ubidots.sendAll(timestamp);
+```
 
 ### Change Data Source Tag
 
