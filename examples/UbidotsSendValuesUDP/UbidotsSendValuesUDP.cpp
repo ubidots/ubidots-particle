@@ -1,9 +1,29 @@
 // This example allow send data using UDP protocol
 
+/****************************************
+ * Include Libraries
+ ****************************************/
+
 #include "Ubidots.h"
 
 
+/****************************************
+ * Define Constants
+ ****************************************/
+
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+
+
+/****************************************
+ * Auxiliar Functions
+ ****************************************/
+
+//Put here your auxiliar functions
+
+
+/****************************************
+ * Main Functions
+ ****************************************/
 
 Ubidots ubidots(TOKEN);
 
