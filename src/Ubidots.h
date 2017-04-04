@@ -35,7 +35,7 @@ Modified by Jose Garcia for Ubidots Inc
 #define SERVER "translate.ubidots.com"
 #define TIME_SERVER "pool.ntp.org"
 #define USER_AGENT "Particle"
-#define VERSION "2.1.9"
+#define VERSION "2.1.10"
 #define PORT 9012
 #define MAX_VALUES 10
 #define TYPE_SMS 0
