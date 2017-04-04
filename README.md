@@ -79,6 +79,32 @@ void loop() {
 }
 ```
 
+## Get Variable context
+
+To get the context from a variable stored in ubidots you can follow our example in the library, select ***UbidotsGetVarContext.cpp** or copy this code
+
+```cpp
+// This example is to save multiple variables with context to the Ubidots API with TCP method
+
+#include "Ubidots/Ubidots.h"
+
+
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#define TOKEN "Your_VAR_ID"  // Put here your variable ID
+
+Ubidots ubidots(TOKEN);
+
+void setup() {
+    Serial.begin(115200);
+    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+}
+void loop() {
+    char* context;
+    ubidots.getVarContext(VAR_ID);
+    delay(5000);
+}
+```
+
 ## Send multiple values to Ubidots 
 
 To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValues.cpp**, copy it and paste to MYAPP.ino
@@ -113,7 +139,7 @@ void loop() {
 To send a value with a custom timestamp to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValuesWithTimestamp.cpp**, copy it and paste to MYAPP.ino
 
 ```c++
-****************************************
+/****************************************
  * Include Libraries
  ****************************************/
 
@@ -235,7 +261,7 @@ ubidots.setDatasourceTag(DATA_SOURCE_Tag);
 
 Ubidots ubidots(TOKEN);
 
-void setup() {  
+void setup() {
     Serial.begin(115200);
     ubidots.setDatasourceTag(DATA_SOURCE_Tag);
 }
@@ -273,7 +299,7 @@ ubidots.setDatasourceName(DATA_SOURCE_Name);
 
 Ubidots ubidots(TOKEN);
 
-void setup() {  
+void setup() {
     Serial.begin(115200);
     ubidots.setDatasourceName(DATA_SOURCE_Name);
 }
@@ -311,7 +337,7 @@ ubidots.setMethod(TYPE_UDP);
 
 Ubidots ubidots(TOKEN);
 
-void setup() {  
+void setup() {
     Serial.begin(115200);
     /* 
     TYPE_TCP is used to send data using TCP method
