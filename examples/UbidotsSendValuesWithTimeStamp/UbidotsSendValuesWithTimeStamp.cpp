@@ -27,6 +27,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
+    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 
 

@@ -445,7 +445,7 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
         }
     }
     sprintf(allData, "%s|end", allData);
-
+    
     if(_debug){
         Serial.println(allData);
     }
