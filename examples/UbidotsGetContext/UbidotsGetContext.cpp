@@ -1,22 +1,17 @@
 // This example is to get the last value of variable from the Ubidots API
 
-// This example is to save multiple variables to the Ubidots API with TCP method
-
 /****************************************
  * Include Libraries
  ****************************************/
 
 #include "Ubidots.h"
 
-
 /****************************************
  * Define Constants
  ****************************************/
 
-#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
-
-Ubidots ubidots(TOKEN);
-
+#define TOKEN "...."  // Put here your Ubidots TOKEN
+#define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
 
 /****************************************
  * Auxiliar Functions
@@ -29,18 +24,16 @@ Ubidots ubidots(TOKEN);
  * Main Functions
  ****************************************/
 
+
+Ubidots ubidots(TOKEN);
+
 void setup() {
     Serial.begin(115200);
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
-
 void loop() {
-    float value1 = analogRead(A0);
-    float value2 = analogRead(A1);
-    float value3 = analogRead(A2);
-    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
-    ubidots.add("Variable_Name_Two", value2);
-    ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    char* context;
+    ubidots.getVarContext(VAR_ID);
+    Serial.println(context);
     delay(5000);
 }

@@ -35,6 +35,7 @@ void setup() {
     set as TCP
     */
     ubidots.setMethod(TYPE_UDP); 
+    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 void loop() {
     float value1 = analogRead(A0);

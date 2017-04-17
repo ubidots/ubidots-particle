@@ -35,13 +35,12 @@ Modified by Jose Garcia for Ubidots Inc
 #define SERVER "translate.ubidots.com"
 #define TIME_SERVER "pool.ntp.org"
 #define USER_AGENT "Particle"
-#define VERSION "2.1.9"
+#define VERSION "2.1.10"
 #define PORT 9012
 #define MAX_VALUES 10
 #define TYPE_SMS 0
 #define TYPE_TCP 1
 #define TYPE_UDP 2
-//#define DEBUG_UBIDOTS
 #define TIMEOUT 10000
 #define SERVERHTTP "things.ubidots.com"
 #define PORTHTTP 80
@@ -59,6 +58,7 @@ class Ubidots {
     explicit Ubidots(char* token, char* server = SERVER);
     bool setDatasourceName(char* dsName);
     bool setDatasourceTag(char* dsTag);
+    void setDebug(bool debug);
     void setMethod(uint8_t method);  // Default UDP
     bool sendAll();
     bool sendAll(unsigned long timestamp_global);
@@ -66,7 +66,8 @@ class Ubidots {
     void add(char *variable_id, double value);
     void add(char *variable_id, double value, char *ctext);
     void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
-    float getValueWithDatasource(char* dsName, char* idName);
+    float getValueWithDatasource(char* device, char* variable);
+    char* getVarContext(char* id);
     unsigned long ntpUnixTime();
 
  private:
@@ -84,6 +85,7 @@ class Ubidots {
     bool sendAllUDP(char* buffer);
     bool sendAllTCP(char* buffer);
     float lastValue;
+    bool _debug = false;
     //bool sendAllSMS(char* buffer);  // Work in progress
 };
 
