@@ -56,37 +56,35 @@ typedef struct Value {
 class Ubidots {
  public:
     explicit Ubidots(char* token, char* server = SERVER);
-    bool setDatasourceName(char* dsName);
-    bool setDatasourceTag(char* dsTag);
-    void setDebug(bool debug);
-    void setMethod(uint8_t method);  // Default UDP
-    bool sendAll();
-    bool sendAll(unsigned long timestamp_global);
-    float getValue(char* id);
     void add(char *variable_id, double value);
     void add(char *variable_id, double value, char *ctext);
     void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
+    float getValue(char* id);
     float getValueWithDatasource(char* device, char* variable);
+    float getValueHTTP(char* id);
     char* getVarContext(char* id);
+    bool sendAll();
+    bool sendAll(unsigned long timestamp_global);
+    bool setDatasourceName(char* dsName);
+    bool setDatasourceTag(char* dsTag);
+    void setDebug(bool debug);
+    void setMethod(uint8_t method); // Default UDP
     unsigned long ntpUnixTime();
 
  private:
     TCPClient _client;
     UDP _clientUDP;
     UDP _clientTMP;
+    Value * val;
+    uint8_t _currentValue;
+    char* _dsName;
+    bool _debug = false;
     uint8_t _method;
+    char* _pId;
     char* _server;
     char* _token;
-    char* _pId;
-    char* _dsName;
-    uint8_t maxValues;
-    uint8_t currentValue;
-    Value * val;
     bool sendAllUDP(char* buffer);
     bool sendAllTCP(char* buffer);
-    float lastValue;
-    bool _debug = false;
-    //bool sendAllSMS(char* buffer);  // Work in progress
 };
 
-#endif  // _Ubidots_H_
+#endif
