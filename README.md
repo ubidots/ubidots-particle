@@ -277,31 +277,30 @@ ubidots.add("test-1", 1);
 ubidots.sendAll(timestamp);
 ```
 
-### Change Data Source Tag
+### Change Device Label
 
->Set data source tag Function
+>Sets the device label
 
 ```c
-ubidots.setDatasourceTag(DATA_SOURCE_Tag);
+ubidots.setDeviceLabel(char* deviceLabel);
 ```
 
->Example using setDatasourceTag Function
+>Example using setDeviceLabel method
 
 ```c
 ```cpp
-// This example is to save values with a setted data source name
+// This example is to save values with a fixed device label
 
 #include "Ubidots/Ubidots.h"
 
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_TAG "Your_Data_Source_Tag"
+#define DEVICE_NAME "Your_Device_Name"
 
 Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
-    ubidots.setDatasourceTag(DATA_SOURCE_Tag);
 }
 void loop() {
     float value1 = analogRead(A0);
@@ -310,36 +309,39 @@ void loop() {
     ubidots.add("Variable_Name_One", value1);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2);
     ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    ubidots.setDeviceLabel(DEVICE_LABEL);
+    if(ubidots.sendAll()){
+        //Do something if values were sent
+        Serial.println("values sent");
+    }
     delay(5000);
 }
 ```
 
-### Change Data Source Name
+### Change Device Name
 
->Set data source name Function
+>Sets the device name to display in Ubidots
 
 ```c
-ubidots.setDatasourceName(DATA_SOURCE_Name);
+ubidots.setDeviceName(char* deviceName);
 ```
 
 >Example using setDatasourceName Function
 
 ```c
 ```cpp
-// This example is to save values with a setted data source name
+// This example is to save values with a fixed device name
 
 #include "Ubidots/Ubidots.h"
 
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_NAME "Your_Data_Source_Name"
+#define DEVICE_NAME "Your_Device_Name"
 
 Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
-    ubidots.setDatasourceName(DATA_SOURCE_Name);
 }
 void loop() {
     float value1 = analogRead(A0);
@@ -348,7 +350,11 @@ void loop() {
     ubidots.add("Variable_Name_One", value1);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2);
     ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    ubidots.setDeviceName(DEVICE_NAME);
+    if(ubidots.sendAll()){
+        //Do something if values were sent
+        Serial.println("data sent");
+    }
     delay(5000);
 }
 ```
