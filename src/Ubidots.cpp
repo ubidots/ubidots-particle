@@ -73,9 +73,7 @@ bool Ubidots::setDatasourceName(char* dsName) {
  */
 
 bool Ubidots::setDatasourceTag(char* dsTag) {
-    #ifndef DEBUG
-        #pragma message "this function is deprecated"
-    #endif
+    Serial.println("Warning, this function is deprecated");
     _pId = dsTag;
     return true;
 }
