@@ -69,8 +69,8 @@ class Ubidots {
     bool sendAll(unsigned long timestamp_global);
     void setDeviceName(char* deviceName);
     void setDeviceLabel(char* deviceLabel);
-    bool setDatasourceName(char* dsName);
-    bool setDatasourceTag(char* dsTag);
+    bool setDatasourceName(char* dsName); //Deprecated
+    bool setDatasourceTag(char* dsTag); //Deprecated
     void setDebug(bool debug);
     void setMethod(uint8_t method); // Default UDP
     unsigned long ntpUnixTime();

@@ -41,11 +41,11 @@ Ubidots::Ubidots(char* token, char* server) {
     _token = token;
     _server = server;
     _method = TYPE_UDP;
-    _pId = "particle";
+    _dsName = "particle";
     _currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = System.deviceID();
-    _dsName = new char[str.length() + 1];
+    _pId = new char[str.length() + 1];
     strcpy(_dsName, str.c_str());
 }
 
