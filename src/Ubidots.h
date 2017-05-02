@@ -67,6 +67,8 @@ class Ubidots {
     char* getVarContext(char* id);
     bool sendAll();
     bool sendAll(unsigned long timestamp_global);
+    void setDeviceName(char* deviceName);
+    void setDeviceLabel(char* deviceLabel);
     bool setDatasourceName(char* dsName);
     bool setDatasourceTag(char* dsTag);
     void setDebug(bool debug);

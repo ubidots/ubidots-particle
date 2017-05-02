@@ -27,56 +27,33 @@ Modified by Jose Garcia for Ubidots Inc
 
 #include "Ubidots.h"
 
+/***************************************************************************
+CONSTRUCTOR
+***************************************************************************/
 
 /**
  * Constructor.
  * Default method is UDP
  * Default dsNmae is Particle
  */
+
 Ubidots::Ubidots(char* token, char* server) {
     _token = token;
     _server = server;
     _method = TYPE_UDP;
-    _dsName = "Particle";
+    _pId = "particle";
     _currentValue = 0;
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
-    String str = Particle.deviceID();
-    _pId = new char[str.length() + 1];
-    strcpy(_pId, str.c_str());
-}
-/** 
- * This function is to set UDP or TCP method
- * @arg method is the method that you want to use
- * @return true uppon succes
- */
-void Ubidots::setMethod(uint8_t method) {
-    if (method >= 0 && method <= 2) {
-        _method = method;
-    }
+    String str = System.deviceID();
+    _dsName = new char[str.length() + 1];
+    strcpy(_dsName, str.c_str());
 }
 
-/** 
- * This function is to set you data source name
- * @arg dsName is the name of your data source name
- * @return true uppon succes
- */
 
-bool Ubidots::setDatasourceName(char* dsName) {
-    _dsName = dsName;
-    return true;
-}
+/***************************************************************************
+FUNCTIONS TO RETRIEVE DATA
+***************************************************************************/
 
-/** 
- * This function is to set you data source Tag
- * @arg dsTag is the name of your data source tag
- * @return true uppon succes
- */
-
-bool Ubidots::setDatasourceTag(char* dsTag) {
-    Serial.println("Warning, this function is deprecated");
-    _pId = dsTag;
-    return true;
-}
 
 /** 
  * This function is to get value from the Ubidots API
@@ -387,7 +364,6 @@ float Ubidots::getValueHTTP(char* id){
  */
 
 char* Ubidots::getVarContext(char* id){
-    q
     String response = "";
     int timeout = 0;
     uint8_t max_retries = 0;
@@ -484,6 +460,11 @@ char* Ubidots::getVarContext(char* id){
     return context;
 }
 
+
+/***************************************************************************
+FUNCTIONS TO SEND DATA
+***************************************************************************/
+
 /**
  * Add a value of variable to save
  * @arg variable_id variable id or name to save in a struct
@@ -497,9 +478,11 @@ void Ubidots::add(char *variable_id, double value) {
   return add(variable_id, value, NULL, NULL);
 }
 
+
 void Ubidots::add(char *variable_id, double value, char *ctext) {
   return add(variable_id, value, ctext, NULL);
 }
+
 
 void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned timestamp_val) {
   (val+_currentValue)->idName = variable_id;
@@ -513,6 +496,52 @@ void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned ti
   }
 }
 
+
+/**
+ * This function is to set UDP or TCP as sending data method
+ * @arg method is the method that you want to use
+ * @return true uppon succes
+ */
+
+
+void Ubidots::setMethod(uint8_t method) {
+    if (method >= 0 && method <= 2) {
+        _method = method;
+    }
+}
+
+
+/**
+ * This function is to set the name of your device to visualize,
+ * if you don't call this method the name by default will be 'Particle'
+ * @arg deviceName is the name to display in Ubidots, avoid to use special
+ * characters or blank spaces
+ * @return true uppon succes
+ */
+
+void Ubidots::setDeviceName(char* deviceName) {
+    Serial.print("Warning, this function is deprecated,");
+    Serial.print("please try to use the setDeviceName() method instead");
+    _dsName = deviceName;
+}
+
+
+/**
+ * This function is to set your device label, the device
+ * label is the unique device identifier in Ubidots.
+ * if you don't call this method the name by default will be the device ID
+ * @arg deviceLabel is the device label, avoid to use special
+ * characters or blank spaces
+ * @return true uppon succes
+ */
+
+void Ubidots::setDeviceLabel(char* deviceLabel) {
+    Serial.print("Warning, this function is deprecated,");
+    Serial.print("please try to use the setDeviceLabel() method instead");
+    _pId = deviceLabel;
+}
+
+
 /**
  * Assamble all package to send in TCP or UDP method
  * @arg timestamp_global [optional] is the timestamp for all the variables added
@@ -524,6 +553,7 @@ void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned ti
 bool Ubidots::sendAll(){
     return sendAll(NULL);
 }
+
 
 bool Ubidots::sendAll(unsigned long timestamp_global) {
     int i;
@@ -569,6 +599,7 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
     }
 }
 
+
 /**
  * Send all package via UDP method
  * @arg buffer the message to send
@@ -591,6 +622,7 @@ bool Ubidots::sendAllUDP(char* buffer) {
     free(buffer);
     return true;
 }
+
 
 /**
  * Send all package via TCP method
@@ -628,6 +660,9 @@ bool Ubidots::sendAllTCP(char* buffer) {
     return false; // If any of the above conditions is reached, returns false to indicate an unexpected issue
 }
 
+/***************************************************************************
+AUXILIAR FUNCTIONS
+***************************************************************************/
 
 /**
  * Turns on or off debug messages
@@ -704,4 +739,37 @@ unsigned long Ubidots::ntpUnixTime () {
     // Discard the rest of the packet
     _clientTMP.flush();
     return time - 2208988800ul;       // convert NTP time to Unix time
+}
+
+
+/***************************************************************************
+DEPRECATED FUNCTIONS
+***************************************************************************/
+
+/**
+ * WARNING: This function is deprecated, use setDeviceName() instead
+ * This function is to set you data source name
+ * @arg dsName is the name of your data source name
+ * @return true uppon succes
+ */
+
+bool Ubidots::setDatasourceName(char* dsName) {
+    Serial.print("Warning, this function is deprecated,");
+    Serial.print("please try to use the setDeviceName() method instead");
+    _dsName = dsName;
+    return true;
+}
+
+/**
+ * WARNING: This function is deprecated, use setDeviceLabel() instead
+ * This function is to set you data source Tag
+ * @arg dsTag is the name of your data source tag
+ * @return true uppon succes
+ */
+
+bool Ubidots::setDatasourceTag(char* dsTag) {
+    Serial.print("Warning, this function is deprecated,");
+    Serial.print("please try to use the setDeviceLabel() method instead");
+    _pId = dsTag;
+    return true;
 }
