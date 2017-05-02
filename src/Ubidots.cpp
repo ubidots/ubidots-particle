@@ -73,6 +73,9 @@ bool Ubidots::setDatasourceName(char* dsName) {
  */
 
 bool Ubidots::setDatasourceTag(char* dsTag) {
+    #ifndef DEBUG
+        #pragma message "this function is deprecated"
+    #endif
     _pId = dsTag;
     return true;
 }
@@ -81,7 +84,7 @@ bool Ubidots::setDatasourceTag(char* dsTag) {
  * This function is to get value from the Ubidots API
  * @arg id the id where you will get the data
  * @return num the data that you get from the Ubidots API, if any error occurs
-    the function returns -3.4028235E+10
+    the function returns ERROR_VALUE
  */
 
 float Ubidots::getValue(char* id) {
@@ -107,7 +110,7 @@ float Ubidots::getValue(char* id) {
                 Serial.println("Could not connect to server");
             }
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
         delay(5000);
     }
@@ -129,7 +132,7 @@ float Ubidots::getValue(char* id) {
             _client.stop();
             delay(5);
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
     }
 
@@ -137,12 +140,12 @@ float Ubidots::getValue(char* id) {
         char c = _client.read();
         if (c == -1){
             if(_debug){
-                Serial.println(F("Error reading from server"));
+                Serial.println(F("Error reading data from server"));
             }
             _client.stop();
             delay(5);
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
         response += c;
         delay(10);
@@ -156,9 +159,9 @@ float Ubidots::getValue(char* id) {
     uint8_t value_init = 3 + response.indexOf("OK|");
     if(value_init!=3){
         if(_debug){
-            Serial.println("Error reading values from server");
+            Serial.println("wrong answer returned by the server");
         }
-        return -3.4028235E+10;
+        return ERROR_VALUE;
     }
 
     response = response.substring(value_init);
@@ -175,12 +178,12 @@ float Ubidots::getValue(char* id) {
 }
 
 /** 
- * This function is to get value from the Ubidots API with the data source tag
- * and variable tag
+ * This function is to get value from the Ubidots API with the data source label
+ * and variable label
  * @arg dsTag is the label of the device
  * @arg idName is the label of the variable
  * @return num the data that you get from the Ubidots API, if any error occurs
-    the function returns -3.4028235E+10
+    the function returns ERROR_VALUE
  */
 
 float Ubidots::getValueWithDatasource(char* device, char* variable) {
@@ -206,7 +209,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
                 Serial.println("Could not connect to server");
             }
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
         delay(5000);
     }
@@ -228,7 +231,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
             _client.stop();
             delay(5);
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
     }
 
@@ -241,7 +244,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
             _client.stop();
             delay(5);
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
         response += c;
         delay(10);
@@ -257,7 +260,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
         if(_debug){
             Serial.println("Error reading values from server");
         }
-        return -3.4028235E+10;
+        return ERROR_VALUE;
     }
 
     response = response.substring(value_init);
@@ -277,7 +280,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
 /**
  * This function obtains the variable from a variable in Ubidots using HTTP requests format
  * @arg id is the Variable ID
- * @return value as float, if any error is raised retuns -3.4028235E+10
+ * @return value as float, if any error is raised retuns ERROR_VALUE
  */
 
 float Ubidots::getValueHTTP(char* id){
@@ -306,7 +309,7 @@ float Ubidots::getValueHTTP(char* id){
                 Serial.println("Could not connect to server");
             }
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
         delay(5000);
     }
@@ -328,7 +331,7 @@ float Ubidots::getValueHTTP(char* id){
             _client.stop();
             delay(5);
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
     }
 
@@ -341,7 +344,7 @@ float Ubidots::getValueHTTP(char* id){
             _client.stop();
             delay(5);
             free(data);
-            return -3.4028235E+10;
+            return ERROR_VALUE;
         }
         response += c;
         delay(10);
@@ -362,7 +365,7 @@ float Ubidots::getValueHTTP(char* id){
         if(_debug){
             Serial.println("Error reading values from server");
         }
-        return -3.4028235E+10;
+        return ERROR_VALUE;
     }
 
     response = response.substring(value_init, value_end);
@@ -386,7 +389,7 @@ float Ubidots::getValueHTTP(char* id){
  */
 
 char* Ubidots::getVarContext(char* id){
-
+    q
     String response = "";
     int timeout = 0;
     uint8_t max_retries = 0;
@@ -580,7 +583,10 @@ bool Ubidots::sendAllUDP(char* buffer) {
     if (! (_clientUDP.beginPacket(_server, PORT)
         && _clientUDP.write(buffer)
         && _clientUDP.endPacket())){
-        Serial.println("ERROR");
+        if(_debug){
+            Serial.println("ERROR sending values with UDP");
+        }
+        return false;
     }
     _currentValue = 0;
     _clientUDP.stop();
@@ -598,19 +604,30 @@ bool Ubidots::sendAllTCP(char* buffer) {
     int i = 0;
     while (!_client.connected() && i < 6) {
         i++;
+        if(_debug){
+            Serial.println("not connected, trying to connect again");
+        }
         _client.connect(_server, PORT);
+        if(i==5){
+            if(_debug){
+                Serial.println("Max attempts to connect reached, data could not be sent");
+            }
+            return false;
+        }
     }
     if (_client.connected()) {        // Connect to the server
         if(_debug){
-            Serial.println("Client connected");
+            Serial.println("Sending data");
         }
         _client.println(buffer);
         _client.flush();
+        _client.stop();
+        free(buffer);
+        _currentValue = 0;
+        return true;
     }
     _currentValue = 0;
-    _client.stop();
-    free(buffer);
-    return true;
+    return false; // If any of the above conditions is reached, returns false to indicate an unexpected issue
 }
 
 

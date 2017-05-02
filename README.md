@@ -47,8 +47,11 @@ void setup() {
 }
 void loop() {
     float value1 = analogRead(A0);
-    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
-    ubidots.sendAll();
+    ubidots.add("Variable_Name_One", value1);  // Change first argument for your variable's label
+    if(ubidots.sendAll()){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }
 ```
@@ -72,9 +75,32 @@ void setup() {
     Serial.begin(115200);
 }
 void loop() {
-    float value;
-    value = ubidots.getValueWithDatasource(DATA_SOURCE_TAG, "Variable_Name");
-    Serial.println(value);
+    /*
+    * Obtains values using TCP according to structure specified at
+    * http://help.ubidots.com/developers/send-data-to-ubidots-over-tcp-or-udp
+    */
+    float value1 = ubidots.getValue(VAR_ID);
+    float value2 = ubidots.getValueWithDatasource(DEVICE_LABEL, VAR_LABEL);
+
+    /*
+    * Obtains values using HTTP according to structure specified at
+    * https://ubidots.com/docs/api/index.html#get-values
+    */
+    float value3 = ubidots.getValueHTTP(VAR_ID);
+
+    // Evaluates the results obtained
+    if(value1!=ERROR_VALUE){
+      Serial.print("value 1:");
+      Serial.println(value1);
+    }
+    if(value2!=ERROR_VALUE){
+      Serial.print("value 2:");
+      Serial.println(value2);
+    }
+    if(value3!=ERROR_VALUE){
+      Serial.print("value 3:");
+      Serial.println(value3);
+    }
     delay(5000);
 }
 ```
@@ -99,8 +125,11 @@ void setup() {
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 void loop() {
-    char* context;
-    ubidots.getVarContext(VAR_ID);
+    char* context = ubidots.getVarContext(VAR_ID);
+    if(context!=NULL){
+        // Do something if context is obtained properly
+        Serial.println(context);
+    }
     delay(5000);
 }
 ```
@@ -126,10 +155,13 @@ void loop() {
     float value1 = analogRead(A0);
     float value2 = analogRead(A1);
     float value3 = analogRead(A2);
-    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.add("Variable_Name_One", value1);  // Set your variable label as first parameter
     ubidots.add("Variable_Name_Two", value2);
     ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    if(ubidots.sendAll(TYPE_TCP)){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }
 ```
@@ -179,9 +211,12 @@ void loop() {
     ubidots.add("test-2", value1, NULL, t-20000);  // Sends a value with a custom timestamp
     ubidots.add("test-3", value1);
 
-    // Sends variables 'test-1' and 'test-2' with your actual timestamp,
+    // Sends variables 'test-1' and 'test-3' with your actual timestamp,
     // variable 'test-2' will be send with its custom timestamp
-    ubidots.sendAll(t);
+    if(ubidots.sendAll(t)){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }
 ```
@@ -219,7 +254,10 @@ void loop() {
     ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2, context_2);
     ubidots.add("Variable_Name_Three", value3,  context_3);
-    ubidots.sendAll();
+    if(ubidots.sendAll()){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }
 ```

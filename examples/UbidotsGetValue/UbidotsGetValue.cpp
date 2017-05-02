@@ -14,6 +14,7 @@
 #define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
 #define VAR_LABEL "...." // Put here your variable api label
 #define DEVICE_LABEL "...." // Put here your device api label
+const ERROR_VALUE = -3.4028235E+10 // Error constant value returned by get functions if any issue is captured
 
 /****************************************
  * Auxiliar Functions
@@ -48,15 +49,15 @@ void loop() {
     float value3 = ubidots.getValueHTTP(VAR_ID);
 
     // Evaluates the results obtained
-    if(value1!=-3.4028235E+10){
+    if(value1!=ERROR_VALUE){
       Serial.print("value 1:");
       Serial.println(value1);
     }
-    if(value2!=-3.4028235E+10){
+    if(value2!=ERROR_VALUE){
       Serial.print("value 2:");
       Serial.println(value2);
     }
-    if(value3!=-3.4028235E+10){
+    if(value3!=ERROR_VALUE){
       Serial.print("value 3:");
       Serial.println(value3);
     }

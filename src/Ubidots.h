@@ -45,6 +45,8 @@ Modified by Jose Garcia for Ubidots Inc
 #define SERVERHTTP "things.ubidots.com"
 #define PORTHTTP 80
 
+const float ERROR_VALUE = -3.4028235E+10;
+
 
 typedef struct Value {
     char  *idName;

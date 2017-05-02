@@ -36,6 +36,9 @@ void loop() {
     char context[25];
     sprintf(context, "lat=1.2343$lng=132.1233"); //Sends latitude and longitude for watching position in a map
     ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
-    ubidots.sendAll();
+    if(ubidots.sendAll()){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }

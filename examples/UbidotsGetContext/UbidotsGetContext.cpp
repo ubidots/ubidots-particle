@@ -33,7 +33,10 @@ void setup() {
 }
 void loop() {
     char* context;
-    ubidots.getVarContext(VAR_ID);
-    Serial.println(context);
+    context = ubidots.getVarContext(VAR_ID);
+    if(context!=NULL){
+    	// Do something if context is obtained properly
+    	Serial.println(context);
+    }
     delay(5000);
 }

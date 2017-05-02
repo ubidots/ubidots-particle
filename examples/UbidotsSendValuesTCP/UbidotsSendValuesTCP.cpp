@@ -40,6 +40,9 @@ void loop() {
     ubidots.add("Variable_Name_One", value1);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2);
     ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    if(ubidots.sendAll(TYPE_TCP)){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }
