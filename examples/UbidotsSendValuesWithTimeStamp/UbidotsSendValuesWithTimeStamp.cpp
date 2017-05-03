@@ -4,12 +4,13 @@
 
 #include "Ubidots.h"
 
-
 /****************************************
  * Define Constants
  ****************************************/
 
-#define TOKEN "Your Ubidots TOKEN"  // Put here your Ubidots TOKEN
+#ifndef TOKEN
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#endif
 
 Ubidots ubidots(TOKEN);
 
@@ -41,6 +42,9 @@ void loop() {
 
     // Sends variables 'test-1' and 'test-2' with your actual timestamp,
     // variable 'test-2' will be send with its custom timestamp
-    ubidots.sendAll(t);
+    if(ubidots.sendAll()){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }

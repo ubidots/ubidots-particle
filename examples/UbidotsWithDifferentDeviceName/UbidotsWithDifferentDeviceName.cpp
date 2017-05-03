@@ -10,8 +10,12 @@
  * Define Constants
  ****************************************/
 
-#define TOKEN "YOUR_TOKEN"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_NAME "test"
+#ifndef TOKEN
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#endif
+#ifndef DEVICE_NAME
+#define DEVICE_NAME "test" // Put here your device name
+#endif
 
 Ubidots ubidots(TOKEN);
 
@@ -28,7 +32,6 @@ Ubidots ubidots(TOKEN);
 void setup() {  
     Serial.begin(115200);
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
-    ubidots.setDatasourceName(DATA_SOURCE_NAME);
 }
 void loop() {
     float value1 = analogRead(A0);
@@ -37,6 +40,10 @@ void loop() {
     ubidots.add("Variable_Name_One", value1);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2);
     ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    ubidots.setDeviceName(DEVICE_NAME);
+    if(ubidots.sendAll()){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }

@@ -26,24 +26,48 @@ Modified by Jose Garcia for Ubidots Inc
 
 #ifndef _Ubidots_H_
 #define _Ubidots_H_
+#endif
 
 #include "application.h"
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
+#ifndef SERVER
 #define SERVER "translate.ubidots.com"
+#endif
+#ifndef TIME_SERVER
 #define TIME_SERVER "pool.ntp.org"
+#endif
+#ifndef USER_AGENT
 #define USER_AGENT "Particle"
-#define VERSION "2.1.10"
+#endif
+#ifndef VERSION
+#define VERSION "2.1.11"
+#endif
+#ifndef PORT
 #define PORT 9012
+#endif
+#ifndef MAX_VALUES
 #define MAX_VALUES 10
-#define TYPE_SMS 0
+#endif
+#ifndef TYPE_TCP
 #define TYPE_TCP 1
+#endif
+#ifndef TYPE_UDP
 #define TYPE_UDP 2
+#endif
+#ifndef TIMEOUT
 #define TIMEOUT 10000
+#endif
+#ifndef SERVERHTTP
 #define SERVERHTTP "things.ubidots.com"
+#endif
+#ifndef PORTHTTP
 #define PORTHTTP 80
+#endif
+
+const float ERROR_VALUE = -3.4028235E+8;
 
 
 typedef struct Value {
@@ -56,37 +80,35 @@ typedef struct Value {
 class Ubidots {
  public:
     explicit Ubidots(char* token, char* server = SERVER);
-    bool setDatasourceName(char* dsName);
-    bool setDatasourceTag(char* dsTag);
-    void setDebug(bool debug);
-    void setMethod(uint8_t method);  // Default UDP
-    bool sendAll();
-    bool sendAll(unsigned long timestamp_global);
-    float getValue(char* id);
     void add(char *variable_id, double value);
     void add(char *variable_id, double value, char *ctext);
     void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
+    float getValue(char* id);
     float getValueWithDatasource(char* device, char* variable);
+    float getValueHTTP(char* id);
     char* getVarContext(char* id);
+    bool sendAll();
+    bool sendAll(unsigned long timestamp_global);
+    void setDeviceName(char* deviceName);
+    void setDeviceLabel(char* deviceLabel);
+    bool setDatasourceName(char* dsName); //Deprecated
+    bool setDatasourceTag(char* dsTag); //Deprecated
+    void setDebug(bool debug);
+    void setMethod(uint8_t method); // Default UDP
     unsigned long ntpUnixTime();
 
  private:
     TCPClient _client;
     UDP _clientUDP;
     UDP _clientTMP;
+    Value * val;
+    uint8_t _currentValue;
+    char* _dsName;
+    bool _debug = false;
     uint8_t _method;
+    char* _pId;
     char* _server;
     char* _token;
-    char* _pId;
-    char* _dsName;
-    uint8_t maxValues;
-    uint8_t currentValue;
-    Value * val;
     bool sendAllUDP(char* buffer);
     bool sendAllTCP(char* buffer);
-    float lastValue;
-    bool _debug = false;
-    //bool sendAllSMS(char* buffer);  // Work in progress
 };
-
-#endif  // _Ubidots_H_

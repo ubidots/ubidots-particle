@@ -8,12 +8,13 @@
 
 #include "Ubidots.h"
 
-
 /****************************************
  * Define Constants
  ****************************************/
 
+#ifndef TOKEN
 #define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
+#endif
 
 Ubidots ubidots(TOKEN);
 
@@ -31,7 +32,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
-    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+    //ubidots.setDebug(true);  //Uncomment this line for printing debug messages
 }
 
 void loop() {
@@ -41,6 +42,10 @@ void loop() {
     ubidots.add("Variable_Name_One", value1);  // Change for your variable name
     ubidots.add("Variable_Name_Two", value2);
     ubidots.add("Variable_Name_Three", value3);
-    ubidots.sendAll();
+    ubidots.setMethod(TYPE_TCP);  //Set to TCP the way to send data
+    if(ubidots.sendAll()){
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
+    }
     delay(5000);
 }

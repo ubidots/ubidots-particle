@@ -10,8 +10,12 @@
  * Define Constants
  ****************************************/
 
+#ifndef TOKEN
 #define TOKEN "...."  // Put here your Ubidots TOKEN
+#endif
+#ifndef VAR_ID
 #define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
+#endif
 
 /****************************************
  * Auxiliar Functions
@@ -33,7 +37,10 @@ void setup() {
 }
 void loop() {
     char* context;
-    ubidots.getVarContext(VAR_ID);
-    Serial.println(context);
+    context = ubidots.getVarContext(VAR_ID);
+    if(context!=NULL){
+    	// Do something if context is obtained properly
+    	Serial.println(context);
+    }
     delay(5000);
 }
