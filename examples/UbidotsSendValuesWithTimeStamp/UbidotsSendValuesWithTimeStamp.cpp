@@ -2,13 +2,15 @@
  * Include Libraries
  ****************************************/
 
-#include <Ubidots.h>
+#include "Ubidots.h"
 
 /****************************************
  * Define Constants
  ****************************************/
 
-#define TOKEN "Your Ubidots TOKEN"  // Put here your Ubidots TOKEN
+#ifndef TOKEN
+#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#endif
 
 Ubidots ubidots(TOKEN);
 

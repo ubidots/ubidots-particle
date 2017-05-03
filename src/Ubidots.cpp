@@ -46,7 +46,7 @@ Ubidots::Ubidots(char* token, char* server) {
     val = (Value *)malloc(MAX_VALUES*sizeof(Value));
     String str = System.deviceID();
     _pId = new char[str.length() + 1];
-    strcpy(_dsName, str.c_str());
+    strcpy(_pId, str.c_str());
 }
 
 
@@ -520,8 +520,6 @@ void Ubidots::setMethod(uint8_t method) {
  */
 
 void Ubidots::setDeviceName(char* deviceName) {
-    Serial.print("Warning, this function is deprecated,");
-    Serial.print("please try to use the setDeviceName() method instead");
     _dsName = deviceName;
 }
 
@@ -536,8 +534,6 @@ void Ubidots::setDeviceName(char* deviceName) {
  */
 
 void Ubidots::setDeviceLabel(char* deviceLabel) {
-    Serial.print("Warning, this function is deprecated,");
-    Serial.print("please try to use the setDeviceLabel() method instead");
     _pId = deviceLabel;
 }
 

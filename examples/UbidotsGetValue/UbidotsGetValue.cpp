@@ -4,17 +4,25 @@
  * Include Libraries
  ****************************************/
 
-#include <Ubidots.h>
+#include "Ubidots.h"
 
 /****************************************
  * Define Constants
  ****************************************/
 
+#ifndef TOKEN
 #define TOKEN "...."  // Put here your Ubidots TOKEN
+#endif
+#ifndef VAR_ID
 #define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
+#endif
+#ifndef VAR_LABEL
 #define VAR_LABEL "...." // Put here your variable api label
+#endif
+#ifndef DEVICE_LABEL
 #define DEVICE_LABEL "...." // Put here your device api label
-const ERROR_VALUE = -3.4028235E+10 // Error constant value returned by get functions if any issue is captured
+#endif
+
 
 /****************************************
  * Auxiliar Functions

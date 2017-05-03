@@ -26,26 +26,48 @@ Modified by Jose Garcia for Ubidots Inc
 
 #ifndef _Ubidots_H_
 #define _Ubidots_H_
+#endif
 
 #include "application.h"
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
+#ifndef SERVER
 #define SERVER "translate.ubidots.com"
+#endif
+#ifndef TIME_SERVER
 #define TIME_SERVER "pool.ntp.org"
+#endif
+#ifndef USER_AGENT
 #define USER_AGENT "Particle"
+#endif
+#ifndef VERSION
 #define VERSION "2.1.11"
+#endif
+#ifndef PORT
 #define PORT 9012
+#endif
+#ifndef MAX_VALUES
 #define MAX_VALUES 10
-#define TYPE_SMS 0
+#endif
+#ifndef TYPE_TCP
 #define TYPE_TCP 1
+#endif
+#ifndef TYPE_UDP
 #define TYPE_UDP 2
+#endif
+#ifndef TIMEOUT
 #define TIMEOUT 10000
+#endif
+#ifndef SERVERHTTP
 #define SERVERHTTP "things.ubidots.com"
+#endif
+#ifndef PORTHTTP
 #define PORTHTTP 80
+#endif
 
-const float ERROR_VALUE = -3.4028235E+10;
+const float ERROR_VALUE = -3.4028235E+8;
 
 
 typedef struct Value {
@@ -90,5 +112,3 @@ class Ubidots {
     bool sendAllUDP(char* buffer);
     bool sendAllTCP(char* buffer);
 };
-
-#endif

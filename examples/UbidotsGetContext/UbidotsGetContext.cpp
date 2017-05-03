@@ -4,14 +4,18 @@
  * Include Libraries
  ****************************************/
 
-#include <Ubidots.h>
+#include "Ubidots.h"
 
 /****************************************
  * Define Constants
  ****************************************/
 
+#ifndef TOKEN
 #define TOKEN "...."  // Put here your Ubidots TOKEN
+#endif
+#ifndef VAR_ID
 #define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
+#endif
 
 /****************************************
  * Auxiliar Functions
