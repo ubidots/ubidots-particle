@@ -20,12 +20,10 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
     * In contributed library write Ubidots and select the Ubidots library.
     * Click on **INCLUDE IN APP**. And return to "MYAPP.ino"
 
-<aside class="warning">
-This library create by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle Core ID.
-</aside>
-<aside class="notice">
+
+This library creates by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle Core ID.
+
 The default method is UDP, if you want to change it go to the features sections and follow the example.
-</aside>
 
 
 ## Send one value to Ubidots
@@ -35,8 +33,7 @@ To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS**
 ```c++
 // This example is to save a value to the Ubidots API with TCP method
 
-#include "Ubidots/Ubidots.h"
-
+#include "Ubidots.h"
 
 #define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
 
