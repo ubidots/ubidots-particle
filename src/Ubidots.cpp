@@ -21,11 +21,12 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Original made by Mateo Velez - Metavix for Ubidots Inc
-Modified by Jose Garcia for Ubidots Inc
+Modified and maintained by Jose Garcia for Ubidots Inc
 
 */
 
 #include "Ubidots.h"
+#include "inet_hal.h"
 
 /***************************************************************************
 CONSTRUCTOR
@@ -43,7 +44,7 @@ Ubidots::Ubidots(char* token, char* server) {
     _method = TYPE_UDP;
     _dsName = "particle";
     _currentValue = 0;
-    val = (Value *)malloc(MAX_VALUES*sizeof(Value));
+    val = (Value *)malloc(MAX_VALUES * sizeof(Value));
     String str = System.deviceID();
     _pId = new char[str.length() + 1];
     strcpy(_pId, str.c_str());
@@ -55,7 +56,7 @@ FUNCTIONS TO RETRIEVE DATA
 ***************************************************************************/
 
 
-/** 
+/**
  * This function is to get value from the Ubidots API
  * @arg id the id where you will get the data
  * @return num the data that you get from the Ubidots API, if any error occurs
@@ -64,7 +65,7 @@ FUNCTIONS TO RETRIEVE DATA
 
 float Ubidots::getValue(char* id) {
 
-    String response="";
+    String response = "";
     int timeout = 0;
     uint8_t max_retries = 0;
     float num;
@@ -74,14 +75,14 @@ float Ubidots::getValue(char* id) {
     Spark.process(); // Cleans previous processes
     _client.connect(SERVER, PORT); // Initial connection
 
-    while(!_client.connected()){
-        if(_debug){
+    while (!_client.connected()) {
+        if (_debug) {
             Serial.println("Attemping to connect");
         }
         _client.connect(SERVER, PORT);
         max_retries++;
-        if(max_retries>5){
-            if(_debug){
+        if (max_retries > 5) {
+            if (_debug) {
                 Serial.println("Could not connect to server");
             }
             free(data);
@@ -90,18 +91,18 @@ float Ubidots::getValue(char* id) {
         delay(5000);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("Getting your variable with request: "));
         Serial.println(F(data));
     }
 
     _client.print(data);
 
-    while(!_client.available() && timeout < 2000) {
+    while (!_client.available() && timeout < 2000) {
         timeout++;
         delay(1);
-        if(timeout>=2000){
-            if(_debug){
+        if (timeout >= 2000) {
+            if (_debug) {
                 Serial.println(F("Error, max timeout reached"));
             }
             _client.stop();
@@ -111,10 +112,10 @@ float Ubidots::getValue(char* id) {
         }
     }
 
-    while(_client.available()) {
+    while (_client.available()) {
         char c = _client.read();
-        if (c == -1){
-            if(_debug){
+        if (c == -1) {
+            if (_debug) {
                 Serial.println(F("Error reading data from server"));
             }
             _client.stop();
@@ -126,21 +127,21 @@ float Ubidots::getValue(char* id) {
         delay(10);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("response:"));
         Serial.println(response);
     }
 
     uint8_t value_init = 3 + response.indexOf("OK|");
-    if(value_init!=3){
-        if(_debug){
+    if (value_init != 3) {
+        if (_debug) {
             Serial.println("wrong answer returned by the server");
         }
         return ERROR_VALUE;
     }
 
     response = response.substring(value_init);
-    if(_debug){
+    if (_debug) {
         Serial.println("Value obtained:");
         Serial.println(response);
     }
@@ -152,7 +153,7 @@ float Ubidots::getValue(char* id) {
     return num;
 }
 
-/** 
+/**
  * This function is to get value from the Ubidots API with the data source label
  * and variable label
  * @arg dsTag is the label of the device
@@ -173,14 +174,14 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
     Spark.process(); // Cleans previous processes
     _client.connect(SERVER, PORT); // Initial connection
 
-    while(!_client.connected()){
-        if(_debug){
+    while (!_client.connected()) {
+        if (_debug) {
             Serial.println("Attemping to connect");
         }
         _client.connect(SERVER, PORT);
         max_retries++;
-        if(max_retries > 5){
-            if(_debug){
+        if (max_retries > 5) {
+            if (_debug) {
                 Serial.println("Could not connect to server");
             }
             free(data);
@@ -189,22 +190,20 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
         delay(5000);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("Getting your variable with request: "));
         Serial.println(F(data));
     }
 
     _client.print(data);
 
-    while(!_client.available() && timeout < 2000) {
+    while (!_client.available() && timeout < 2000) {
         timeout++;
         delay(1);
-        if(timeout >= 2000){
-            if(_debug){
+        if (timeout >= 2000) {
+            if (_debug) {
                 Serial.println(F("Error, max timeout reached"));
             }
-            _client.stop();
-            delay(5);
             free(data);
             return ERROR_VALUE;
         }
@@ -212,8 +211,8 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
 
     while (_client.available()) {
         char c = _client.read();
-        if (c == -1){
-            if(_debug){
+        if (c == -1) {
+            if (_debug) {
                 Serial.println(F("Error reading from server"));
             }
             _client.stop();
@@ -225,21 +224,24 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
         delay(10);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("response:"));
         Serial.println(response);
     }
 
     uint8_t value_init = 3 + response.indexOf("OK|");
-    if(value_init!= 3){
-        if(_debug){
+    if (value_init != 3) {
+        if (_debug) {
             Serial.println("Error reading values from server");
         }
+        free(data);
+        _client.stop();
+        delay(5);
         return ERROR_VALUE;
     }
 
     response = response.substring(value_init);
-    if(_debug){
+    if (_debug) {
         Serial.println("Value obtained:");
         Serial.println(response);
     }
@@ -258,7 +260,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
  * @return value as float, if any error is raised retuns ERROR_VALUE
  */
 
-float Ubidots::getValueHTTP(char* id){
+float Ubidots::getValueHTTP(char* id) {
 
     String response = "";
     int timeout = 0;
@@ -273,14 +275,14 @@ float Ubidots::getValueHTTP(char* id){
     Spark.process(); // Cleans previous processes
     _client.connect(SERVERHTTP, PORTHTTP); // Initial connection
 
-    while(!_client.connected()){
-        if(_debug){
+    while (!_client.connected()) {
+        if (_debug) {
             Serial.println("Attemping to connect");
         }
         _client.connect(SERVERHTTP, PORTHTTP);
         max_retries++;
-        if(max_retries > 5){
-            if(_debug){
+        if (max_retries > 5) {
+            if (_debug) {
                 Serial.println("Could not connect to server");
             }
             free(data);
@@ -289,22 +291,20 @@ float Ubidots::getValueHTTP(char* id){
         delay(5000);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("Getting your variable with request: "));
         Serial.println(F(data));
     }
 
     _client.print(data);
 
-    while(!_client.available() && timeout < 2000) {
+    while (!_client.available() && timeout < 2000) {
         timeout++;
         delay(1);
-        if(timeout >= 2000){
-            if(_debug){
+        if (timeout >= 2000) {
+            if (_debug) {
                 Serial.println(F("Error, max timeout reached"));
             }
-            _client.stop();
-            delay(5);
             free(data);
             return ERROR_VALUE;
         }
@@ -312,8 +312,8 @@ float Ubidots::getValueHTTP(char* id){
 
     while (_client.available()) {
         char c = _client.read();
-        if (c == -1){
-            if(_debug){
+        if (c == -1) {
+            if (_debug) {
                 Serial.println(F("Error reading from server"));
             }
             _client.stop();
@@ -325,7 +325,7 @@ float Ubidots::getValueHTTP(char* id){
         delay(10);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("response:"));
         Serial.println(response);
     }
@@ -336,15 +336,17 @@ float Ubidots::getValueHTTP(char* id){
     int value_init = 9 + response.indexOf("\"value\":"); // position of "value" + one because of the space between "value": {value}
     int value_end = response.indexOf(", \"timestamp\":");
 
-    if(value_end<value_init){
-        if(_debug){
+    if (value_end < value_init) {
+        if (_debug) {
             Serial.println("Error reading values from server");
         }
+        _client.stop();
+        free(data);
         return ERROR_VALUE;
     }
 
     response = response.substring(value_init, value_end);
-    if(_debug){
+    if (_debug) {
         Serial.println("Value obtained:");
         Serial.println(response);
     }
@@ -357,13 +359,13 @@ float Ubidots::getValueHTTP(char* id){
 }
 
 
-/** 
+/**
  * This function obtains the context from a variable in Ubidots
- * @arg id is the Variable ID 
+ * @arg id is the Variable ID
  * @return Context as char array
  */
 
-char* Ubidots::getVarContext(char* id){
+char* Ubidots::getVarContext(char* id) {
     String response = "";
     int timeout = 0;
     uint8_t max_retries = 0;
@@ -377,14 +379,14 @@ char* Ubidots::getVarContext(char* id){
     Spark.process(); // Cleans previous processes
     _client.connect(SERVERHTTP, PORTHTTP); // Initial connection
 
-    while(!_client.connected()){
-        if(_debug){
+    while (!_client.connected()) {
+        if (_debug) {
             Serial.println("Attemping to connect");
         }
         _client.connect(SERVERHTTP, PORTHTTP);
         max_retries++;
-        if(max_retries > 5){
-            if(_debug){
+        if (max_retries > 5) {
+            if (_debug) {
                 Serial.println("Could not connect to server");
             }
             free(data);
@@ -393,22 +395,20 @@ char* Ubidots::getVarContext(char* id){
         delay(5000);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("Getting your variable with request: "));
         Serial.println(F(data));
     }
 
     _client.print(data);
 
-    while(!_client.available() && timeout < 2000) {
+    while (!_client.available() && timeout < 2000) {
         timeout++;
-        delay(1);
-        if(timeout >= 2000){
-            if(_debug){
+        if (timeout >= 2000) {
+            if (_debug) {
                 Serial.println(F("Error, max timeout reached"));
             }
             _client.stop();
-            delay(5);
             free(data);
             return NULL;
         }
@@ -416,20 +416,18 @@ char* Ubidots::getVarContext(char* id){
 
     while (_client.available()) {
         char c = _client.read();
-        if (c == -1){
-            if(_debug){
+        if (c == -1) {
+            if (_debug) {
                 Serial.println(F("Error reading from server"));
             }
             _client.stop();
-            delay(5);
             free(data);
             return NULL;
         }
         response += c;
-        delay(10);
     }
 
-    if(_debug){
+    if (_debug) {
         Serial.println(F("response:"));
         Serial.println(response);
     }
@@ -438,17 +436,17 @@ char* Ubidots::getVarContext(char* id){
     response = response.substring(bodyPosinit);
 
     int context_init = 13 + response.indexOf("\"context\":");
-    int context_end = response.indexOf(", \"created_at\":") -1;
+    int context_end = response.indexOf(", \"created_at\":") - 1;
 
-    if(context_end<context_init){
-        if(_debug){
+    if (context_end < context_init) {
+        if (_debug) {
             Serial.println("Error reading values from server");
         }
         return NULL;
     }
 
     response = response.substring(context_init, context_end);
-    if(_debug){
+    if (_debug) {
         Serial.println("Value obtained:");
         Serial.println(response);
     }
@@ -456,7 +454,6 @@ char* Ubidots::getVarContext(char* id){
     char* context = new char [response.length() + 1];
     free(data);
     _client.stop();
-    delay(5);
     return context;
 }
 
@@ -475,25 +472,25 @@ FUNCTIONS TO SEND DATA
  */
 
 void Ubidots::add(char *variable_id, double value) {
-  return add(variable_id, value, NULL, NULL);
+    return add(variable_id, value, NULL, NULL);
 }
 
 
 void Ubidots::add(char *variable_id, double value, char *ctext) {
-  return add(variable_id, value, ctext, NULL);
+    return add(variable_id, value, ctext, NULL);
 }
 
 
 void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned timestamp_val) {
-  (val+_currentValue)->idName = variable_id;
-  (val+_currentValue)->idValue = value;
-  (val+_currentValue)->contextOne = ctext;
-  (val+_currentValue)->timestamp_val = timestamp_val;
-  _currentValue++;
-  if (_currentValue > MAX_VALUES) {
+    (val + _currentValue)->idName = variable_id;
+    (val + _currentValue)->idValue = value;
+    (val + _currentValue)->contextOne = ctext;
+    (val + _currentValue)->timestamp_val = timestamp_val;
+    _currentValue++;
+    if (_currentValue > MAX_VALUES) {
         Serial.println(F("You are sending more than the maximum of consecutive variables"));
         _currentValue = MAX_VALUES;
-  }
+    }
 }
 
 
@@ -546,7 +543,7 @@ void Ubidots::setDeviceLabel(char* deviceLabel) {
  * @return true upon success, false upon error.
  */
 
-bool Ubidots::sendAll(){
+bool Ubidots::sendAll() {
     return sendAll(NULL);
 }
 
@@ -554,17 +551,17 @@ bool Ubidots::sendAll(){
 bool Ubidots::sendAll(unsigned long timestamp_global) {
     int i;
     char* allData = (char *) malloc(sizeof(char) * 700);
-    if( timestamp_global!= NULL){
+    if ( timestamp_global != NULL) {
         if (_dsName == "Particle") {
-            sprintf(allData, "%s|POST|%s|%s@%lu%s=>", USER_AGENT, _token, _pId, timestamp_global, "000");
+            sprintf(allData, "%s/%s|POST|%s|%s@%lu%s=>", USER_AGENT, VERSION, _token, _pId, timestamp_global, "000");
         } else {
-            sprintf(allData, "%s|POST|%s|%s:%s@%lu%s=>", USER_AGENT, _token, _pId, _dsName, timestamp_global, "000");
+            sprintf(allData, "%s/%s|POST|%s|%s:%s@%lu%s=>", USER_AGENT, VERSION, _token, _pId, _dsName, timestamp_global, "000");
         }
-    }else{
+    } else {
         if (_dsName == "Particle") {
-            sprintf(allData, "%s|POST|%s|%s=>", USER_AGENT, _token, _pId);
+            sprintf(allData, "%s/%s|POST|%s|%s=>", USER_AGENT, VERSION, _token, _pId);
         } else {
-            sprintf(allData, "%s|POST|%s|%s:%s=>", USER_AGENT, _token, _pId, _dsName);
+            sprintf(allData, "%s/%s|POST|%s|%s:%s=>", USER_AGENT, VERSION, _token, _pId, _dsName);
         }
     }
     for (i = 0; i < _currentValue; ) {
@@ -582,7 +579,7 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
     }
     sprintf(allData, "%s|end", allData);
 
-    if(_debug){
+    if (_debug) {
         Serial.println(allData);
     }
 
@@ -604,15 +601,38 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
 
 bool Ubidots::sendAllUDP(char* buffer) {
     int size;
+    IPAddress ipAddress;
+
+    // Obtains the remote server's IP
+    HAL_IPAddress ip;
+    network_interface_t t;
+    ipAddress = (inet_gethostbyname(_server, strlen(_server), &ip, t, NULL)<0) ?
+               IPAddress(uint32_t(0)) : IPAddress(ip);
+
+    // Routine to send data through UDP
     _clientUDP.begin(PORT);
-    if (! (_clientUDP.beginPacket(_server, PORT)
-        && _clientUDP.write(buffer)
-        && _clientUDP.endPacket())){
-        if(_debug){
-            Serial.println("ERROR sending values with UDP");
+    if (ipAddress) {
+        if (! (_clientUDP.beginPacket(ipAddress, PORT)
+                && _clientUDP.write(buffer)
+                && _clientUDP.endPacket())) {
+            if (_debug) {
+                Serial.println("ERROR sending values with UDP");
+            }
+            _currentValue = 0;
+            _clientUDP.stop();
+            free(buffer);
+            return false;
         }
+    } else {
+        if (_debug) {
+            Serial.println("ERROR, could not solve IP Address of the remote server, please check your DNS setup");
+        }
+        _currentValue = 0;
+        _clientUDP.stop();
+        free(buffer);
         return false;
     }
+
     _currentValue = 0;
     _clientUDP.stop();
     free(buffer);
@@ -630,19 +650,19 @@ bool Ubidots::sendAllTCP(char* buffer) {
     int i = 0;
     while (!_client.connected() && i < 6) {
         i++;
-        if(_debug){
+        if (_debug) {
             Serial.println("not connected, trying to connect again");
         }
         _client.connect(_server, PORT);
-        if(i==5){
-            if(_debug){
+        if (i == 5) {
+            if (_debug) {
                 Serial.println("Max attempts to connect reached, data could not be sent");
             }
             return false;
         }
     }
     if (_client.connected()) {        // Connect to the server
-        if(_debug){
+        if (_debug) {
             Serial.println("Sending data");
         }
         _client.println(buffer);
@@ -665,7 +685,7 @@ AUXILIAR FUNCTIONS
  * @debug is a bool flag to activate or deactivate messages
  */
 
-void Ubidots::setDebug(bool debug){
+void Ubidots::setDebug(bool debug) {
     _debug = debug;
 }
 
@@ -696,11 +716,16 @@ unsigned long Ubidots::ntpUnixTime () {
     // Clear received data from possible stray received packets
     _clientTMP.flush();
 
+    _client.connect(TIME_SERVER, 123);
+    IPAddress ipAddress = _client.remoteIP();
+    _client.stop();
+
+
     // Send an NTP request
-    if (! (_clientTMP.beginPacket(TIME_SERVER, 123) // 123 is the NTP port
-        && _clientTMP.write((byte *)&ntpFirstFourBytes, 48) == 48
-        && _clientTMP.endPacket()))
-            return 0;               // sending request failed
+    if (! (_clientTMP.beginPacket(ipAddress, 123) // 123 is the NTP port
+            && _clientTMP.write((byte *)&ntpFirstFourBytes, 48) == 48
+            && _clientTMP.endPacket()))
+        return 0;               // sending request failed
 
     // Wait for response; check every pollIntv ms up to maxPoll times
     const int pollIntv = 150;     // poll every this many ms
@@ -731,7 +756,7 @@ unsigned long Ubidots::ntpUnixTime () {
     // for an assumed network delay of 50ms, and (0.5-0.05)*256=115;
     // additionally, we account for how much we delayed reading the packet
     // since its arrival, which we assume on average to be pollIntv/2.
-    time += (_clientTMP.read() > 115 - pollIntv/8);
+    time += (_clientTMP.read() > 115 - pollIntv / 8);
     // Discard the rest of the packet
     _clientTMP.flush();
     return time - 2208988800ul;       // convert NTP time to Unix time

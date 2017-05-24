@@ -43,7 +43,7 @@ Modified by Jose Garcia for Ubidots Inc
 #define USER_AGENT "Particle"
 #endif
 #ifndef VERSION
-#define VERSION "2.1.11"
+#define VERSION "2.1.12"
 #endif
 #ifndef PORT
 #define PORT 9012
