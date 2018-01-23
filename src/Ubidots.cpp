@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 Ubidots.
+Copyright (c) 2013-2018 Ubidots.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -64,93 +64,59 @@ FUNCTIONS TO RETRIEVE DATA
  */
 
 float Ubidots::getValue(char* id) {
-
-    String response = "";
-    int timeout = 0;
-    uint8_t max_retries = 0;
-    float num;
-    char* data = (char *) malloc(sizeof(char) * 200);
-    sprintf(data, "%s/%s|GET|%s|%s|end", USER_AGENT, VERSION, _token, id);
-
     Spark.process(); // Cleans previous processes
-    _client.connect(SERVER, PORT); // Initial connection
 
-    while (!_client.connected()) {
-        if (_debug) {
-            Serial.println("Attemping to connect");
-        }
-        _client.connect(SERVER, PORT);
-        max_retries++;
-        if (max_retries > 5) {
-            if (_debug) {
-                Serial.println("Could not connect to server");
-            }
-            free(data);
-            return ERROR_VALUE;
-        }
-        delay(5000);
+    char* response = (char *) malloc(sizeof(char) * 40);
+    char* data = (char *) malloc(sizeof(char) * 700);
+    sprintf(data, "%s/%s|GET|%s|%s", USER_AGENT, VERSION, _token, id);
+    sprintf(data, "%s|end", data);
+
+    if (_debug){
+      Serial.println(data);
     }
 
-    if (_debug) {
-        Serial.println(F("Getting your variable with request: "));
-        Serial.println(F(data));
+    if (_client.connect(SERVER, PORT)) {
+      if (_debug){
+        Serial.println(F("Getting your variable: "));
+      }
+      _client.print(data);
     }
 
-    _client.print(data);
-
-    while (!_client.available() && timeout < 2000) {
-        timeout++;
-        delay(1);
-        if (timeout >= 2000) {
-            if (_debug) {
-                Serial.println(F("Error, max timeout reached"));
-            }
-            _client.stop();
-            delay(5);
-            free(data);
-            return ERROR_VALUE;
-        }
-    }
-
-    while (_client.available()) {
-        char c = _client.read();
-        if (c == -1) {
-            if (_debug) {
-                Serial.println(F("Error reading data from server"));
-            }
-            _client.stop();
-            delay(5);
-            free(data);
-            return ERROR_VALUE;
-        }
-        response += c;
-        delay(10);
-    }
-
-    if (_debug) {
-        Serial.println(F("response:"));
-        Serial.println(response);
-    }
-
-    uint8_t value_init = 3 + response.indexOf("OK|");
-    if (value_init != 3) {
-        if (_debug) {
-            Serial.println("wrong answer returned by the server");
-        }
-        return ERROR_VALUE;
-    }
-
-    response = response.substring(value_init);
-    if (_debug) {
-        Serial.println("Value obtained:");
-        Serial.println(response);
-    }
-
-    num = response.toFloat();
+    int timeout = 0;
     free(data);
-    _client.stop();
-    delay(5);
-    return num;
+
+    while(!_client.available() && timeout < 50000) {
+      timeout++;
+      if (timeout >= 49999){
+          free(response);
+          Serial.println("timeout");
+          return ERROR_VALUE;
+      }
+      delay(1);
+    }
+
+    int i = 0;
+    for (int i = 0; i <= 40; i++){
+      response[i] = '\0';
+    }
+
+     while (_client.available()) {
+      response[i++] = (char)_client.read();
+    }
+
+    // Parses the answer, Expected "OK|{value}"
+    char * pch = strchr(response, '|');
+    if (pch != NULL){
+      float num;
+      pch[0] = '0';
+      num = atof(pch);
+      free(response);
+      _client.stop();
+      return num;
+    }
+
+    free(response);
+    return ERROR_VALUE;
 }
 
 /**
@@ -164,93 +130,59 @@ float Ubidots::getValue(char* id) {
 
 float Ubidots::getValueWithDatasource(char* device, char* variable) {
 
-    String response = "";
-    int timeout = 0;
-    uint8_t max_retries = 0;
-    float num;
-    char* data = (char *) malloc(sizeof(char) * 300);
-    sprintf(data, "%s/%s|LV|%s|%s:%s|end", USER_AGENT, VERSION, _token, device, variable);
-
     Spark.process(); // Cleans previous processes
-    _client.connect(SERVER, PORT); // Initial connection
 
-    while (!_client.connected()) {
-        if (_debug) {
-            Serial.println("Attemping to connect");
-        }
-        _client.connect(SERVER, PORT);
-        max_retries++;
-        if (max_retries > 5) {
-            if (_debug) {
-                Serial.println("Could not connect to server");
-            }
-            free(data);
-            return ERROR_VALUE;
-        }
-        delay(5000);
+    char* data = (char *) malloc(sizeof(char) * 700);
+    char* response = (char *) malloc(sizeof(char) * 40);
+    sprintf(data, "%s/%s|LV|%s|%s:%s", USER_AGENT, VERSION, _token, device, variable);
+    sprintf(data, "%s|end", data);
+
+    if (_debug){
+      Serial.println(data);
     }
 
-    if (_debug) {
-        Serial.println(F("Getting your variable with request: "));
-        Serial.println(F(data));
+    if (_client.connect(SERVER, PORT)) {
+      if (_debug){
+        Serial.println(F("Getting your variable: "));
+      }
+      _client.print(data);
     }
 
-    _client.print(data);
-
-    while (!_client.available() && timeout < 2000) {
-        timeout++;
-        delay(1);
-        if (timeout >= 2000) {
-            if (_debug) {
-                Serial.println(F("Error, max timeout reached"));
-            }
-            free(data);
-            return ERROR_VALUE;
-        }
-    }
-
-    while (_client.available()) {
-        char c = _client.read();
-        if (c == -1) {
-            if (_debug) {
-                Serial.println(F("Error reading from server"));
-            }
-            _client.stop();
-            delay(5);
-            free(data);
-            return ERROR_VALUE;
-        }
-        response += c;
-        delay(10);
-    }
-
-    if (_debug) {
-        Serial.println(F("response:"));
-        Serial.println(response);
-    }
-
-    uint8_t value_init = 3 + response.indexOf("OK|");
-    if (value_init != 3) {
-        if (_debug) {
-            Serial.println("Error reading values from server");
-        }
-        free(data);
-        _client.stop();
-        delay(5);
-        return ERROR_VALUE;
-    }
-
-    response = response.substring(value_init);
-    if (_debug) {
-        Serial.println("Value obtained:");
-        Serial.println(response);
-    }
-
-    num = response.toFloat();
+    int timeout = 0;
     free(data);
-    _client.stop();
-    delay(5);
-    return num;
+
+    while(!_client.available() && timeout < 50000) {
+      timeout++;
+      if (timeout >= 49999){
+          Serial.println("Server connection timeout");
+          free(response);
+          return ERROR_VALUE;
+      }
+      delay(1);
+    }
+
+    int i = 0;
+    for (int i = 0; i <= 40; i++){
+      response[i] = '\0';
+    }
+
+     while (_client.available()) {
+      response[i++] = (char)_client.read();
+    }
+
+    // Parses the answer, Expected "OK|{value}"
+    char * pch = strchr(response, '|');
+    if (pch != NULL){
+      float num;
+      pch[0] = '0';
+      num = atof(pch);
+      free(response);
+      _client.stop();
+      return num;
+    }
+
+    free(response);
+    return ERROR_VALUE;
 }
 
 
@@ -262,9 +194,8 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
 
 float Ubidots::getValueHTTP(char* id) {
 
-    String response = "";
-    int timeout = 0;
-    uint8_t max_retries = 0;
+    Spark.process(); // Cleans previous processes
+    char* response = (char *) malloc(sizeof(char) * 700);
     char* data = (char *) malloc(sizeof(char) * 300);
 
     sprintf(data, "GET /api/v1.6/variables/%s", id);
@@ -272,23 +203,25 @@ float Ubidots::getValueHTTP(char* id) {
     sprintf(data, "%sHost: things.ubidots.com\r\nUser-Agent: %s/%s\r\n", data, USER_AGENT, VERSION);
     sprintf(data, "%sX-Auth-Token: %s\r\nConnection: close\r\n\r\n", data, _token);
 
-    Spark.process(); // Cleans previous processes
     _client.connect(SERVERHTTP, PORTHTTP); // Initial connection
 
+    int timeout = 0;
+    if (_debug) {
+        Serial.println("Attemping to connect");
+    }
+
     while (!_client.connected()) {
-        if (_debug) {
-            Serial.println("Attemping to connect");
-        }
         _client.connect(SERVERHTTP, PORTHTTP);
-        max_retries++;
-        if (max_retries > 5) {
+        timeout++;
+        if (timeout > 4999) {
             if (_debug) {
                 Serial.println("Could not connect to server");
             }
+            free(response);
             free(data);
             return ERROR_VALUE;
         }
-        delay(5000);
+        delay(1);
     }
 
     if (_debug) {
@@ -297,65 +230,52 @@ float Ubidots::getValueHTTP(char* id) {
     }
 
     _client.print(data);
+    timeout = 0;
 
-    while (!_client.available() && timeout < 2000) {
-        timeout++;
-        delay(1);
-        if (timeout >= 2000) {
-            if (_debug) {
-                Serial.println(F("Error, max timeout reached"));
-            }
-            free(data);
-            return ERROR_VALUE;
-        }
+    while(!_client.available() && timeout < 50000) {
+      timeout++;
+      if (timeout >= 49999){
+          Serial.println("Server connection timeout");
+          free(response);
+          return ERROR_VALUE;
+      }
+      delay(1);
+    }
+
+    int i = 0;
+    for (int i = 0; i <= 40; i++){
+      response[i] = '\0';
     }
 
     while (_client.available()) {
-        char c = _client.read();
-        if (c == -1) {
-            if (_debug) {
-                Serial.println(F("Error reading from server"));
-            }
-            _client.stop();
-            delay(5);
-            free(data);
-            return ERROR_VALUE;
-        }
-        response += c;
-        delay(10);
+      response[i++] = (char)_client.read();
     }
 
-    if (_debug) {
-        Serial.println(F("response:"));
-        Serial.println(response);
-    }
+    // Parses the answer, Expected "OK|{value}"
+    char * pch = strstr(response, "value");
+    if (pch != NULL){
+        char * pch2 = strchr(pch, ':');
+        pch = strrchr(pch2, ']');
+        int index = (int)(pch - pch2 - 1);
 
-    uint8_t bodyPosinit = 4 + response.indexOf("\r\n\r\n");
-    response = response.substring(bodyPosinit);
-
-    int value_init = 9 + response.indexOf("\"value\":"); // position of "value" + one because of the space between "value": {value}
-    int value_end = response.indexOf(", \"timestamp\":");
-
-    if (value_end < value_init) {
-        if (_debug) {
-            Serial.println("Error reading values from server");
+        char num[15];
+        for (int i = 0; i < 15; i++){
+            num[i] = '\0';
         }
+        memcpy(num, pch2, index);
+        num[0] = '0';
+        num[1] = '0';
+        float result = atof(num);
+        free(response);
         _client.stop();
-        free(data);
-        return ERROR_VALUE;
+        return result;
     }
 
-    response = response.substring(value_init, value_end);
-    if (_debug) {
-        Serial.println("Value obtained:");
-        Serial.println(response);
+    if (_debug){
+        Serial.println("there was an error parsing the server answer");
     }
 
-    float num = response.toFloat();
-    free(data);
-    _client.stop();
-    delay(5);
-    return num;
+    return ERROR_VALUE;
 }
 
 
