@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 Ubidots.
+Copyright (c) 2013-2018 Ubidots.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -71,44 +71,46 @@ const float ERROR_VALUE = -3.4028235E+8;
 
 
 typedef struct Value {
-    char  *idName;
-    char  *contextOne;
-    float idValue;
-    unsigned long timestamp_val;
+  char  *idName;
+  char  *contextOne;
+  float idValue;
+  unsigned long timestamp_val;
 } Value;
 
 class Ubidots {
- public:
-    explicit Ubidots(char* token, char* server = SERVER);
-    void add(char *variable_id, double value);
-    void add(char *variable_id, double value, char *ctext);
-    void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
-    float getValue(char* id);
-    float getValueWithDatasource(char* device, char* variable);
-    float getValueHTTP(char* id);
-    char* getVarContext(char* id);
-    bool sendAll();
-    bool sendAll(unsigned long timestamp_global);
-    void setDeviceName(char* deviceName);
-    void setDeviceLabel(char* deviceLabel);
-    bool setDatasourceName(char* dsName); //Deprecated
-    bool setDatasourceTag(char* dsTag); //Deprecated
-    void setDebug(bool debug);
-    void setMethod(uint8_t method); // Default UDP
-    unsigned long ntpUnixTime();
+  public:
+  explicit Ubidots(char* token, char* server = SERVER);
+  void add(char *variable_id, double value);
+  void add(char *variable_id, double value, char *ctext);
+  void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
+  float getValue(char* id);
+  float getValueWithDatasource(char* device, char* variable);
+  float getValueHTTP(char* id);
+  char* getVarContext(char* id);
+  bool isDirty();
+  bool sendAll();
+  bool sendAll(unsigned long timestamp_global);
+  void setDeviceName(char* deviceName);
+  void setDeviceLabel(char* deviceLabel);
+  bool setDatasourceName(char* dsName); //Deprecated
+  bool setDatasourceTag(char* dsTag); //Deprecated
+  void setDebug(bool debug);
+  void setMethod(uint8_t method); // Default UDP
+  unsigned long ntpUnixTime();
 
  private:
-    TCPClient _client;
-    UDP _clientUDP;
-    UDP _clientTMP;
-    Value * val;
-    uint8_t _currentValue;
-    char* _dsName;
-    bool _debug = false;
-    uint8_t _method;
-    char* _pId;
-    char* _server;
-    char* _token;
-    bool sendAllUDP(char* buffer);
-    bool sendAllTCP(char* buffer);
+  TCPClient _client;
+  UDP _clientUDP;
+  UDP _clientTMP;
+  Value * val;
+  uint8_t _currentValue;
+  char* _dsName;
+  bool _debug = false;
+  bool _dirty = false;
+  uint8_t _method;
+  char* _pId;
+  char* _server;
+  char* _token;
+  bool sendAllUDP(char* buffer);
+  bool sendAllTCP(char* buffer);
 };
