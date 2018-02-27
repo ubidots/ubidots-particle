@@ -96,6 +96,7 @@ class Ubidots {
   bool setDatasourceTag(char* dsTag); //Deprecated
   void setDebug(bool debug);
   void setMethod(uint8_t method); // Default UDP
+  void setTimeout(int timeout);
   unsigned long ntpUnixTime();
 
  private:
@@ -111,6 +112,7 @@ class Ubidots {
   char* _pId;
   char* _server;
   char* _token;
+  int _timeout = 5000;
   bool sendAllUDP(char* buffer);
   bool sendAllTCP(char* buffer);
 };
