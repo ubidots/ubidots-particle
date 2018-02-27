@@ -272,6 +272,7 @@ float Ubidots::getValueHTTP(char* id) {
   }
 
   _client.print(data);
+  free(data);
   timeout = 0;
 
   while(!_client.available() && timeout < _timeout) {
