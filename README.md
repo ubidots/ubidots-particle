@@ -25,6 +25,86 @@ This library creates by default new Data Source. The name of this data source wi
 
 The default method is UDP, if you want to change it go to the features sections and follow the example.
 
+# Documentation
+
+## Constructor
+
+### Ubidots
+
+```
+Ubidots(char* token)
+```
+> Creates an Ubidots instance, you must setup as input your Ubidots TOKEN.
+
+## Methods
+
+```
+add(char* variableLabel, float value, char *context, char *timestamp);
+```
+> Add a variable with a value, context and timestamp to be sent to a certain data source, once you use add() you can publish your variable using the ubidotsPublish() method. You can add 5 variables maximum before of publish them. 
+**Important:** The max payload lenght is 700 bytes, if your payload is greater it will not be properly sent. You can see on your serial console the payload to send if you call the ```setDebug(bool debug)``` method and pass a true value to it.
+
+```
+getValue(char *id);
+```
+> Returns as float the last value of the variable with the ID passed as argument. The value is retrieved through TCP.
+
+```
+getValueWithDatasource(char* device, char* variable);
+```
+> Returns as float the last value of the variable with the label specified as argument that belongs to the device label specified also as argument.
+
+```
+getValueHTTP(char* id);
+```
+> Returns as float the last value of the variable with the ID passed as argument. The value is retrieved through HTTP.
+
+```
+getVarContext(char* id);
+```
+> Returns as char array the last value of the variable with the ID passed as argument. The context is retrieved through TCP.
+
+```
+isDirty();
+```
+> Returns true if the array used by the add() method for sending data is not empty.
+
+```
+setDebug(bool debug);;
+```
+
+> Make available debug messages through the serial port.
+
+```
+sendAll(unsigned long timestamp_global);
+```
+> Sends all the data added using the add() method. Global timestamp is optional, if added, it must be in seconds and ALL the variables will be sent with be stored with that timestamp.
+
+```
+setDeviceName(char* deviceName);
+```
+> Sets the device name to be created or updated.
+
+```
+setDeviceLabel(char* deviceLabel);
+```
+> Sets the device label to be created or updated.
+
+```
+setMethod(uint8_t method);
+```
+> Sets the method for sending data:
+> * TYPE_UDP : set this for sending data through UDP, this is the default one.
+> * TYPE_TCP : set this for sending data through TCP
+
+```
+setTimeout(int timeout);
+```
+
+> Sets the max timeout (in milliseconds) to wait for an answer from the serve. 5000 milliseconds are set as default.
+
+# Examples
+
 
 ## Send one value to Ubidots
 
@@ -104,7 +184,7 @@ void loop() {
 
 ## Get Variable context
 
-To get the context from a variable stored in ubidots you can follow our example in the library, select ***UbidotsGetVarContext.cpp** or copy this code
+To get the context from a variable stored in ubidots you can follow our example in the library, select **UbidotsGetVarContext.cpp** or copy this code
 
 ```cpp
 // This example is to save multiple variables with context to the Ubidots API with TCP method
@@ -122,8 +202,10 @@ void setup() {
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 void loop() {
-    char* context = ubidots.getVarContext(VAR_ID);
-    if(context!=NULL){
+    char* context;
+    sprintf(context, "%s", "error");
+    context = ubidots.getVarContext(VAR_ID);
+    if(strcmp(context, "error") != 0){
         // Do something if context is obtained properly
         Serial.println(context);
     }
@@ -220,7 +302,7 @@ void loop() {
 
 ## Send multiple values with context
 
-To send values with context you can follow our example in the library, select ***UbidotsSendValuesWithContext.cpp** or copy this code
+To send values with context you can follow our example in the library, select **UbidotsSendValuesWithContext.cpp** or copy this code
 
 ```cpp
 // This example is to save multiple variables with context to the Ubidots API with TCP method
