@@ -1,0 +1,5 @@
+=== VERIFICATION HOWTO ===
+
+1. Create an account at Ubidots Industrial: http://industrial.ubidots.com or Ubidots for Education: http://app.ubidots.com
+2. Make login into your account
+3. Follow this guide: http://help.ubidots.com/connect-your-devices/connect-a-particle-device-to-ubidots
