@@ -25,118 +25,160 @@ This library creates by default new Data Source. The name of this data source wi
 
 The default method is UDP, if you want to change it go to the features sections and follow the example.
 
+# Documentation
 
-## Send one value to Ubidots
+## Constructor
 
-To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValues.cpp**, copy it and paste to MYAPP.ino.
+### Ubidots
 
-```c++
-// This example is to save a value to the Ubidots API with TCP method
+```
+Ubidots(char* token)
+```
+> Creates an Ubidots instance, you must setup as input your Ubidots [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).
 
-#include "Ubidots.h"
+## Methods
 
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+```
+add(char* variableLabel, float value, char *context, char *timestamp);
+```
+> Add a variable with a value, context and timestamp to be sent to a certain data source, once you use add() you can publish your variable using the ubidotsPublish() method. You can add 5 variables maximum before of publish them. 
 
-Ubidots ubidots(TOKEN);
+**Important:** The max payload lenght is 700 bytes, if your payload is greater it will not be properly sent. You can see on your serial console the payload to send if you call the ```setDebug(bool debug)``` method and pass a true value to it.
 
-void setup() {
-    Serial.begin(115200);
-}
-void loop() {
-    float value1 = analogRead(A0);
-    ubidots.add("Variable_Name_One", value1);  // Change first argument for your variable's label
-    if(ubidots.sendAll()){
-        // Do something if values were sent properly
-        Serial.println("Values sent by the device");
-    }
-    delay(5000);
-}
+```
+getValue(char *id);
+```
+> Returns as float the last value of the variable with the ID passed as argument. The value is retrieved through TCP.
+
+```
+getValueWithDatasource(char* device, char* variable);
+```
+> Returns as float the last value of the variable with the label specified as argument that belongs to the device label specified also as argument.
+
+```
+getValueHTTP(char* id);
+```
+> Returns as float the last value of the variable with the ID passed as argument. The value is retrieved through HTTP.
+
+```
+getVarContext(char* id);
+```
+> Returns as char array the last value of the variable with the ID passed as argument. The context is retrieved through TCP.
+
+```
+isDirty();
+```
+> Returns true if the array used by the add() method for sending data is not empty.
+
+```
+setDebug(bool debug);;
 ```
 
+> Make available debug messages through the serial port.
 
-## Get one value from Ubidots
+```
+sendAll(unsigned long timestamp_global);
+```
+> Sends all the data added using the add() method. Global timestamp is optional, if added, it must be in seconds and ALL the variables will be sent with be stored with that timestamp.
 
-To get the last value of a variable from Ubidots,  go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsGetValue.cpp**, copy it and paste to MYAPP.ino
+```
+setDeviceName(char* deviceName);
+```
+> Sets the device name to be created or updated.
+
+```
+setDeviceLabel(char* deviceLabel);
+```
+> Sets the device label to be created or updated.
+
+```
+setMethod(uint8_t method);
+```
+> Sets the method for sending data:
+> * TYPE_UDP : set this for sending data through UDP, this is the default one.
+> * TYPE_TCP : set this for sending data through TCP
+
+```
+setTimeout(int timeout);
+```
+
+> Sets the max timeout (in milliseconds) to wait for an answer from the serve. 5000 milliseconds are set as default.
+
+# Examples
+
+## Send values to Ubidots
+
+You can send values to Ubidots using the [**variable label**](http://help.ubidots.com/faqs-and-troubleshooting/automatically-provision-devices-and-variables-with-ubidots-api-labels), also you can send values with **timestamp** and **context**
+
+### Send values using variable label
+
+The following example is to send values to Ubidots, it will create the variable automatically with the label assign by you on the code.
+
+The library allows you send 5 values maximum. If you desire send more values just add this line `ubidots.add("variable_name", value)`; to your code with the parameters needed.
+
+Also, you can find the examples code on the **Particle IDE**, go to **Included Libraries** click on **UBIDOTS** and select **UbidotsSendValues.cpp**, copy it and paste to **MYAPP.ino**.
+
+Do not forget add your Ubidots [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account) where indicated.
 
 ```c++
 // This example is to get the last value of variable from the Ubidots API
 
-#include "Ubidots/Ubidots.h"
+// This example is to save multiple variables to the Ubidots API with TCP method
 
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define DATA_SOURCE_TAG "Your_Data_Source_Tag"  // Put here your data source name
+/****************************************
+ * Include Libraries
+ ****************************************/
 
-Ubidots ubidots(TOKEN);
-
-void setup() {
-    Serial.begin(115200);
-}
-void loop() {
-    /*
-    * Obtains values using TCP according to structure specified at
-    * http://help.ubidots.com/developers/send-data-to-ubidots-over-tcp-or-udp
-    */
-    float value1 = ubidots.getValue(VAR_ID);
-    float value2 = ubidots.getValueWithDatasource(DEVICE_LABEL, VAR_LABEL);
-
-    /*
-    * Obtains values using HTTP according to structure specified at
-    * https://ubidots.com/docs/api/index.html#get-values
-    */
-    float value3 = ubidots.getValueHTTP(VAR_ID);
-
-    // Evaluates the results obtained
-    if(value1!=ERROR_VALUE){
-      Serial.print("value 1:");
-      Serial.println(value1);
-    }
-    if(value2!=ERROR_VALUE){
-      Serial.print("value 2:");
-      Serial.println(value2);
-    }
-    if(value3!=ERROR_VALUE){
-      Serial.print("value 3:");
-      Serial.println(value3);
-    }
-    delay(5000);
-}
-```
-
-## Get Variable context
-
-To get the context from a variable stored in ubidots you can follow our example in the library, select ***UbidotsGetVarContext.cpp** or copy this code
-
-```cpp
-// This example is to save multiple variables with context to the Ubidots API with TCP method
-
-#include "Ubidots/Ubidots.h"
+#include "Ubidots.h"
 
 
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#define TOKEN "Your_VAR_ID"  // Put here your variable ID
+/****************************************
+ * Define Constants
+ ****************************************/
+
+#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
 
 Ubidots ubidots(TOKEN);
+
+
+/****************************************
+ * Auxiliar Functions
+ ****************************************/
+
+//Put here your auxiliar functions
+
+
+/****************************************
+ * Main Functions
+ ****************************************/
 
 void setup() {
     Serial.begin(115200);
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
+
 void loop() {
-    char* context = ubidots.getVarContext(VAR_ID);
-    if(context!=NULL){
-        // Do something if context is obtained properly
-        Serial.println(context);
-    }
+    float value1 = analogRead(A0);
+    float value2 = analogRead(A1);
+    float value3 = analogRead(A2);
+    ubidots.add("Variable_Name_One", value1);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2);
+    ubidots.add("Variable_Name_Three", value3);
+    ubidots.sendAll();
     delay(5000);
 }
 ```
 
-## Send multiple values to Ubidots 
+### Send values with context
 
-To send a value to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValues.cpp**, copy it and paste to MYAPP.ino
+The following example is to send one value with context to Ubidots, it will create the variable automatically with the [**label**](http://help.ubidots.com/faqs-and-troubleshooting/automatically-provision-devices-and-variables-with-ubidots-api-labels) assign by you on the code.
 
-```c++
-// This example is to save multiple variables to the Ubidots API with TCP method
+Also, you can find the examples code on the **Particle IDE**, go to **Included Libraries** click on **UBIDOTS** and select **UbidotsSendValuesWithContext.cpp**, copy it and paste to **MYAPP.ino**.
+
+Do not forget add your Ubidots [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account) where indicated.
+
+```cpp
+// This example is to save multiple variables with context to the Ubidots API with TCP method
 
 #include "Ubidots/Ubidots.h"
 
@@ -152,10 +194,19 @@ void loop() {
     float value1 = analogRead(A0);
     float value2 = analogRead(A1);
     float value3 = analogRead(A2);
-    ubidots.add("Variable_Name_One", value1);  // Set your variable label as first parameter
-    ubidots.add("Variable_Name_Two", value2);
-    ubidots.add("Variable_Name_Three", value3);
-    if(ubidots.sendAll(TYPE_TCP)){
+    char context[25];
+    char context_2[25];
+    char context_3[45];
+    sprintf(context, "lat=1.2343$lng=132.1233");
+    // To send latitude and longitude to Ubidots and see it in a map widget
+    sprintf(context_2, "Name_Of_Context=Value_Of_Context");
+    // The format of the context is like this, you must send it like this example
+    sprintf(context_3, "Name_Of_Context=Value_Of_Context$Name_Of_Context_2=Value_Of_Context_2$Name_Of_Context_3=Value_Of_Context_3");
+    // You can send multiple context in one variable, to send it you must add a "$" symbol between every context
+    ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
+    ubidots.add("Variable_Name_Two", value2, context_2);
+    ubidots.add("Variable_Name_Three", value3,  context_3);
+    if(ubidots.sendAll()){
         // Do something if values were sent properly
         Serial.println("Values sent by the device");
     }
@@ -163,9 +214,14 @@ void loop() {
 }
 ```
 
-## Send values with custom different timestamp
 
-To send a value with a custom timestamp to Ubidots, go to **Included Libraries** and clic on **UBIDOTS** and select **UbidotsSendValuesWithTimestamp.cpp**, copy it and paste to MYAPP.ino
+### Send values with timestamp
+
+The following example is to send one value with timestamp to Ubidots, it will create the variable automatically with the [**label**](http://help.ubidots.com/faqs-and-troubleshooting/automatically-provision-devices-and-variables-with-ubidots-api-labels) assign by you on the code.
+
+Also, you can find the examples code on the **Particle IDE**, go to **Included Libraries** click on **UBIDOTS** and select **UbidotsSendValuesWithTimeStamp.cpp**, copy it and paste to **MYAPP.ino**.
+
+Do not forget add your Ubidots [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account) where indicated.
 
 ```c++
 /****************************************
@@ -218,43 +274,120 @@ void loop() {
 }
 ```
 
-## Send multiple values with context
+## Get values from Ubidots
 
-To send values with context you can follow our example in the library, select ***UbidotsSendValuesWithContext.cpp** or copy this code
+This library let get the last value of a variable from Ubidots using the [**variable label**](http://help.ubidots.com/faqs-and-troubleshooting/automatically-provision-devices-and-variables-with-ubidots-api-labels) or [**variable ID**](http://help.ubidots.com/faqs-and-troubleshooting/where-can-i-find-the-variable-id), also you can get the context of it.
 
-```cpp
-// This example is to save multiple variables with context to the Ubidots API with TCP method
+* To get the last value using the variable ID you should use the following line:
 
-#include "Ubidots/Ubidots.h"
+> getValue(VAR_ID) 
+
+* To get the last value using the variable label you should use the following line:
+
+> getValueWithDatasource(DEVICE_LABEL, VAR_LABEL) 
+
+The following example is to get the last value of a variable from Ubidots.
+
+Do not forget add your Ubidots [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account) where indicated, also the device and **variable label** or **variable ID**.
+
+```c++
+// This example is to get the last value of variable from the Ubidots API
+
+/****************************************
+ * Include Libraries
+ ****************************************/
+
+#include "Ubidots.h"
+
+/****************************************
+ * Define Constants
+ ****************************************/
+
+#define TOKEN "...."  // Put here your Ubidots TOKEN
+#define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
+#define VAR_LABEL "...." // Put here your variable api label
+#define DEVICE_LABEL "...." // Put here your device api label
+
+/****************************************
+ * Auxiliar Functions
+ ****************************************/
+
+//Put here your auxiliar functions
 
 
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+/****************************************
+ * Main Functions
+ ****************************************/
+
 
 Ubidots ubidots(TOKEN);
 
 void setup() {
     Serial.begin(115200);
+    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 void loop() {
-    float value1 = analogRead(A0);
-    float value2 = analogRead(A1);
-    float value3 = analogRead(A2);
-    char context[25];
-    char context_2[25];
-    char context_3[45];
-    sprintf(context, "lat=1.2343$lng=132.1233");
-    // To send latitude and longitude to Ubidots and see it in a map widget
-    sprintf(context_2, "Name_Of_Context=Value_Of_Context");
-    // The format of the context is like this, you must send it like this example
-    sprintf(context_3, "Name_Of_Context=Value_Of_Context$Name_Of_Context_2=Value_Of_Context_2$Name_Of_Context_3=Value_Of_Context_3");
-    // You can send multiple context in one variable, to send it you must add a "$" symbol between every context
-    ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
-    ubidots.add("Variable_Name_Two", value2, context_2);
-    ubidots.add("Variable_Name_Three", value3,  context_3);
-    if(ubidots.sendAll()){
-        // Do something if values were sent properly
-        Serial.println("Values sent by the device");
+    float value1;
+    value1 = ubidots.getValue(VAR_ID);
+    float value2;
+    value2 = ubidots.getValueWithDatasource(DEVICE_LABEL, VAR_LABEL);
+    if(value1!=NULL){
+      Serial.println(value1);
     }
+    if(value2!=NULL){
+      Serial.println(value2);
+    }
+    delay(5000);
+}
+```
+
+### Get variable context
+
+The following example is to get the context of a variable from Ubidots.
+
+
+To get the context from a variable stored in ubidots , go to **Included Libraries** and click on **UBIDOTS** and select **UbidotsGetContext.cpp**, copy it and paste to **MYAPP.ino**
+
+Do not forget add your Ubidots [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account) where indicated, also the [variable ID](http://help.ubidots.com/faqs-and-troubleshooting/where-can-i-find-the-variable-id).
+
+```c++
+// This example is to get the last value of variable from the Ubidots API
+
+/****************************************
+ * Include Libraries
+ ****************************************/
+
+#include "Ubidots.h"
+
+/****************************************
+ * Define Constants
+ ****************************************/
+
+#define TOKEN "...."  // Put here your Ubidots TOKEN
+#define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
+
+/****************************************
+ * Auxiliar Functions
+ ****************************************/
+
+//Put here your auxiliar functions
+
+
+/****************************************
+ * Main Functions
+ ****************************************/
+
+
+Ubidots ubidots(TOKEN);
+
+void setup() {
+    Serial.begin(115200);
+    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+}
+void loop() {
+    char* context;
+    ubidots.getVarContext(VAR_ID);
+    Serial.println(context);
     delay(5000);
 }
 ```

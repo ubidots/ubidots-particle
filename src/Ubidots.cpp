@@ -79,7 +79,7 @@ float Ubidots::getValue(char* id) {
   while (!_client.connected()) {
     _client.connect(SERVERHTTP, PORTHTTP);
     timeout++;
-    if (timeout > 4999) {
+    if (timeout > _timeout - 1) {
       if (_debug) {
         Serial.println("Could not connect to server");
       }
@@ -106,9 +106,9 @@ float Ubidots::getValue(char* id) {
   timeout = 0;
   free(data);
 
-  while(!_client.available() && timeout < 50000) {
+  while(!_client.available() && timeout < _timeout) {
     timeout++;
-    if (timeout >= 49999){
+    if (timeout >= _timeout - 1){
       free(response);
       Serial.println("timeout");
       return ERROR_VALUE;
@@ -167,7 +167,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
   while (!_client.connected()) {
     _client.connect(SERVERHTTP, PORTHTTP);
     timeout++;
-    if (timeout > 4999) {
+    if (timeout > _timeout - 1) {
       if (_debug) {
         Serial.println("Could not connect to server");
       }
@@ -193,9 +193,9 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
   timeout = 0;
   free(data);
 
-  while(!_client.available() && timeout < 50000) {
+  while(!_client.available() && timeout < _timeout) {
     timeout++;
-    if (timeout >= 49999){
+    if (timeout >= _timeout - 1){
       Serial.println("Server connection timeout");
       free(response);
       return ERROR_VALUE;
@@ -255,7 +255,7 @@ float Ubidots::getValueHTTP(char* id) {
   while (!_client.connected()) {
     _client.connect(SERVERHTTP, PORTHTTP);
     timeout++;
-    if (timeout > 4999) {
+    if (timeout > _timeout - 1) {
       if (_debug) {
         Serial.println("Could not connect to server");
       }
@@ -272,11 +272,12 @@ float Ubidots::getValueHTTP(char* id) {
   }
 
   _client.print(data);
+  free(data);
   timeout = 0;
 
-  while(!_client.available() && timeout < 50000) {
+  while(!_client.available() && timeout < _timeout) {
     timeout++;
-    if (timeout >= 49999){
+    if (timeout >= _timeout - 1){
       Serial.println("Server connection timeout");
       free(response);
       return ERROR_VALUE;
@@ -328,10 +329,10 @@ float Ubidots::getValueHTTP(char* id) {
  */
 
 char* Ubidots::getVarContext(char* id) {
-  String response = "";
   int timeout = 0;
   uint8_t max_retries = 0;
   char* data = (char *) malloc(sizeof(char) * 300);
+  char* response = (char *) malloc(sizeof(char) * 700);
 
   sprintf(data, "GET /api/v1.6/variables/%s", id);
   sprintf(data, "%s/values?page_size=1 HTTP/1.1\r\n", data);
@@ -352,7 +353,7 @@ char* Ubidots::getVarContext(char* id) {
         Serial.println("Could not connect to server");
       }
       free(data);
-      return NULL;
+      return "error";
     }
     delay(5000);
   }
@@ -363,30 +364,32 @@ char* Ubidots::getVarContext(char* id) {
   }
 
   _client.print(data);
+  free(data);
 
-  while (!_client.available() && timeout < 2000) {
+  while (!_client.available() && timeout < _timeout) {
     timeout++;
-    if (timeout >= 2000) {
+    if (timeout >= _timeout - 1) {
       if (_debug) {
         Serial.println(F("Error, max timeout reached"));
       }
       _client.stop();
+      free(response);
       free(data);
-      return NULL;
+      return "error";
     }
   }
 
+  // Populates with null values the response array
+  for (int i = 0; i <= 700; i++){
+    response[i] = '\0';
+  }
+
+  int i = 0;
   while (_client.available()) {
-    char c = _client.read();
-    if (c == -1) {
-      if (_debug) {
-        Serial.println(F("Error reading from server"));
-      }
-      _client.stop();
-      free(data);
-      return NULL;
+    if (i >= 699){
+      break;
     }
-    response += c;
+    response[i++] = (char)_client.read();
   }
 
   if (_debug) {
@@ -394,29 +397,28 @@ char* Ubidots::getVarContext(char* id) {
     Serial.println(response);
   }
 
-  uint8_t bodyPosinit = 4 + response.indexOf("\r\n\r\n");
-  response = response.substring(bodyPosinit);
+  // Parses the answer
+  char * pch = strchr(response, '[');
 
-  int context_init = 13 + response.indexOf("\"context\":");
-  int context_end = response.indexOf(", \"created_at\":") - 1;
+  if (pch != NULL){
+    char * pch2 = strchr(pch + 2, '{');
+    pch = strchr(pch2, '}');
+    int index = (int)(pch - pch2 + 1);
 
-  if (context_end < context_init) {
-    if (_debug) {
-      Serial.println("Error reading values from server");
+    // Populates with null values the context array
+    char context[400];
+    for (int i = 0; i < 400; i++){
+      context[i] = '\0';
     }
-    return NULL;
+
+    memcpy(context, pch2, index);
+    free(response);
+    _client.stop();
+    return context;
   }
 
-  response = response.substring(context_init, context_end);
-  if (_debug) {
-    Serial.println("Value obtained:");
-    Serial.println(response);
-  }
-
-  char* context = new char [response.length() + 1];
-  free(data);
-  _client.stop();
-  return context;
+  free(response);
+  return "error";
 }
 
 
@@ -674,6 +676,10 @@ bool Ubidots::isDirty() {
   return _dirty;
 }
 
+void Ubidots::setTimeout(int timeout){
+  // Changes the max timeout value
+  _timeout = timeout;
+}
 
 /*
  * © Francesco Potortì 2013 - GPLv3 - Revision: 1.13
