@@ -38,7 +38,7 @@ CONSTRUCTOR
  * Default dsNmae is Particle
  */
 
-Ubidots::Ubidots(char* token, char* server) {
+Ubidots::Ubidots(char* token, const char * server) {
   _token = token;
   _server = server;
   _method = TYPE_UDP;
@@ -64,8 +64,6 @@ FUNCTIONS TO RETRIEVE DATA
  */
 
 float Ubidots::getValue(char* id) {
-  Spark.process(); // Cleans previous processes
-
   char* response = (char *) malloc(sizeof(char) * 40);
   char* data = (char *) malloc(sizeof(char) * 700);
   sprintf(data, "%s/%s|GET|%s|%s", USER_AGENT, VERSION, _token, id);
@@ -77,7 +75,7 @@ float Ubidots::getValue(char* id) {
 
   int timeout = 0;
   while (!_client.connected()) {
-    _client.connect(SERVERHTTP, PORTHTTP);
+    _client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT);
     timeout++;
     if (timeout > _timeout - 1) {
       if (_debug) {
@@ -96,7 +94,7 @@ float Ubidots::getValue(char* id) {
   }
 
 
-  if (_client.connect(SERVER, PORT)) {
+  if (_client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT)) {
     if (_debug){
       Serial.println(F("Getting your variable: "));
     }
@@ -150,9 +148,6 @@ float Ubidots::getValue(char* id) {
  */
 
 float Ubidots::getValueWithDatasource(char* device, char* variable) {
-
-  Spark.process(); // Cleans previous processes
-
   char* data = (char *) malloc(sizeof(char) * 700);
   char* response = (char *) malloc(sizeof(char) * 40);
   sprintf(data, "%s/%s|LV|%s|%s:%s", USER_AGENT, VERSION, _token, device, variable);
@@ -165,7 +160,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
   }
 
   while (!_client.connected()) {
-    _client.connect(SERVERHTTP, PORTHTTP);
+    _client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT);
     timeout++;
     if (timeout > _timeout - 1) {
       if (_debug) {
@@ -183,7 +178,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
     Serial.println(data);
   }
 
-  if (_client.connect(SERVER, PORT)) {
+  if (_client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT)) {
     if (_debug){
       Serial.println(F("Getting your variable: "));
     }
@@ -235,8 +230,6 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
  */
 
 float Ubidots::getValueHTTP(char* id) {
-
-  Spark.process(); // Cleans previous processes
   char* response = (char *) malloc(sizeof(char) * 700);
   char* data = (char *) malloc(sizeof(char) * 300);
 
@@ -245,7 +238,7 @@ float Ubidots::getValueHTTP(char* id) {
   sprintf(data, "%sHost: things.ubidots.com\r\nUser-Agent: %s/%s\r\n", data, USER_AGENT, VERSION);
   sprintf(data, "%sX-Auth-Token: %s\r\nConnection: close\r\n\r\n", data, _token);
 
-  _client.connect(SERVERHTTP, PORTHTTP); // Initial connection
+  _client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT); // Initial connection
 
   int timeout = 0;
   if (_debug) {
@@ -253,7 +246,7 @@ float Ubidots::getValueHTTP(char* id) {
   }
 
   while (!_client.connected()) {
-    _client.connect(SERVERHTTP, PORTHTTP);
+    _client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT);
     timeout++;
     if (timeout > _timeout - 1) {
       if (_debug) {
@@ -339,21 +332,21 @@ char* Ubidots::getVarContext(char* id) {
   sprintf(data, "%sHost: things.ubidots.com\r\nUser-Agent: %s/%s\r\n", data, USER_AGENT, VERSION);
   sprintf(data, "%sX-Auth-Token: %s\r\nConnection: close\r\n\r\n", data, _token);
 
-  Spark.process(); // Cleans previous processes
-  _client.connect(SERVERHTTP, PORTHTTP); // Initial connection
+  _client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT); // Initial connection
 
   while (!_client.connected()) {
     if (_debug) {
       Serial.println("Attemping to connect");
     }
-    _client.connect(SERVERHTTP, PORTHTTP);
+    _client.connect(UBIDOTS_SERVER, UBIDOTS_HTTP_PORT);
     max_retries++;
     if (max_retries > 5) {
       if (_debug) {
         Serial.println("Could not connect to server");
       }
       free(data);
-      return "error";
+      char* error_message = "error";
+      return error_message;
     }
     delay(5000);
   }
@@ -499,6 +492,43 @@ void Ubidots::setDeviceLabel(char* deviceLabel) {
   _pId = deviceLabel;
 }
 
+bool Ubidots::sendValuesTCP() {
+  return sendValuesTCP(NULL);
+}
+
+bool Ubidots::sendValuesTCP(unsigned long timestamp_global) {
+  /* Builds the payload */
+  char* payload = (char *) malloc(sizeof(char) * 700);
+  buildTcpPayload(payload, timestamp_global);
+
+  /* Makes sure that the client is connected to Ubidots */
+  _client.connect(UBIDOTS_SERVER, UBIDOTS_TCP_PORT);
+  reconnect();
+
+  /* Sends data to Ubidots */
+  if (_client.connected()) {
+    _client.print(payload);
+    free(payload);
+  } else {
+    free(payload);
+    if (_debug) {
+      Serial.println("Could not connect to the server");
+    }
+    return false;
+  }
+
+  /* Waits for the server's answer */
+  if (!waitServerAnswer()) {
+    return false;
+  }
+
+  /* Parses the server answer, returns true if it is 'Ok' */
+  char* response = (char *) malloc(sizeof(char) * 100);
+  bool result = parseTCPAnswer(response);
+  free(response);
+  return result;
+
+}
 
 /**
  * Assamble all package to send in TCP or UDP method
@@ -588,8 +618,8 @@ bool Ubidots::sendAllUDP(char* buffer) {
 
 
   // Routine to send data through UDP
-  _clientUDP.begin(PORT);
-  if (! (_clientUDP.beginPacket(ipAddress, PORT)
+  _clientUDP.begin(UBIDOTS_TCP_PORT);
+  if (! (_clientUDP.beginPacket(ipAddress, UBIDOTS_TCP_PORT)
       && _clientUDP.write(buffer)
       && _clientUDP.endPacket())) {
     if (_debug) {
@@ -623,7 +653,7 @@ bool Ubidots::sendAllTCP(char* buffer) {
     if (_debug) {
       Serial.println("not connected, trying to connect again");
     }
-    _client.connect(_server, PORT);
+    _client.connect(_server, UBIDOTS_TCP_PORT);
     if (i == 5) {
       if (_debug) {
         Serial.println("Max attempts to connect reached, data could not be sent");
@@ -679,6 +709,106 @@ bool Ubidots::isDirty() {
 void Ubidots::setTimeout(int timeout){
   // Changes the max timeout value
   _timeout = timeout;
+}
+
+void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
+  sprintf(payload, "");
+  sprintf(payload, "%s/%s|POST|%s|", USER_AGENT, VERSION, _token);
+  sprintf(payload, "%s%s:%s", payload, _pId, _dsName);
+
+  if (timestamp_global != NULL) {
+    sprintf(payload, "%s@%lu", payload, timestamp_global);
+  }
+
+  for (uint8_t i = 0; i < _currentValue;) {
+    sprintf(payload, "%s%s:%f", payload, (val + i)->idName, (val+i)->idValue);
+
+    if ((val + i)->timestamp_val != NULL) {
+      sprintf(payload, "%s@%lu%s", payload, (val + i)->timestamp_val, "000");
+    }
+    if ((val + i)->contextOne != NULL) {
+      sprintf(payload, "%s$%s", payload, (val + i)->contextOne);
+    }
+
+    i++;
+
+    if (i < _currentValue) {
+      sprintf(payload, "%s,", payload);
+    } else {
+      sprintf(payload, "%s|end", payload);
+      _currentValue = 0;
+    }
+  }
+
+  if (_debug) {
+    Serial.println("----------");
+    Serial.println("payload:");
+    Serial.println(payload);
+    Serial.println("----------");
+    Serial.println("");
+  }
+
+}
+
+void Ubidots::reconnect() {
+  uint8_t attempts = 0;
+  while (!_client.connected() && attempts < 5) {
+    if (_debug) {
+      Serial.print("Trying to connect to Ubidots");
+      Serial.print(", attempt number: ");
+      Serial.println(attempts);
+    }
+    _client.connect(UBIDOTS_SERVER, UBIDOTS_TCP_PORT);
+    attempts += 1;
+    delay(1000);
+  }
+}
+
+bool Ubidots::waitServerAnswer() {
+  int timeout = 0;
+  while(!_client.available() && timeout < _timeout) {
+    timeout++;
+    delay(1);
+    if (timeout > _timeout - 1) {
+      if (_debug) {
+        Serial.println("timeout, could not read any response from the server");
+      }
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Ubidots::parseTCPAnswer(char* response) {
+  int j = 0;
+
+  if (_debug){
+    Serial.println("----------");
+    Serial.println("Server's response:");
+  }
+
+  while (_client.available()) {
+    char c = _client.read();
+    if (_debug) {
+      Serial.write(c);
+    }
+    response[j] = c;
+    j++;
+  }
+
+  if (_debug){
+    Serial.println("\n----------");
+  }
+
+  response[j] = '\0';
+
+  char *pch = strstr(response, "OK");
+  bool result = false;
+  if (pch != NULL) {
+    result = true;
+  }
+
+  return result;
 }
 
 /*

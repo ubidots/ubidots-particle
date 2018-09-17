@@ -21,7 +21,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Original maker Mateo Velez - Metavix for Ubidots Inc
-Modified by Jose Garcia for Ubidots Inc
+Modified and mainteined by Jose Garcia for Ubidots Inc
 */
 
 #ifndef _Ubidots_H_
@@ -33,42 +33,19 @@ Modified by Jose Garcia for Ubidots Inc
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 
-#ifndef SERVER
-#define SERVER "translate.ubidots.com"
-#endif
-#ifndef TIME_SERVER
-#define TIME_SERVER "pool.ntp.org"
-#endif
-#ifndef USER_AGENT
-#define USER_AGENT "Particle"
-#endif
-#ifndef VERSION
-#define VERSION "2.1.12"
-#endif
-#ifndef PORT
-#define PORT 9012
-#endif
-#ifndef MAX_VALUES
-#define MAX_VALUES 10
-#endif
-#ifndef TYPE_TCP
-#define TYPE_TCP 1
-#endif
-#ifndef TYPE_UDP
-#define TYPE_UDP 2
-#endif
-#ifndef TIMEOUT
-#define TIMEOUT 10000
-#endif
-#ifndef SERVERHTTP
-#define SERVERHTTP "things.ubidots.com"
-#endif
-#ifndef PORTHTTP
-#define PORTHTTP 80
-#endif
-
-const float ERROR_VALUE = -3.4028235E+8;
-
+namespace {
+  const char * UBIDOTS_SERVER = "industrial.api.ubidots.com";
+  const char * USER_AGENT = "UbidotsParticle";
+  const char * VERSION = "2.2";
+  const int UBIDOTS_HTTP_PORT = 80;
+  const int UBIDOTS_TCP_PORT = 9012;
+  const int MAX_VALUES = 10;
+  const int TYPE_TCP = 1;
+  const int TYPE_UDP = 2;
+  const int TYPE_HTTP = 3;
+  const char * TIME_SERVER = "pool.ntp.org";
+  const float ERROR_VALUE = -3.4028235E+8;
+}
 
 typedef struct Value {
   char  *idName;
@@ -79,7 +56,7 @@ typedef struct Value {
 
 class Ubidots {
   public:
-  explicit Ubidots(char* token, char* server = SERVER);
+  explicit Ubidots(char* token, const char * server = UBIDOTS_SERVER);
   void add(char *variable_id, double value);
   void add(char *variable_id, double value, char *ctext);
   void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
@@ -89,6 +66,10 @@ class Ubidots {
   char* getVarContext(char* id);
   bool isDirty();
   bool sendAll();
+  bool sendValuesTCP();
+  bool sendValuesTCP(unsigned long timestamp_global);
+  // bool sendValuesUDP();
+  // bool sendValuesHTTP();
   bool sendAll(unsigned long timestamp_global);
   void setDeviceName(char* deviceName);
   void setDeviceLabel(char* deviceLabel);
@@ -110,9 +91,13 @@ class Ubidots {
   bool _dirty = false;
   uint8_t _method;
   char* _pId;
-  char* _server;
+  const char * _server;
   char* _token;
   int _timeout = 5000;
   bool sendAllUDP(char* buffer);
   bool sendAllTCP(char* buffer);
+  void buildTcpPayload(char* payload, unsigned long timestamp_global);
+  void reconnect();
+  bool waitServerAnswer();
+  bool parseTCPAnswer(char* response);
 };
