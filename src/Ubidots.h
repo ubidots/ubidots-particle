@@ -32,6 +32,7 @@ Modified and mainteined by Jose Garcia for Ubidots Inc
 #include "spark_wiring_string.h"
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
+#include "inet_hal.h"
 
 namespace {
   const char * UBIDOTS_SERVER = "industrial.api.ubidots.com";
@@ -68,22 +69,19 @@ class Ubidots {
   bool sendAll();
   bool sendValuesTCP();
   bool sendValuesTCP(unsigned long timestamp_global);
-  // bool sendValuesUDP();
+  bool sendValuesUDP();
+  bool sendValuesUDP(unsigned long timestamp_global);
   // bool sendValuesHTTP();
   bool sendAll(unsigned long timestamp_global);
   void setDeviceName(char* deviceName);
   void setDeviceLabel(char* deviceLabel);
-  bool setDatasourceName(char* dsName); //Deprecated
-  bool setDatasourceTag(char* dsTag); //Deprecated
   void setDebug(bool debug);
   void setMethod(uint8_t method); // Default UDP
   void setTimeout(int timeout);
-  unsigned long ntpUnixTime();
 
  private:
   TCPClient _client;
   UDP _clientUDP;
-  UDP _clientTMP;
   Value * val;
   uint8_t _currentValue;
   char* _dsName;
@@ -100,4 +98,6 @@ class Ubidots {
   void reconnect();
   bool waitServerAnswer();
   bool parseTCPAnswer(char* response);
+  bool sendUdpPacket();
+  IPAddress getServerIp();
 };

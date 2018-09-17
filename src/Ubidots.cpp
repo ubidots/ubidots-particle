@@ -530,6 +530,51 @@ bool Ubidots::sendValuesTCP(unsigned long timestamp_global) {
 
 }
 
+bool Ubidots::sendValuesUDP() {
+  return sendValuesUDP(NULL);
+}
+
+bool Ubidots::sendValuesUDP(unsigned long timestamp_global) {
+  /* Builds the payload */
+  char* payload = (char *) malloc(sizeof(char) * 700);
+  buildTcpPayload(payload, timestamp_global);
+
+  /* Obtains the remote server's IP */
+  IPAddress serverIpAddress = getServerIp();
+
+  if (! serverIpAddress){
+    if (_debug) {
+      Serial.println("ERROR, could not solve IP Address of the remote server, please check your DNS setup");
+    }
+    free(payload);
+    _currentValue = 0;
+    _clientUDP.stop();
+    _dirty = false;
+    return false;
+  }
+
+  /* Sends data to Ubidots */
+  _clientUDP.begin(UBIDOTS_TCP_PORT);
+  if (! (_clientUDP.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT)
+      && _clientUDP.write(payload)
+      && _clientUDP.endPacket())) {
+    if (_debug) {
+      Serial.println("ERROR sending values with UDP");
+    }
+    _currentValue = 0;
+    _clientUDP.stop();
+    _dirty = false;
+    free(payload);
+    return false;
+  }
+
+  _currentValue = 0;
+  _clientUDP.stop();
+  _dirty = false;
+  free(payload);
+  return true;
+}
+
 /**
  * Assamble all package to send in TCP or UDP method
  * @arg timestamp_global [optional] is the timestamp for all the variables added
@@ -720,6 +765,7 @@ void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
     sprintf(payload, "%s@%lu", payload, timestamp_global);
   }
 
+  sprintf(payload, "%s=>", payload);
   for (uint8_t i = 0; i < _currentValue;) {
     sprintf(payload, "%s%s:%f", payload, (val + i)->idName, (val+i)->idValue);
 
@@ -811,108 +857,14 @@ bool Ubidots::parseTCPAnswer(char* response) {
   return result;
 }
 
-/*
- * © Francesco Potortì 2013 - GPLv3 - Revision: 1.13
- *
- * Send an NTP packet and wait for the response, return the Unix time
- *
- * To lower the memory footprint, no buffers are allocated for sending
- * and receiving the NTP packets.  Four bytes of memory are allocated
- * for transmision, the rest is random garbage collected from the data
- * memory segment, and the received packet is read one byte at a time.
- * The Unix time is returned, that is, seconds from 1970-01-01T00:00.
- */
 
-unsigned long Ubidots::ntpUnixTime () {
+IPAddress Ubidots::getServerIp() {
+  /* Obtains the remote server's IP */
+  IPAddress serverIpAddress;
+  HAL_IPAddress ip;
+  network_interface_t t;
+  serverIpAddress = (inet_gethostbyname(_server, strlen(_server), &ip, t, NULL)<0) ?
+       IPAddress(uint32_t(0)) : IPAddress(ip);
 
-  static int udpInited = _clientTMP.begin(123); // open socket on arbitrary port
-
-  // Only the first four bytes of an outgoing NTP packet need to be set
-  // appropriately, the rest can be whatever.
-  const long ntpFirstFourBytes = 0xEC0600E3; // NTP request header
-
-  // Fail if WiFiUdp.begin() could not init a socket
-  if (! udpInited)
-    return 0;
-
-  // Clear received data from possible stray received packets
-  _clientTMP.flush();
-
-  _client.connect(TIME_SERVER, 123);
-  IPAddress ipAddress = _client.remoteIP();
-  _client.stop();
-
-
-  // Send an NTP request
-  if (! (_clientTMP.beginPacket(ipAddress, 123) // 123 is the NTP port
-      && _clientTMP.write((byte *)&ntpFirstFourBytes, 48) == 48
-      && _clientTMP.endPacket()))
-    return 0;         // sending request failed
-
-  // Wait for response; check every pollIntv ms up to maxPoll times
-  const int pollIntv = 150;   // poll every this many ms
-  const byte maxPoll = 15;    // poll up to this many times
-  int pktLen;         // received packet length
-  for (byte i = 0; i < maxPoll; i++) {
-    if ((pktLen = _clientTMP.parsePacket()) == 48)
-      break;
-    delay(pollIntv);
-  }
-  if (pktLen != 48)
-    return 0;         // no correct packet received
-
-  // Read and discard the first useless bytes
-  // Set useless to 32 for speed; set to 40 for accuracy.
-  const byte useless = 40;
-  for (byte i = 0; i < useless; ++i)
-    _clientTMP.read();
-
-  // Read the integer part of sending time
-  unsigned long time = _clientTMP.read();  // NTP time
-  for (byte i = 1; i < 4; i++)
-    time = time << 8 | _clientTMP.read();
-
-  // Round to the nearest second if we want accuracy
-  // The fractionary part is the next byte divided by 256: if it is
-  // greater than 500ms we round to the next second; we also account
-  // for an assumed network delay of 50ms, and (0.5-0.05)*256=115;
-  // additionally, we account for how much we delayed reading the packet
-  // since its arrival, which we assume on average to be pollIntv/2.
-  time += (_clientTMP.read() > 115 - pollIntv / 8);
-  // Discard the rest of the packet
-  _clientTMP.flush();
-  return time - 2208988800ul;     // convert NTP time to Unix time
-}
-
-
-/***************************************************************************
-DEPRECATED FUNCTIONS
-***************************************************************************/
-
-/**
- * WARNING: This function is deprecated, use setDeviceName() instead
- * This function is to set you data source name
- * @arg dsName is the name of your data source name
- * @return true uppon succes
- */
-
-bool Ubidots::setDatasourceName(char* dsName) {
-  Serial.print("Warning, this function is deprecated,");
-  Serial.print("please try to use the setDeviceName() method instead");
-  _dsName = dsName;
-  return true;
-}
-
-/**
- * WARNING: This function is deprecated, use setDeviceLabel() instead
- * This function is to set you data source Tag
- * @arg dsTag is the name of your data source tag
- * @return true uppon succes
- */
-
-bool Ubidots::setDatasourceTag(char* dsTag) {
-  Serial.print("Warning, this function is deprecated,");
-  Serial.print("please try to use the setDeviceLabel() method instead");
-  _pId = dsTag;
-  return true;
+  return serverIpAddress;
 }
