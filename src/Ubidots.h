@@ -46,6 +46,7 @@ namespace {
   const int TYPE_HTTP = 3;
   const char * TIME_SERVER = "pool.ntp.org";
   const float ERROR_VALUE = -3.4028235E+8;
+  const int MAX_BUFFER_SIZE = 700;
 }
 
 typedef struct Value {
@@ -57,20 +58,21 @@ typedef struct Value {
 
 class Ubidots {
   public:
-  explicit Ubidots(char* token, const char * host = UBIDOTS_SERVER);
-  void add(char *variable_id, double value);
-  void add(char *variable_id, double value, char *context);
-  void add(char *variable_id, double value, char *context, unsigned long timestamp);
+  explicit Ubidots(char* token, const char * host=UBIDOTS_SERVER);
+  void add(char *variable_id, float value);
+  void add(char *variable_id, float value, char *context);
+  void add(char *variable_id, float value, char *context, unsigned long dot_timestamp);
   float getValue(char* id);
   float getValueWithDatasource(char* device, char* variable);
   float getValueHTTP(char* id);
   char* getVarContext(char* id);
   bool isDirty();
   bool sendAll();
-  bool sendValuesTCP();
-  bool sendValuesTCP(unsigned long timestamp_global);
-  bool sendValuesUDP();
-  bool sendValuesUDP(unsigned long timestamp_global);
+  bool sendValuesTcp();
+  bool sendValuesTcp(unsigned long timestamp_global);
+  bool sendValuesUdp();
+  bool sendValuesHttp();
+  bool sendValuesUdp(unsigned long timestamp_global);
   bool sendAll(unsigned long timestamp_global);
   void setDeviceName(char* device_name);
   void setDeviceLabel(char* device_label);
@@ -79,8 +81,8 @@ class Ubidots {
   void setTimeout(int timeout);
 
  private:
-  TCPClient _client;
-  UDP _clientUDP;
+  TCPClient _client_tcp_ubi;
+  UDP _client_udp_ubi;
   Value * val;
   uint8_t _currentValue;
   char* _device_name;
@@ -94,9 +96,11 @@ class Ubidots {
   bool sendAllUdp(char* buffer);
   bool sendAllTcp(char* buffer);
   void buildTcpPayload(char* payload, unsigned long timestamp_global);
-  void reconnect();
+  void buildHttpPayload(char* payload);
+  void reconnect();  // Default method to reconnect to both UDP and TCP server
+  void reconnect(const char * host, int port);
   bool waitServerAnswer();
-  bool parseTCPAnswer(char* response);
+  bool parseTcpAnswer(char* response);
   bool sendUdpPacket();
   IPAddress getServerIp();
 };
