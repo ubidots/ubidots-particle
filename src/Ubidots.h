@@ -54,7 +54,8 @@ typedef struct Value {
   char  *variable_label;
   char  *dot_context;
   float dot_value;
-  unsigned long dot_timestamp;
+  unsigned long dot_timestamp_seconds;
+  unsigned int dot_timestamp_millis;
 } Value;
 
 class Ubidots {
@@ -62,7 +63,8 @@ class Ubidots {
   explicit Ubidots(char* token, const char * host=UBIDOTS_SERVER);
   void add(char *variable_id, float value);
   void add(char *variable_id, float value, char *context);
-  void add(char *variable_id, float value, char *context, unsigned long dot_timestamp);
+  void add(char *variable_id, float value, char *context, unsigned long dot_timestamp_seconds);
+  void add(char *variable_id, float value, char *context, unsigned long dot_timestamp_seconds, unsigned int dot_timestamp_millis);
   float getValue(char* id);
   float getValueWithDatasource(char* device, char* variable);
   float getValueHTTP(char* id);
@@ -73,6 +75,7 @@ class Ubidots {
   bool sendValuesTcp(unsigned long timestamp_global);
   bool sendValuesUdp();
   bool sendValuesHttp();
+  void cleanValuesBuffer();
   bool sendValuesWebhook(char* webhook_name);
   bool sendValuesWebhook(char* webhook_name, PublishFlags flags);
   bool sendValuesUdp(unsigned long timestamp_global);
@@ -87,7 +90,7 @@ class Ubidots {
   TCPClient _client_tcp_ubi;
   UDP _client_udp_ubi;
   Value * val;
-  uint8_t _currentValue;
+  uint8_t _current_value;
   char* _device_name;
   bool _debug = false;
   bool _dirty = false;

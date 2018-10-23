@@ -41,7 +41,7 @@ Ubidots::Ubidots(char* token, const char * host) {
   _host = host;
   _method = TYPE_UDP;
   _device_name = "particle";
-  _currentValue = 0;  // Current value index from Value type structure
+  _current_value = 0;  // Current value index from Value type structure
   val = (Value *)malloc(MAX_VALUES * sizeof(Value));
   String str = System.deviceID();
   _device_label = new char[str.length() + 1];
@@ -63,7 +63,7 @@ FUNCTIONS TO RETRIEVE DATA
 
 float Ubidots::getValue(char* variable_id) {
   char* response = (char *) malloc(sizeof(char) * 40);
-  char* data = (char *) malloc(sizeof(char) * 700);
+  char* data = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
   sprintf(data, "%s/%s|GET|%s|%s", USER_AGENT, VERSION, _token, variable_id);
   sprintf(data, "%s|end", data);
 
@@ -422,29 +422,33 @@ FUNCTIONS TO SEND DATA
  * @arg variable_labeln [Mandatory] variable label where the dot will be stored
  * @arg value [Mandatory] Dot value
  * @arg context [optional] Dot context to store. Default NULL
- * @arg dot_timestamp [optional] Dot timestamp, usefull for datalogger. Default NULL
+ * @arg dot_timestamp_seconds [optional] Dot timestamp, usefull for datalogger. Default NULL
  */
 
 void Ubidots::add(char *variable_label, float value) {
-  return add(variable_label, value, NULL, NULL);
+  return add(variable_label, value, NULL, NULL, NULL);
 }
 
 
 void Ubidots::add(char *variable_label, float value, char *context) {
-  return add(variable_label, value, context, NULL);
+  return add(variable_label, value, context, NULL, NULL);
 }
 
+void Ubidots::add(char *variable_label, float value, char *context, long unsigned dot_timestamp_seconds) {
+  return add(variable_label, value, context, dot_timestamp_seconds, NULL);
+}
 
-void Ubidots::add(char *variable_label, float value, char *context, long unsigned dot_timestamp) {
+void Ubidots::add(char *variable_label, float value, char *context, long unsigned dot_timestamp_seconds, unsigned int dot_timestamp_millis) {
   _dirty = true;
-  (val + _currentValue)->variable_label = variable_label;
-  (val + _currentValue)->dot_value = value;
-  (val + _currentValue)->dot_context = context;
-  (val + _currentValue)->dot_timestamp = dot_timestamp;
-  _currentValue++;
-  if (_currentValue > MAX_VALUES) {
+  (val + _current_value)->variable_label = variable_label;
+  (val + _current_value)->dot_value = value;
+  (val + _current_value)->dot_context = context;
+  (val + _current_value)->dot_timestamp_seconds = dot_timestamp_seconds;
+  (val + _current_value)->dot_timestamp_millis = dot_timestamp_millis;
+  _current_value++;
+  if (_current_value > MAX_VALUES) {
     Serial.println(F("You are sending more than the maximum of consecutive variables"));
-    _currentValue = MAX_VALUES;
+    _current_value = MAX_VALUES;
   }
 }
 
@@ -495,7 +499,7 @@ bool Ubidots::sendValuesTcp() {
 
 bool Ubidots::sendValuesTcp(unsigned long timestamp_global) {
   /* Builds the payload */
-  char* payload = (char *) malloc(sizeof(char) * 700);
+  char* payload = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
   buildTcpPayload(payload, timestamp_global);
 
   /* Makes sure that the client is connected to Ubidots */
@@ -533,7 +537,7 @@ bool Ubidots::sendValuesUdp() {
 
 bool Ubidots::sendValuesUdp(unsigned long timestamp_global) {
   /* Builds the payload */
-  char* payload = (char *) malloc(sizeof(char) * 700);
+  char* payload = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
   buildTcpPayload(payload, timestamp_global);
 
   /* Obtains the remote host's IP */
@@ -544,7 +548,7 @@ bool Ubidots::sendValuesUdp(unsigned long timestamp_global) {
       Serial.println("ERROR, could not solve IP Address of the remote host, please check your DNS setup");
     }
     free(payload);
-    _currentValue = 0;
+    _current_value = 0;
     _client_udp_ubi.stop();
     _dirty = false;
     return false;
@@ -558,14 +562,14 @@ bool Ubidots::sendValuesUdp(unsigned long timestamp_global) {
     if (_debug) {
       Serial.println("ERROR sending values with UDP");
     }
-    _currentValue = 0;
+    _current_value = 0;
     _client_udp_ubi.stop();
     _dirty = false;
     free(payload);
     return false;
   }
 
-  _currentValue = 0;
+  _current_value = 0;
   _client_udp_ubi.stop();
   _dirty = false;
   free(payload);
@@ -600,16 +604,16 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
     }
   }
 
-  for (i = 0; i < _currentValue; ) {
+  for (i = 0; i < _current_value; ) {
     sprintf(allData, "%s%s:%f", allData, (val + i)->variable_label, (val + i)->dot_value);
-    if ((val + i)->dot_timestamp != NULL) {
-      sprintf(allData, "%s@%lu%s", allData, (val + i)->dot_timestamp, "000");
+    if ((val + i)->dot_timestamp_seconds != NULL) {
+      sprintf(allData, "%s@%lu%s", allData, (val + i)->dot_timestamp_seconds, "000");
     }
     if ((val + i)->dot_context != NULL) {
       sprintf(allData, "%s$%s", allData, (val + i)->dot_context);
     }
     i++;
-    if (i < _currentValue) {
+    if (i < _current_value) {
       sprintf(allData, "%s,", allData);
     }
   }
@@ -649,13 +653,12 @@ bool Ubidots::sendAllUdp(char* buffer) {
     if (_debug) {
       Serial.println("ERROR, could not solve IP Address of the remote host, please check your DNS setup");
     }
-    _currentValue = 0;
+    _current_value = 0;
     _client_udp_ubi.stop();
     _dirty = false;
     free(buffer);
     return false;
   }
-
 
   // Routine to send data through UDP
   _client_udp_ubi.begin(UBIDOTS_TCP_PORT);
@@ -665,14 +668,14 @@ bool Ubidots::sendAllUdp(char* buffer) {
     if (_debug) {
       Serial.println("ERROR sending values with UDP");
     }
-    _currentValue = 0;
+    _current_value = 0;
     _client_udp_ubi.stop();
     _dirty = false;
     free(buffer);
     return false;
   }
 
-  _currentValue = 0;
+  _current_value = 0;
   _client_udp_ubi.stop();
   _dirty = false;
   free(buffer);
@@ -713,13 +716,13 @@ bool Ubidots::sendAllTcp(char* buffer) {
     _client_tcp_ubi.stop();
     free(buffer);
     _dirty = false;
-    _currentValue = 0;
+    _current_value = 0;
     return true;
   }
 
   free(buffer);
   _dirty = false;
-  _currentValue = 0;
+  _current_value = 0;
   return false; // If any of the above conditions is reached, returns false to indicate an unexpected issue
 }
 
@@ -783,7 +786,7 @@ bool Ubidots::sendValuesHttp() {
       Serial.print(payload);
       Serial.print("\r\n");
       _dirty = false;
-      _currentValue = 0;
+      _current_value = 0;
       _client_tcp_ubi.flush();
       result = true;
     }
@@ -827,7 +830,7 @@ bool Ubidots::sendValuesWebhook(char* webhook_name, PublishFlags flags) {
   result = Particle.publish(webhook_name, payload, flags);
 
   if (result) {
-    _currentValue = 0;
+    _current_value = 0;
     _dirty = false;
   }
 
@@ -883,23 +886,30 @@ void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
   }
 
   sprintf(payload, "%s=>", payload);
-  for (uint8_t i = 0; i < _currentValue;) {
+  for (uint8_t i = 0; i < _current_value;) {
     sprintf(payload, "%s%s:%f", payload, (val + i)->variable_label, (val+i)->dot_value);
 
-    if ((val + i)->dot_timestamp != NULL) {
-      sprintf(payload, "%s@%lu%s", payload, (val + i)->dot_timestamp, "000");
+    if ((val + i)->dot_timestamp_seconds != NULL) {
+      sprintf(payload, "%s@%lu", payload, (val + i)->dot_timestamp_seconds);
     }
+
+    if ((val + i)->dot_timestamp_millis != NULL) {
+      sprintf(payload, "%s%d", payload, (val + i)->dot_timestamp_millis);
+    } else {
+      sprintf(payload, "%s000", payload);
+    }
+    
     if ((val + i)->dot_context != NULL) {
       sprintf(payload, "%s$%s", payload, (val + i)->dot_context);
     }
 
     i++;
 
-    if (i < _currentValue) {
+    if (i < _current_value) {
       sprintf(payload, "%s,", payload);
     } else {
       sprintf(payload, "%s|end", payload);
-      _currentValue = 0;
+      _current_value = 0;
     }
   }
 
@@ -923,11 +933,18 @@ void Ubidots::buildHttpPayload(char* payload) {
   /* Builds the payload */
   sprintf(payload, "{");
 
-  for (uint8_t i = 0; i < _currentValue;) {
+  for (uint8_t i = 0; i < _current_value;) {
     sprintf(payload, "%s\"%s\":{\"value\":%f", payload, (val + i)->variable_label, (val+i)->dot_value);
-    if ((val + i)->dot_timestamp != NULL) {
-      sprintf(payload, "%s,\"timestamp\":%lu%s", payload, (val + i)->dot_timestamp, "000");
+    if ((val + i)->dot_timestamp_seconds != NULL) {
+      sprintf(payload, "%s,\"timestamp\":%lu", payload, (val + i)->dot_timestamp_seconds);
     }
+
+    if ((val + i)->dot_timestamp_millis != NULL) {
+      sprintf(payload, "%s%d", payload, (val + i)->dot_timestamp_millis);
+    } else {
+      sprintf(payload, "%s000", payload);
+    }
+
     if ((val + i)->dot_context != NULL) {
       sprintf(payload, "%s,\"context\": {%s}", payload, (val + i)->dot_context);
     }
@@ -935,11 +952,11 @@ void Ubidots::buildHttpPayload(char* payload) {
     sprintf(payload, "%s}", payload);
     i++;
 
-    if (i < _currentValue) {
+    if (i < _current_value) {
       sprintf(payload, "%s,", payload);
     } else {
       sprintf(payload, "%s}", payload);
-      _currentValue = 0;
+      _current_value = 0;
     }
   }
 
@@ -1047,4 +1064,28 @@ IPAddress Ubidots::getServerIp() {
        IPAddress(uint32_t(0)) : IPAddress(ip);
 
   return serverIpAddress;
+}
+
+/*
+ *  Cleans the buffer that stores values. It should be called if the method
+ * isDirty() returns true and the device needs to store new values.
+ */
+
+void Ubidots::cleanValuesBuffer() {
+  
+  for (uint8_t i = 0; i < _current_value;) {
+    (val + i)->variable_label = NULL;
+    (val+i)->dot_value = NULL;
+    (val + i)->dot_timestamp_seconds = NULL; 
+    (val + i)->dot_timestamp_millis = NULL; 
+    (val + i)->dot_context = NULL;
+  }
+
+  _current_value = 0;
+  _dirty = false;
+
+  if (_debug) {
+    Serial.println("Buffer is now clear");
+  }
+
 }
