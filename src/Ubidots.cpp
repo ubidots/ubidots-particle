@@ -723,16 +723,19 @@ void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
   for (uint8_t i = 0; i < _current_value;) {
     sprintf(payload, "%s%s:%f", payload, (val + i)->variable_label, (val+i)->dot_value);
 
+    // Adds timestamp seconds
     if ((val + i)->dot_timestamp_seconds != NULL) {
       sprintf(payload, "%s@%lu", payload, (val + i)->dot_timestamp_seconds);
     }
 
+    // Adds timestamp milliseconds
     if ((val + i)->dot_timestamp_millis != NULL) {
       sprintf(payload, "%s%d", payload, (val + i)->dot_timestamp_millis);
     } else {
       sprintf(payload, "%s000", payload);
     }
     
+    // Adds dot context
     if ((val + i)->dot_context != NULL) {
       sprintf(payload, "%s$%s", payload, (val + i)->dot_context);
     }
@@ -769,16 +772,20 @@ void Ubidots::buildHttpPayload(char* payload) {
 
   for (uint8_t i = 0; i < _current_value;) {
     sprintf(payload, "%s\"%s\":{\"value\":%f", payload, (val + i)->variable_label, (val+i)->dot_value);
+
+    // Adds timestamp seconds
     if ((val + i)->dot_timestamp_seconds != NULL) {
       sprintf(payload, "%s,\"timestamp\":%lu", payload, (val + i)->dot_timestamp_seconds);
     }
 
+    // Adds timestamp milliseconds
     if ((val + i)->dot_timestamp_millis != NULL) {
       sprintf(payload, "%s%d", payload, (val + i)->dot_timestamp_millis);
     } else {
       sprintf(payload, "%s000", payload);
     }
 
+    // Adds dot context
     if ((val + i)->dot_context != NULL) {
       sprintf(payload, "%s,\"context\": {%s}", payload, (val + i)->dot_context);
     }
