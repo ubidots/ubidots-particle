@@ -20,7 +20,6 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Original made by Mateo Velez - Metavix for Ubidots Inc
 Modified and maintained by Jose Garcia for Ubidots Inc
 
 */
@@ -33,21 +32,20 @@ CONSTRUCTOR
 ***************************************************************************/
 
 /**
- * Constructor.
- * Default method is UDP
- * Default dsNmae is Particle
+ * @token [Mandatory] Ubidots Account token
+ * @host [Mandatory] Ubidots Endpoint to send data, default industrial.api.ubidots.com
  */
 
-Ubidots::Ubidots(char* token, const char * server) {
+Ubidots::Ubidots(char* token, const char * host) {
   _token = token;
-  _server = server;
+  _host = host;
   _method = TYPE_UDP;
-  _dsName = "particle";
-  _currentValue = 0;
+  _device_name = "particle";
+  _currentValue = 0;  // Current value index from Value type structure
   val = (Value *)malloc(MAX_VALUES * sizeof(Value));
   String str = System.deviceID();
-  _pId = new char[str.length() + 1];
-  strcpy(_pId, str.c_str());
+  _device_label = new char[str.length() + 1];
+  strcpy(_device_label, str.c_str());
 }
 
 
@@ -58,12 +56,12 @@ FUNCTIONS TO RETRIEVE DATA
 
 /**
  * This function is to get value from the Ubidots API
- * @arg id the id where you will get the data
- * @return num the data that you get from the Ubidots API, if any error occurs
+ * @variable_id [Mandatory] variable id where you will get the data from
+ * @return value obtained from the Ubidots API, if any error occurs
   the function returns ERROR_VALUE
  */
 
-float Ubidots::getValue(char* id) {
+float Ubidots::getValue(char* variable_id) {
   char* response = (char *) malloc(sizeof(char) * 40);
   char* data = (char *) malloc(sizeof(char) * 700);
   sprintf(data, "%s/%s|GET|%s|%s", USER_AGENT, VERSION, _token, id);
@@ -79,7 +77,7 @@ float Ubidots::getValue(char* id) {
     timeout++;
     if (timeout > _timeout - 1) {
       if (_debug) {
-        Serial.println("Could not connect to server");
+        Serial.println("Could not connect to host");
       }
       free(response);
       free(data);
@@ -141,16 +139,16 @@ float Ubidots::getValue(char* id) {
 /**
  * This function is to get value from the Ubidots API with the data source label
  * and variable label
- * @arg dsTag is the label of the device
- * @arg idName is the label of the variable
- * @return num the data that you get from the Ubidots API, if any error occurs
+ * @arg device_label [Mandatory] is the label of the device
+ * @arg variable_label [Mandatory] is the label of the variable
+ * @return value obtained from the Ubidots API, if any error occurs
   the function returns ERROR_VALUE
  */
 
-float Ubidots::getValueWithDatasource(char* device, char* variable) {
+float Ubidots::getValueWithDatasource(char* device_label, char* variable) {
   char* data = (char *) malloc(sizeof(char) * 700);
   char* response = (char *) malloc(sizeof(char) * 40);
-  sprintf(data, "%s/%s|LV|%s|%s:%s", USER_AGENT, VERSION, _token, device, variable);
+  sprintf(data, "%s/%s|LV|%s|%s:%s", USER_AGENT, VERSION, _token, device_label, variable);
   sprintf(data, "%s|end", data);
 
   int timeout = 0;
@@ -164,7 +162,7 @@ float Ubidots::getValueWithDatasource(char* device, char* variable) {
     timeout++;
     if (timeout > _timeout - 1) {
       if (_debug) {
-        Serial.println("Could not connect to server");
+        Serial.println("Could not connect to host");
       }
       free(response);
       free(data);
@@ -250,7 +248,7 @@ float Ubidots::getValueHTTP(char* id) {
     timeout++;
     if (timeout > _timeout - 1) {
       if (_debug) {
-        Serial.println("Could not connect to server");
+        Serial.println("Could not connect to host");
       }
       free(response);
       free(data);
@@ -308,7 +306,7 @@ float Ubidots::getValueHTTP(char* id) {
   }
 
   if (_debug){
-    Serial.println("there was an error parsing the server answer");
+    Serial.println("there was an error parsing the host answer");
   }
 
   return ERROR_VALUE;
@@ -317,17 +315,17 @@ float Ubidots::getValueHTTP(char* id) {
 
 /**
  * This function obtains the context from a variable in Ubidots
- * @arg id is the Variable ID
+ * @arg variable_id is the Variable ID
  * @return Context as char array
  */
 
-char* Ubidots::getVarContext(char* id) {
+char* Ubidots::getVarContext(char* variable_id) {
   int timeout = 0;
   uint8_t max_retries = 0;
   char* data = (char *) malloc(sizeof(char) * 300);
   char* response = (char *) malloc(sizeof(char) * 700);
 
-  sprintf(data, "GET /api/v1.6/variables/%s", id);
+  sprintf(data, "GET /api/v1.6/variables/%s", variable_id);
   sprintf(data, "%s/values?page_size=1 HTTP/1.1\r\n", data);
   sprintf(data, "%sHost: things.ubidots.com\r\nUser-Agent: %s/%s\r\n", data, USER_AGENT, VERSION);
   sprintf(data, "%sX-Auth-Token: %s\r\nConnection: close\r\n\r\n", data, _token);
@@ -342,7 +340,7 @@ char* Ubidots::getVarContext(char* id) {
     max_retries++;
     if (max_retries > 5) {
       if (_debug) {
-        Serial.println("Could not connect to server");
+        Serial.println("Could not connect to host");
       }
       free(data);
       char* error_message = "error";
@@ -421,29 +419,28 @@ FUNCTIONS TO SEND DATA
 
 /**
  * Add a value of variable to save
- * @arg variable_id variable id or name to save in a struct
- * @arg value variable value to save in a struct
- * @arg ctext [optional] is the context that you will save, default
- * @arg timestamp_val [optional] is the timestamp for the actual value
- * is NULL
+ * @arg variable_labeln [Mandatory] variable label where the dot will be stored
+ * @arg value [Mandatory] Dot value
+ * @arg context [optional] Dot context to store. Default NULL
+ * @arg dot_timestamp [optional] Dot timestamp, usefull for datalogger. Default NULL
  */
 
-void Ubidots::add(char *variable_id, double value) {
-  return add(variable_id, value, NULL, NULL);
+void Ubidots::add(char *variable_label, float value) {
+  return add(variable_label, value, NULL, NULL);
 }
 
 
-void Ubidots::add(char *variable_id, double value, char *ctext) {
-  return add(variable_id, value, ctext, NULL);
+void Ubidots::add(char *variable_label, float value, char *context) {
+  return add(variable_label, value, context, NULL);
 }
 
 
-void Ubidots::add(char *variable_id, double value, char *ctext, long unsigned timestamp_val) {
+void Ubidots::add(char *variable_label, float value, char *context, long unsigned dot_timestamp) {
   _dirty = true;
-  (val + _currentValue)->idName = variable_id;
-  (val + _currentValue)->idValue = value;
-  (val + _currentValue)->contextOne = ctext;
-  (val + _currentValue)->timestamp_val = timestamp_val;
+  (val + _currentValue)->variable_label = variable_label;
+  (val + _currentValue)->dot_value = value;
+  (val + _currentValue)->dot_context = context;
+  (val + _currentValue)->dot_timestamp = dot_timestamp;
   _currentValue++;
   if (_currentValue > MAX_VALUES) {
     Serial.println(F("You are sending more than the maximum of consecutive variables"));
@@ -469,13 +466,13 @@ void Ubidots::setMethod(uint8_t method) {
 /**
  * This function is to set the name of your device to visualize,
  * if you don't call this method the name by default will be 'Particle'
- * @arg deviceName is the name to display in Ubidots, avoid to use special
+ * @arg device_name is the name to display in Ubidots, avoid to use special
  * characters or blank spaces
  * @return true uppon succes
  */
 
-void Ubidots::setDeviceName(char* deviceName) {
-  _dsName = deviceName;
+void Ubidots::setDeviceName(char* device_name) {
+  _device_name = device_name;
 }
 
 
@@ -483,13 +480,13 @@ void Ubidots::setDeviceName(char* deviceName) {
  * This function is to set your device label, the device
  * label is the unique device identifier in Ubidots.
  * if you don't call this method the name by default will be the device ID
- * @arg deviceLabel is the device label, avoid to use special
+ * @arg device_label is the device label, avoid to use special
  * characters or blank spaces
  * @return true uppon succes
  */
 
-void Ubidots::setDeviceLabel(char* deviceLabel) {
-  _pId = deviceLabel;
+void Ubidots::setDeviceLabel(char* device_label) {
+  _device_label = device_label;
 }
 
 bool Ubidots::sendValuesTCP() {
@@ -512,17 +509,17 @@ bool Ubidots::sendValuesTCP(unsigned long timestamp_global) {
   } else {
     free(payload);
     if (_debug) {
-      Serial.println("Could not connect to the server");
+      Serial.println("Could not connect to the host");
     }
     return false;
   }
 
-  /* Waits for the server's answer */
+  /* Waits for the host's answer */
   if (!waitServerAnswer()) {
     return false;
   }
 
-  /* Parses the server answer, returns true if it is 'Ok' */
+  /* Parses the host answer, returns true if it is 'Ok' */
   char* response = (char *) malloc(sizeof(char) * 100);
   bool result = parseTCPAnswer(response);
   free(response);
@@ -539,12 +536,12 @@ bool Ubidots::sendValuesUDP(unsigned long timestamp_global) {
   char* payload = (char *) malloc(sizeof(char) * 700);
   buildTcpPayload(payload, timestamp_global);
 
-  /* Obtains the remote server's IP */
+  /* Obtains the remote host's IP */
   IPAddress serverIpAddress = getServerIp();
 
   if (! serverIpAddress){
     if (_debug) {
-      Serial.println("ERROR, could not solve IP Address of the remote server, please check your DNS setup");
+      Serial.println("ERROR, could not solve IP Address of the remote host, please check your DNS setup");
     }
     free(payload);
     _currentValue = 0;
@@ -577,9 +574,7 @@ bool Ubidots::sendValuesUDP(unsigned long timestamp_global) {
 
 /**
  * Assamble all package to send in TCP or UDP method
- * @arg timestamp_global [optional] is the timestamp for all the variables added
- using add() method, if a timestamp_val was declared on the add() method, Ubidots
- will take as timestamp for the val the timestamp_val instead of the timestamp_global
+ * @arg timestamp_global [optional] Timestamp for all the dots
  * @return true upon success, false upon error.
  */
 
@@ -592,26 +587,26 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
   int i;
   char* allData = (char *) malloc(sizeof(char) * 700);
   if ( timestamp_global != NULL) {
-    if (_dsName == "Particle") {
-      sprintf(allData, "%s/%s|POST|%s|%s@%lu%s=>", USER_AGENT, VERSION, _token, _pId, timestamp_global, "000");
+    if (_device_name == "Particle") {
+      sprintf(allData, "%s/%s|POST|%s|%s@%lu%s=>", USER_AGENT, VERSION, _token, _device_label, timestamp_global, "000");
     } else {
-      sprintf(allData, "%s/%s|POST|%s|%s:%s@%lu%s=>", USER_AGENT, VERSION, _token, _pId, _dsName, timestamp_global, "000");
+      sprintf(allData, "%s/%s|POST|%s|%s:%s@%lu%s=>", USER_AGENT, VERSION, _token, _device_label, _device_name, timestamp_global, "000");
     }
   } else {
-    if (_dsName == "Particle") {
-      sprintf(allData, "%s/%s|POST|%s|%s=>", USER_AGENT, VERSION, _token, _pId);
+    if (_device_name == "Particle") {
+      sprintf(allData, "%s/%s|POST|%s|%s=>", USER_AGENT, VERSION, _token, _device_label);
     } else {
-      sprintf(allData, "%s/%s|POST|%s|%s:%s=>", USER_AGENT, VERSION, _token, _pId, _dsName);
+      sprintf(allData, "%s/%s|POST|%s|%s:%s=>", USER_AGENT, VERSION, _token, _device_label, _device_name);
     }
   }
 
   for (i = 0; i < _currentValue; ) {
-    sprintf(allData, "%s%s:%f", allData, (val + i)->idName, (val + i)->idValue);
-    if ((val + i)->timestamp_val != NULL) {
-      sprintf(allData, "%s@%lu%s", allData, (val + i)->timestamp_val, "000");
+    sprintf(allData, "%s%s:%f", allData, (val + i)->variable_label, (val + i)->dot_value);
+    if ((val + i)->dot_timestamp != NULL) {
+      sprintf(allData, "%s@%lu%s", allData, (val + i)->dot_timestamp, "000");
     }
-    if ((val + i)->contextOne != NULL) {
-      sprintf(allData, "%s$%s", allData, (val + i)->contextOne);
+    if ((val + i)->dot_context != NULL) {
+      sprintf(allData, "%s$%s", allData, (val + i)->dot_context);
     }
     i++;
     if (i < _currentValue) {
@@ -625,34 +620,34 @@ bool Ubidots::sendAll(unsigned long timestamp_global) {
   }
 
   if (_method == TYPE_TCP) {
-    return sendAllTCP(allData);
+    return sendAllTcp(allData);
   }
 
   if (_method == TYPE_UDP) {
-    return sendAllUDP(allData);
+    return sendAllUdp(allData);
   }
 }
 
 
 /**
  * Send all package via UDP method
- * @arg buffer the message to send
+ * @arg buffer [Mandatory] message to send
  * @return true upon success, false upon error.
  */
 
-bool Ubidots::sendAllUDP(char* buffer) {
+bool Ubidots::sendAllUdp(char* buffer) {
   int size;
   IPAddress ipAddress;
 
-  // Obtains the remote server's IP
+  // Obtains the remote host's IP
   HAL_IPAddress ip;
   network_interface_t t;
-  ipAddress = (inet_gethostbyname(_server, strlen(_server), &ip, t, NULL)<0) ?
+  ipAddress = (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL)<0) ?
        IPAddress(uint32_t(0)) : IPAddress(ip);
 
   if (! ipAddress){
     if (_debug) {
-      Serial.println("ERROR, could not solve IP Address of the remote server, please check your DNS setup");
+      Serial.println("ERROR, could not solve IP Address of the remote host, please check your DNS setup");
     }
     _currentValue = 0;
     _clientUDP.stop();
@@ -687,18 +682,18 @@ bool Ubidots::sendAllUDP(char* buffer) {
 
 /**
  * Send all package via TCP method
- * @arg buffer the message to send
+ * @arg buffer [Mandatory] the message to send
  * @return true upon success, false upon error.
  */
 
-bool Ubidots::sendAllTCP(char* buffer) {
+bool Ubidots::sendAllTcp(char* buffer) {
   int i = 0;
   while (!_client.connected() && i < 6) {
     i++;
     if (_debug) {
       Serial.println("not connected, trying to connect again");
     }
-    _client.connect(_server, UBIDOTS_TCP_PORT);
+    _client.connect(_host, UBIDOTS_TCP_PORT);
     if (i == 5) {
       if (_debug) {
         Serial.println("Max attempts to connect reached, data could not be sent");
@@ -709,7 +704,7 @@ bool Ubidots::sendAllTCP(char* buffer) {
     }
   }
 
-  if (_client.connected()) {    // Connect to the server
+  if (_client.connected()) {    // Connect to the host
     if (_debug) {
       Serial.println("Sending data");
     }
@@ -734,7 +729,7 @@ AUXILIAR FUNCTIONS
 
 /**
  * Turns on or off debug messages
- * @debug is a bool flag to activate or deactivate messages
+ * @debug [Mandatory] bool flag to activate or deactivate debug messages
  */
 
 void Ubidots::setDebug(bool debug) {
@@ -744,22 +739,32 @@ void Ubidots::setDebug(bool debug) {
 
 /**
  * Lets to the user to know if the buffer array has data or not
- * @debug is a bool flag to activate or deactivate messages
  */
 
 bool Ubidots::isDirty() {
   return _dirty;
 }
 
+/**
+ * Lets the user to set the max time to wait for the host answer
+ * @timeout [Mandatory] max time to wait in seconds. Default 5000
+ */
+
 void Ubidots::setTimeout(int timeout){
   // Changes the max timeout value
   _timeout = timeout;
 }
 
+/**
+ * Builds the TCP payload to send and saves it to the input char pointer.
+ * @payload [Mandatory] char payload pointer to store the built structure.
+ * @timestamp_global [Optional] If set, it will be used for any dot without timestamp.
+ */
+
 void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
   sprintf(payload, "");
   sprintf(payload, "%s/%s|POST|%s|", USER_AGENT, VERSION, _token);
-  sprintf(payload, "%s%s:%s", payload, _pId, _dsName);
+  sprintf(payload, "%s%s:%s", payload, _device_label, _device_name);
 
   if (timestamp_global != NULL) {
     sprintf(payload, "%s@%lu", payload, timestamp_global);
@@ -767,13 +772,13 @@ void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
 
   sprintf(payload, "%s=>", payload);
   for (uint8_t i = 0; i < _currentValue;) {
-    sprintf(payload, "%s%s:%f", payload, (val + i)->idName, (val+i)->idValue);
+    sprintf(payload, "%s%s:%f", payload, (val + i)->variable_label, (val+i)->dot_value);
 
-    if ((val + i)->timestamp_val != NULL) {
-      sprintf(payload, "%s@%lu%s", payload, (val + i)->timestamp_val, "000");
+    if ((val + i)->dot_timestamp != NULL) {
+      sprintf(payload, "%s@%lu%s", payload, (val + i)->dot_timestamp, "000");
     }
-    if ((val + i)->contextOne != NULL) {
-      sprintf(payload, "%s$%s", payload, (val + i)->contextOne);
+    if ((val + i)->dot_context != NULL) {
+      sprintf(payload, "%s$%s", payload, (val + i)->dot_context);
     }
 
     i++;
@@ -796,6 +801,10 @@ void Ubidots::buildTcpPayload(char* payload, unsigned long timestamp_global) {
 
 }
 
+/**
+ * Implements a reconnect routine
+ */
+
 void Ubidots::reconnect() {
   uint8_t attempts = 0;
   while (!_client.connected() && attempts < 5) {
@@ -810,6 +819,12 @@ void Ubidots::reconnect() {
   }
 }
 
+/**
+ * Function to waits for the host answer up to the already set _timeout.
+ * @return true once the host answer buffer length is greater than zero,
+ *         false if timeout is reached.
+ */
+
 bool Ubidots::waitServerAnswer() {
   int timeout = 0;
   while(!_client.available() && timeout < _timeout) {
@@ -817,13 +832,19 @@ bool Ubidots::waitServerAnswer() {
     delay(1);
     if (timeout > _timeout - 1) {
       if (_debug) {
-        Serial.println("timeout, could not read any response from the server");
+        Serial.println("timeout, could not read any response from the host");
       }
       return false;
     }
   }
   return true;
 }
+
+/**
+ * Parse the TCP host answer and saves it to the input char pointer.
+ * @payload [Mandatory] char payload pointer to store the host answer.
+ * @return true if there is an 'Ok' in the answer, false if not.
+ */
 
 bool Ubidots::parseTCPAnswer(char* response) {
   int j = 0;
@@ -857,13 +878,15 @@ bool Ubidots::parseTCPAnswer(char* response) {
   return result;
 }
 
+/**
+ * Obtains the remote host's IP
+ */
 
 IPAddress Ubidots::getServerIp() {
-  /* Obtains the remote server's IP */
   IPAddress serverIpAddress;
   HAL_IPAddress ip;
   network_interface_t t;
-  serverIpAddress = (inet_gethostbyname(_server, strlen(_server), &ip, t, NULL)<0) ?
+  serverIpAddress = (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL)<0) ?
        IPAddress(uint32_t(0)) : IPAddress(ip);
 
   return serverIpAddress;

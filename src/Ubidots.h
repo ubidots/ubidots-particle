@@ -49,18 +49,18 @@ namespace {
 }
 
 typedef struct Value {
-  char  *idName;
-  char  *contextOne;
-  float idValue;
-  unsigned long timestamp_val;
+  char  *variable_label;
+  char  *dot_context;
+  float dot_value;
+  unsigned long dot_timestamp;
 } Value;
 
 class Ubidots {
   public:
-  explicit Ubidots(char* token, const char * server = UBIDOTS_SERVER);
+  explicit Ubidots(char* token, const char * host = UBIDOTS_SERVER);
   void add(char *variable_id, double value);
-  void add(char *variable_id, double value, char *ctext);
-  void add(char *variable_id, double value, char *ctext, unsigned long timestamp);
+  void add(char *variable_id, double value, char *context);
+  void add(char *variable_id, double value, char *context, unsigned long timestamp);
   float getValue(char* id);
   float getValueWithDatasource(char* device, char* variable);
   float getValueHTTP(char* id);
@@ -71,10 +71,9 @@ class Ubidots {
   bool sendValuesTCP(unsigned long timestamp_global);
   bool sendValuesUDP();
   bool sendValuesUDP(unsigned long timestamp_global);
-  // bool sendValuesHTTP();
   bool sendAll(unsigned long timestamp_global);
-  void setDeviceName(char* deviceName);
-  void setDeviceLabel(char* deviceLabel);
+  void setDeviceName(char* device_name);
+  void setDeviceLabel(char* device_label);
   void setDebug(bool debug);
   void setMethod(uint8_t method); // Default UDP
   void setTimeout(int timeout);
@@ -84,16 +83,16 @@ class Ubidots {
   UDP _clientUDP;
   Value * val;
   uint8_t _currentValue;
-  char* _dsName;
+  char* _device_name;
   bool _debug = false;
   bool _dirty = false;
   uint8_t _method;
-  char* _pId;
-  const char * _server;
+  char* _device_label;
+  const char * _host;
   char* _token;
   int _timeout = 5000;
-  bool sendAllUDP(char* buffer);
-  bool sendAllTCP(char* buffer);
+  bool sendAllUdp(char* buffer);
+  bool sendAllTcp(char* buffer);
   void buildTcpPayload(char* payload, unsigned long timestamp_global);
   void reconnect();
   bool waitServerAnswer();
