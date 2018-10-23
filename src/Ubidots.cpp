@@ -39,7 +39,6 @@ CONSTRUCTOR
 Ubidots::Ubidots(char* token, const char * host) {
   _token = token;
   _host = host;
-  _method = TYPE_UDP;
   _device_name = "particle";
   _current_value = 0;  // Current value index from Value type structure
   val = (Value *)malloc(MAX_VALUES * sizeof(Value));
@@ -452,21 +451,6 @@ void Ubidots::add(char *variable_label, float value, char *context, long unsigne
   }
 }
 
-
-/**
- * This function is to set UDP or TCP as sending data method
- * @arg method is the method that you want to use
- * @return true uppon succes
- */
-
-
-void Ubidots::setMethod(uint8_t method) {
-  if (method >= 0 && method <= 2) {
-    _method = method;
-  }
-}
-
-
 /**
  * This function is to set the name of your device to visualize,
  * if you don't call this method the name by default will be 'Particle'
@@ -574,156 +558,6 @@ bool Ubidots::sendValuesUdp(unsigned long timestamp_global) {
   _dirty = false;
   free(payload);
   return true;
-}
-
-/**
- * Assamble all package to send in TCP or UDP method
- * @arg timestamp_global [optional] Timestamp for all the dots
- * @return true upon success, false upon error.
- */
-
-bool Ubidots::sendAll() {
-  return sendAll(NULL);
-}
-
-
-bool Ubidots::sendAll(unsigned long timestamp_global) {
-  int i;
-  char* allData = (char *) malloc(sizeof(char) * 700);
-  if ( timestamp_global != NULL) {
-    if (_device_name == "Particle") {
-      sprintf(allData, "%s/%s|POST|%s|%s@%lu%s=>", USER_AGENT, VERSION, _token, _device_label, timestamp_global, "000");
-    } else {
-      sprintf(allData, "%s/%s|POST|%s|%s:%s@%lu%s=>", USER_AGENT, VERSION, _token, _device_label, _device_name, timestamp_global, "000");
-    }
-  } else {
-    if (_device_name == "Particle") {
-      sprintf(allData, "%s/%s|POST|%s|%s=>", USER_AGENT, VERSION, _token, _device_label);
-    } else {
-      sprintf(allData, "%s/%s|POST|%s|%s:%s=>", USER_AGENT, VERSION, _token, _device_label, _device_name);
-    }
-  }
-
-  for (i = 0; i < _current_value; ) {
-    sprintf(allData, "%s%s:%f", allData, (val + i)->variable_label, (val + i)->dot_value);
-    if ((val + i)->dot_timestamp_seconds != NULL) {
-      sprintf(allData, "%s@%lu%s", allData, (val + i)->dot_timestamp_seconds, "000");
-    }
-    if ((val + i)->dot_context != NULL) {
-      sprintf(allData, "%s$%s", allData, (val + i)->dot_context);
-    }
-    i++;
-    if (i < _current_value) {
-      sprintf(allData, "%s,", allData);
-    }
-  }
-  sprintf(allData, "%s|end", allData);
-
-  if (_debug) {
-    Serial.println(allData);
-  }
-
-  if (_method == TYPE_TCP) {
-    return sendAllTcp(allData);
-  }
-
-  if (_method == TYPE_UDP) {
-    return sendAllUdp(allData);
-  }
-}
-
-
-/**
- * Send all package via UDP method
- * @arg buffer [Mandatory] message to send
- * @return true upon success, false upon error.
- */
-
-bool Ubidots::sendAllUdp(char* buffer) {
-  int size;
-  IPAddress ipAddress;
-
-  // Obtains the remote host's IP
-  HAL_IPAddress ip;
-  network_interface_t t;
-  ipAddress = (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL)<0) ?
-       IPAddress(uint32_t(0)) : IPAddress(ip);
-
-  if (! ipAddress){
-    if (_debug) {
-      Serial.println("ERROR, could not solve IP Address of the remote host, please check your DNS setup");
-    }
-    _current_value = 0;
-    _client_udp_ubi.stop();
-    _dirty = false;
-    free(buffer);
-    return false;
-  }
-
-  // Routine to send data through UDP
-  _client_udp_ubi.begin(UBIDOTS_TCP_PORT);
-  if (! (_client_udp_ubi.beginPacket(ipAddress, UBIDOTS_TCP_PORT)
-      && _client_udp_ubi.write(buffer)
-      && _client_udp_ubi.endPacket())) {
-    if (_debug) {
-      Serial.println("ERROR sending values with UDP");
-    }
-    _current_value = 0;
-    _client_udp_ubi.stop();
-    _dirty = false;
-    free(buffer);
-    return false;
-  }
-
-  _current_value = 0;
-  _client_udp_ubi.stop();
-  _dirty = false;
-  free(buffer);
-  return true;
-}
-
-
-/**
- * Send all package via TCP method
- * @arg buffer [Mandatory] the message to send
- * @return true upon success, false upon error.
- */
-
-bool Ubidots::sendAllTcp(char* buffer) {
-  int i = 0;
-  while (!_client_tcp_ubi.connected() && i < 6) {
-    i++;
-    if (_debug) {
-      Serial.println("not connected, trying to connect again");
-    }
-    _client_tcp_ubi.connect(_host, UBIDOTS_TCP_PORT);
-    if (i == 5) {
-      if (_debug) {
-        Serial.println("Max attempts to connect reached, data could not be sent");
-      }
-      free(buffer);
-      _dirty = false;
-      return false;
-    }
-  }
-
-  if (_client_tcp_ubi.connected()) {    // Connect to the host
-    if (_debug) {
-      Serial.println("Sending data");
-    }
-    _client_tcp_ubi.println(buffer);
-    _client_tcp_ubi.flush();
-    _client_tcp_ubi.stop();
-    free(buffer);
-    _dirty = false;
-    _current_value = 0;
-    return true;
-  }
-
-  free(buffer);
-  _dirty = false;
-  _current_value = 0;
-  return false; // If any of the above conditions is reached, returns false to indicate an unexpected issue
 }
 
 /**

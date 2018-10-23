@@ -42,10 +42,6 @@ namespace {
   const int UBIDOTS_HTTP_PORT = 80;
   const int UBIDOTS_TCP_PORT = 9012;
   const int MAX_VALUES = 10;
-  const int TYPE_TCP = 1;
-  const int TYPE_UDP = 2;
-  const int TYPE_HTTP = 3;
-  const char * TIME_SERVER = "pool.ntp.org";
   const float ERROR_VALUE = -3.4028235E+8;
   const int MAX_BUFFER_SIZE = 700;
 }
@@ -70,7 +66,6 @@ class Ubidots {
   float getValueHTTP(char* id);
   char* getVarContext(char* id);
   bool isDirty();
-  bool sendAll();
   bool sendValuesTcp();
   bool sendValuesTcp(unsigned long timestamp_global);
   bool sendValuesUdp();
@@ -79,11 +74,9 @@ class Ubidots {
   bool sendValuesWebhook(char* webhook_name);
   bool sendValuesWebhook(char* webhook_name, PublishFlags flags);
   bool sendValuesUdp(unsigned long timestamp_global);
-  bool sendAll(unsigned long timestamp_global);
   void setDeviceName(char* device_name);
   void setDeviceLabel(char* device_label);
   void setDebug(bool debug);
-  void setMethod(uint8_t method); // Default UDP
   void setTimeout(int timeout);
 
  private:
@@ -94,13 +87,10 @@ class Ubidots {
   char* _device_name;
   bool _debug = false;
   bool _dirty = false;
-  uint8_t _method;
   char* _device_label;
   const char * _host;
   char* _token;
   int _timeout = 5000;
-  bool sendAllUdp(char* buffer);
-  bool sendAllTcp(char* buffer);
   void buildTcpPayload(char* payload, unsigned long timestamp_global);
   void buildHttpPayload(char* payload);
   void reconnect();  // Default method to reconnect to both UDP and TCP server
