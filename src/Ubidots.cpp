@@ -725,7 +725,6 @@ bool Ubidots::sendAllTcp(char* buffer) {
 
 /**
  * Send all package via HTTP
- * @arg buffer [Mandatory] the message to send
  * @return true upon success, false upon error.
  */
 
@@ -809,6 +808,32 @@ bool Ubidots::sendValuesHttp() {
   return result;
 
 }
+
+/**
+ * Send all package via Particle Webhooks
+ * @return true upon success, false upon error.
+ */
+
+bool Ubidots::sendValuesWebhook(char* webhook_name) {
+  return sendValuesWebhook(webhook_name, PRIVATE | WITH_ACK);
+}
+
+bool Ubidots::sendValuesWebhook(char* webhook_name, PublishFlags flags) {
+  char payload[MAX_BUFFER_SIZE];
+  buildHttpPayload(payload);
+
+  bool result = false;
+
+  result = Particle.publish(webhook_name, payload, flags);
+
+  if (result) {
+    _currentValue = 0;
+    _dirty = false;
+  }
+
+  return result;
+}
+
 
 /***************************************************************************
 AUXILIAR FUNCTIONS
