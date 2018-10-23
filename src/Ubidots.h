@@ -33,6 +33,7 @@ Modified and mainteined by Jose Garcia for Ubidots Inc
 #include "spark_wiring_tcpclient.h"
 #include "spark_wiring_usbserial.h"
 #include "inet_hal.h"
+#include "Particle.h"
 
 namespace {
   const char * UBIDOTS_SERVER = "industrial.api.ubidots.com";
@@ -72,6 +73,8 @@ class Ubidots {
   bool sendValuesTcp(unsigned long timestamp_global);
   bool sendValuesUdp();
   bool sendValuesHttp();
+  bool sendValuesWebhook(char* webhook_name);
+  bool sendValuesWebhook(char* webhook_name, PublishFlags flags);
   bool sendValuesUdp(unsigned long timestamp_global);
   bool sendAll(unsigned long timestamp_global);
   void setDeviceName(char* device_name);
