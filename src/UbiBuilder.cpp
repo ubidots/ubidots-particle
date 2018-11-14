@@ -1,6 +1,6 @@
 #include "UbiProtocol.h"
-#include "UbiHttp.h"
 #include "UbiTcp.h"
+#include "UbiHttp.h"
 #include "UbiUdp.h"
 #include "UbiParticle.h"
 #include "UbiBuilder.h"
@@ -9,8 +9,8 @@
 
 UbiBuilder::UbiBuilder(const char* host, const char* token, IotProtocol iot_protocol) {
   _iot_protocol = iot_protocol;
-  command_list[UBI_HTTP]=&builderHttp;
   command_list[UBI_TCP]=&builderTcp;
+  command_list[UBI_HTTP]=&builderHttp;
   command_list[UBI_UDP]=&builderUdp;
   command_list[UBI_PARTICLE]=&builderParticle;
   _host = host;
@@ -34,11 +34,11 @@ UbiProtocol * builderTcp() {
 }
 
 UbiProtocol * builderUdp() {
-  UbiProtocol * httpInstance = new UbiUdp("", 1, "", "");
+  UbiProtocol * httpInstance = new UbiUdp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
   return httpInstance;
 }
 
 UbiProtocol * builderParticle() {
-  UbiProtocol * httpInstance = new UbiParticle("", 1, "", "");
+  UbiProtocol * httpInstance = new UbiParticle(_host, NULL, NULL, _token);
   return httpInstance;
 }

@@ -4,10 +4,11 @@
 #include "Particle.h"
 #include "UbiProtocol.h"
 #include "UbiTypes.h"
+#include "UbiConstants.h"
 #include <map>
 
-UbiProtocol * builderHttp();
 UbiProtocol * builderTcp();
+UbiProtocol * builderHttp();
 UbiProtocol * builderUdp();
 UbiProtocol * builderParticle();
 

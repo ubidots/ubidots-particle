@@ -2,6 +2,7 @@
 #define _UbiConstants_H_
 
 #include "UbiTypes.h"
+#include "Particle.h"
 
 const char * const UBIDOTS_SERVER = "industrial.api.ubidots.com";
 const char * const USER_AGENT = "UbidotsParticle/3.0";

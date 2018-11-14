@@ -6,7 +6,7 @@
 class UbiTcp : public UbiProtocol {
   public:
     UbiTcp(const char* host, const int port, const char* user_agent, const char* token);
-    bool sendData(const char* device_label, const char* device_name, char* payload);
+    bool sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags);
     void setDebug(bool debug);
   private:
     const char *_host;
