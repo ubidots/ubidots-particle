@@ -37,6 +37,10 @@ bool UbiUdp::sendData(const char* device_label, const char* device_name, char* p
   return true;
 }
 
+float UbiUdp::get(const char* device_label, const char* variable_label) {
+  return ERROR_VALUE;
+}
+
 /**
  * Makes available debug traces
  */

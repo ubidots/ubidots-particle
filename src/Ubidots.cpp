@@ -99,6 +99,35 @@ bool Ubidots::send(const char* device_label, const char* device_name, Ubi_flags*
   return result;
 }
 
+float Ubidots::get(const char* device_label, const char* variable_label) {
+  if (_iot_protocol == UBI_UDP || _iot_protocol == UBI_PARTICLE) {
+    Serial.println("ERROR, data retrieval is only supported using TCP or HTTP protocols");
+    return ERROR_VALUE;
+  }
+
+  float value = ERROR_VALUE;
+
+  // TCP
+  if (_iot_protocol == UBI_TCP) {
+    if (_debug) {
+      Serial.println("Getting data...");
+    }
+    value = _ubiProtocol->get(device_label, variable_label);
+
+    return value;
+  }
+
+  // HTTP
+  if (_debug) {
+    Serial.println("Getting data...");
+  }
+
+  value = _ubiProtocol->get(device_label, variable_label);
+
+  return value;
+}
+
+
 /**
  * Builds the HTTP payload to send and saves it to the input char pointer.
  * @payload [Mandatory] char payload pointer to store the built structure.

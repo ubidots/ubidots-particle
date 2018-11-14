@@ -7,6 +7,7 @@ class UbiTcp : public UbiProtocol {
   public:
     UbiTcp(const char* host, const int port, const char* user_agent, const char* token);
     bool sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags);
+    float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);
   private:
     const char *_host;
@@ -17,7 +18,7 @@ class UbiTcp : public UbiProtocol {
     TCPClient _client_tcp_ubi;
     int _timeout = 5000;
     bool waitServerAnswer();
-    bool parseTcpAnswer(char* response);
+    float parseTcpAnswer(const char* request_type, char* response);
     void reconnect(const char * host, const int port);
 };
 

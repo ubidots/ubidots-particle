@@ -7,6 +7,7 @@ class UbiParticle : public UbiProtocol {
   public:
     UbiParticle(const char* host, const int port, const char* user_agent, const char* token);
     bool sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags);
+    float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);
   private:
     const char *_host;

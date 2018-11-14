@@ -31,10 +31,64 @@ bool UbiTcp::sendData(const char* device_label, const char* device_name, char* p
 
   /* Parses the host answer, returns true if it is 'Ok' */
   char* response = (char *) malloc(sizeof(char) * 100);
-  bool result = parseTcpAnswer(response);
-  free(response);
-  return result;
 
+  float value = parseTcpAnswer("POST", response);
+  free(response);
+  if (value != ERROR_VALUE){
+    return true;
+  }
+
+  return false;
+
+}
+
+float UbiTcp::get(const char* device_label, const char* variable_label) {
+  /* Connecting the client */
+  _client_tcp_ubi.connect(_host, UBIDOTS_TCP_PORT);
+  reconnect(_host, UBIDOTS_TCP_PORT);
+
+  if (_client_tcp_ubi.connected()) {
+    /* Builds the request POST - Please reference this link to know all the request's structures https://ubidots.com/docs/api/ */
+    _client_tcp_ubi.print(_user_agent);
+    _client_tcp_ubi.print("|LV|");
+    _client_tcp_ubi.print(_token);
+    _client_tcp_ubi.print("|");
+    _client_tcp_ubi.print(device_label);
+    _client_tcp_ubi.print(":");
+    _client_tcp_ubi.print(variable_label);
+    _client_tcp_ubi.print("|end");
+
+    if (_debug){
+      Serial.println("----");
+      Serial.println("Payload for request:");
+      Serial.print(_user_agent);
+      Serial.print("|LV|");
+      Serial.print(_token);
+      Serial.print("|");
+      Serial.print(device_label);
+      Serial.print(":");
+      Serial.print(variable_label);
+      Serial.print("|end");
+      Serial.println("\n----");
+    }
+
+    /* Waits for the host's answer */
+    if (!waitServerAnswer()) {
+      return ERROR_VALUE;
+    }
+
+    /* Reads the response from the server */
+    char* response = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
+    float value = parseTcpAnswer("LV", response);
+    free(response);
+    return value;
+  }
+
+  if (_debug) {
+    Serial.println("ERROR could not connect to the server");
+  }
+
+  return ERROR_VALUE;
 }
 
 /**
@@ -85,7 +139,7 @@ bool UbiTcp::waitServerAnswer() {
  * @return true if there is an 'Ok' in the answer, false if not.
  */
 
-bool UbiTcp::parseTcpAnswer(char* response) {
+float UbiTcp::parseTcpAnswer(const char* request_type, char* response) {
   int j = 0;
 
   if (_debug){
@@ -100,6 +154,9 @@ bool UbiTcp::parseTcpAnswer(char* response) {
     }
     response[j] = c;
     j++;
+    if (j >= MAX_BUFFER_SIZE - 1) {
+      break;
+    }
   }
 
   if (_debug){
@@ -107,11 +164,21 @@ bool UbiTcp::parseTcpAnswer(char* response) {
   }
 
   response[j] = '\0';
+  float result = ERROR_VALUE;
 
-  char *pch = strstr(response, "OK");
-  bool result = false;
+  // POST
+  if (request_type == "POST") {
+    char *pch = strstr(response, "OK");
+    if (pch != NULL) {
+      result = 1;
+    }
+    return result;
+  }
+
+  // LV
+  char *pch = strchr(response, '|');
   if (pch != NULL) {
-    result = true;
+    result = atof(pch + 1);
   }
 
   return result;

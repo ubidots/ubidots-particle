@@ -9,7 +9,7 @@
 
 class Ubidots {
   public:
-    explicit Ubidots(char* token, IotProtocol iot_protocol=UBI_PARTICLE);
+    explicit Ubidots(char* token, IotProtocol iot_protocol=UBI_HTTP);
     void add(char *variable_id, float value);
     void add(char *variable_id, float value, char *context);
     void add(char *variable_id, float value, char *context, unsigned long dot_timestamp_seconds);
@@ -19,6 +19,7 @@ class Ubidots {
     bool send(const char* device_label, const char* device_name);
     bool send(const char* device_label, PublishFlags flags);
     bool send(const char* device_label, const char* device_name, Ubi_flags* flags);
+    float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);
   private:
     UbiProtocol * _ubiProtocol;

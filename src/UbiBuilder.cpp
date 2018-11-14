@@ -23,13 +23,13 @@ UbiProtocol * UbiBuilder::builder() {
   return ubiBuilder;
 }
 
-UbiProtocol * builderHttp() {
-  UbiProtocol * httpInstance = new UbiHttp(_host, UBIDOTS_HTTP_PORT, USER_AGENT, _token);
-  return httpInstance;
+UbiProtocol * builderTcp() {
+  UbiProtocol * tcpInstance = new UbiTcp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
+  return tcpInstance;
 }
 
-UbiProtocol * builderTcp() {
-  UbiProtocol * httpInstance = new UbiTcp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
+UbiProtocol * builderHttp() {
+  UbiProtocol * httpInstance = new UbiHttp(_host, UBIDOTS_HTTP_PORT, USER_AGENT, _token);
   return httpInstance;
 }
 
