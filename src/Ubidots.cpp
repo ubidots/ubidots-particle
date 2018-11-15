@@ -4,8 +4,34 @@
 #include "UbiBuilder.h"
 #include "UbiConstants.h"
 
+/**************************************************************************
+* Overloaded constructors
+***************************************************************************/
+
 Ubidots::Ubidots(char* token, IotProtocol iot_protocol) {
-  UbiBuilder builder(UBIDOTS_SERVER, token, iot_protocol);
+  UbiBuilder builder(UBI_INDUSTRIAL, token, UBI_TCP);
+  _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
+  _iot_protocol = iot_protocol;
+  _ubiProtocol = builder.builder();
+  _token = token;
+  String particle_id_str = System.deviceID();
+  _default_device_label = new char[particle_id_str.length() + 1];
+  strcpy(_default_device_label, particle_id_str.c_str());
+}
+
+// Ubidots::Ubidots(char* token, UbiServer server) {
+//   UbiBuilder builder(server, token, UBI_TCP);
+//   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
+//   _iot_protocol = UBI_TCP;
+//   _ubiProtocol = builder.builder();
+//   _token = token;
+//   String particle_id_str = System.deviceID();
+//   _default_device_label = new char[particle_id_str.length() + 1];
+//   strcpy(_default_device_label, particle_id_str.c_str());
+// }
+
+Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iot_protocol) {
+  UbiBuilder builder(server, token, iot_protocol);
   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
   _iot_protocol = iot_protocol;
   _ubiProtocol = builder.builder();

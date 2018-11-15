@@ -11,5 +11,7 @@ const int UBIDOTS_TCP_PORT = 9012;
 const uint8_t MAX_VALUES = 10;
 const float ERROR_VALUE = -3.4028235E+8;
 const int MAX_BUFFER_SIZE = 700;
+static UbiServer UBI_INDUSTRIAL = "industrial.api.ubidots.com";
+static UbiServer UBI_EDUCATIONAL = "things.ubidots.com";
 
 #endif

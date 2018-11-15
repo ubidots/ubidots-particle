@@ -11,6 +11,8 @@ typedef struct Value {
   unsigned int dot_timestamp_millis;
 } Value;
 
+typedef const char* UbiServer;
+
 typedef enum {
   UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE
 } IotProtocol;

@@ -9,7 +9,9 @@
 
 class Ubidots {
   public:
-    explicit Ubidots(char* token, IotProtocol iot_protocol=UBI_HTTP);
+    explicit Ubidots(char* token, IotProtocol iot_protocol);
+    // explicit Ubidots(char* token, UbiServer server);
+    explicit Ubidots(char* token, UbiServer server=UBI_INDUSTRIAL, IotProtocol iot_protocol=UBI_TCP);
     void add(char *variable_id, float value);
     void add(char *variable_id, float value, char *context);
     void add(char *variable_id, float value, char *context, unsigned long dot_timestamp_seconds);
