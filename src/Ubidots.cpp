@@ -260,7 +260,7 @@ void Ubidots::getContext(char* context_result) {
       sprintf(context_result, "%s%s=%s", context_result, (_context + i)->key_label, (_context + i)->key_value);
       i++;
       if (i < _current_context) {
-        sprintf(context_result, "%s,", context_result);
+        sprintf(context_result, "%s$", context_result);
       } else {
         sprintf(context_result, "%s", context_result);
         _current_context = 0;
