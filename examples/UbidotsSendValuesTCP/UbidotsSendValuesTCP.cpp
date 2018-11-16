@@ -32,7 +32,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {
   Serial.begin(115200);
-  //ubidots.setDebug(true);  //Uncomment this line for printing debug messages
+  //ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
 
 void loop() {
@@ -42,12 +42,9 @@ void loop() {
   ubidots.add("Variable_Name_One", value1);  // Change for your variable name
   ubidots.add("Variable_Name_Two", value2);
   ubidots.add("Variable_Name_Three", value3);
-  ubidots.setMethod(TYPE_TCP);  //Set to TCP the way to send data
 
   bool bufferSent = false;
-  if(ubidots.isDirty()){  // There are stored values in buffer
-    bufferSent = ubidots.sendAll();
-  }
+  bufferSent = ubidots.send();  // Will send data to a device label that matches the device Id
 
   if(bufferSent){
     // Do something if values were sent properly
