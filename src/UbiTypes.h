@@ -11,6 +11,11 @@ typedef struct Value {
   unsigned int dot_timestamp_millis;
 } Value;
 
+typedef struct ContextUbi {
+  char *key_label;
+  char *key_value;
+} ContextUbi;
+
 typedef const char* UbiServer;
 
 typedef enum {

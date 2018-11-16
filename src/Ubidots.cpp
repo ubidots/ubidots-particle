@@ -11,6 +11,7 @@
 Ubidots::Ubidots(char* token, IotProtocol iot_protocol) {
   UbiBuilder builder(UBI_INDUSTRIAL, token, UBI_TCP);
   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
+  _context = (ContextUbi *)malloc(MAX_VALUES * sizeof(ContextUbi));
   _iot_protocol = iot_protocol;
   _ubiProtocol = builder.builder();
   _token = token;
@@ -19,20 +20,10 @@ Ubidots::Ubidots(char* token, IotProtocol iot_protocol) {
   strcpy(_default_device_label, particle_id_str.c_str());
 }
 
-// Ubidots::Ubidots(char* token, UbiServer server) {
-//   UbiBuilder builder(server, token, UBI_TCP);
-//   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
-//   _iot_protocol = UBI_TCP;
-//   _ubiProtocol = builder.builder();
-//   _token = token;
-//   String particle_id_str = System.deviceID();
-//   _default_device_label = new char[particle_id_str.length() + 1];
-//   strcpy(_default_device_label, particle_id_str.c_str());
-// }
-
 Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iot_protocol) {
   UbiBuilder builder(server, token, iot_protocol);
   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
+  _context = (ContextUbi *)malloc(MAX_VALUES * sizeof(ContextUbi));
   _iot_protocol = iot_protocol;
   _ubiProtocol = builder.builder();
   _token = token;
@@ -121,6 +112,7 @@ bool Ubidots::send(const char* device_label, const char* device_name, Ubi_flags*
   free(payload);
   if (result) {
     _dirty = false;
+    _current_value = 0;
   }
   return result;
 }
@@ -253,6 +245,57 @@ void Ubidots::buildTcpPayload(char* payload, const char* device_label, const cha
     Serial.println(payload);
     Serial.println("----------");
     Serial.println("");
+  }
+
+}
+
+/*
+* Adds to the context structure values to retrieve later it easily by the user
+*/
+
+void Ubidots::addContext(char *key_label, char *key_value) {
+  (_context + _current_context)->key_label = key_label;
+  (_context + _current_context)->key_value = key_value;
+  _current_context++;
+  if (_current_context >= MAX_VALUES) {
+      Serial.println(F("You are adding more than the maximum of consecutive key-values pairs"));
+    _current_context = MAX_VALUES;
+  }
+}
+
+/*
+* Retrieves the actual stored context properly formatted
+*/
+
+void Ubidots::getContext(char* context_result) {
+  // TCP context type
+  if (_iot_protocol == UBI_TCP || _iot_protocol == UBI_UDP) {
+    sprintf(context_result, "");
+    for (uint8_t i = 0; i < _current_context;) {
+      sprintf(context_result, "%s%s=%s", context_result, (_context + i)->key_label, (_context + i)->key_value);
+      i++;
+      if (i < _current_context) {
+        sprintf(context_result, "%s,", context_result);
+      } else {
+        sprintf(context_result, "%s", context_result);
+        _current_context = 0;
+      }
+    }
+  }
+
+  // HTTP context type
+  if (_iot_protocol == UBI_PARTICLE || _iot_protocol == UBI_HTTP) {
+    sprintf(context_result, "");
+    for (uint8_t i = 0; i < _current_context;) {
+      sprintf(context_result, "%s\"%s\":\"%s\"", context_result, (_context + i)->key_label, (_context + i)->key_value);
+      i++;
+      if (i < _current_context) {
+        sprintf(context_result, "%s,", context_result);
+      } else {
+        sprintf(context_result, "%s", context_result);
+        _current_context = 0;
+      }
+    }
   }
 
 }
