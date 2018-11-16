@@ -64,6 +64,21 @@ float get(const char* device_label, const char* variable_label)
 Returns as float the last value of the dot from the variable.
 
 ```
+void addContext(char *key_label, char *key_value)
+```
+> @key_label, [Mandatory]. The key context label to store values.  
+@key_value, [Mandatory]. The key pair value.  
+
+Adds to local memory a new key-value context key. The method inputs must be char pointers. The method allows to store up to 10 key-value pairs.
+
+```
+void getContext(char *context)
+```
+> @context, [Mandatory]. A char pointer where the context will be stored.  
+
+Builds the context according to the chosen protocol and stores it in the context char pointer.
+
+```
 void setDebug(bool debug);;
 ```
 
