@@ -12,15 +12,9 @@
  * Define Constants
  ****************************************/
 
-#ifndef TOKEN
-#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
-#endif
+const char* WEBHOOK_NAME = "my-webhook";
 
-#ifndef
-WEBHOOK_NAME = "my-particle-webhook"
-#endif
-
-Ubidots ubidots(TOKEN, UBI_PARTICLE);
+Ubidots ubidots("webhook", UBI_PARTICLE);
 
 
 /****************************************
@@ -36,7 +30,7 @@ Ubidots ubidots(TOKEN, UBI_PARTICLE);
 
 void setup() {
   Serial.begin(115200);
-  //ubidots.setDebug(true);  // Uncomment this line for printing debug messages
+  ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
 
 void loop() {

@@ -37,6 +37,7 @@ class Ubidots {
     IotProtocol _iot_protocol;
     void buildHttpPayload(char* payload);
     void buildTcpPayload(char* payload, const char* device_label, const char* device_name);
+    void builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };
 
 #endif

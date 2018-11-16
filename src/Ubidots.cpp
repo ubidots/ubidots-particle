@@ -9,18 +9,14 @@
 ***************************************************************************/
 
 Ubidots::Ubidots(char* token, IotProtocol iot_protocol) {
-  _iot_protocol = iot_protocol;
-  UbiBuilder builder(UBI_INDUSTRIAL, token, _iot_protocol);
-  _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
-  _context = (ContextUbi *)malloc(MAX_VALUES * sizeof(ContextUbi));
-  _ubiProtocol = builder.builder();
-  _token = token;
-  String particle_id_str = System.deviceID();
-  _default_device_label = new char[particle_id_str.length() + 1];
-  strcpy(_default_device_label, particle_id_str.c_str());
+  builder(token, UBI_INDUSTRIAL, iot_protocol);
 }
 
 Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iot_protocol) {
+  builder(token, server, iot_protocol);
+}
+
+void Ubidots::builder(char* token, UbiServer server, IotProtocol iot_protocol) {
   _iot_protocol = iot_protocol;
   UbiBuilder builder(server, token, _iot_protocol);
   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
