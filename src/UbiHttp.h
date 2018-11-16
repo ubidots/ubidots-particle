@@ -1,7 +1,6 @@
 #ifndef _UbiHttp_H_
 #define _UbiHttp_H_
 
-#include "Particle.h"
 #include "UbiProtocol.h"
 
 class UbiHttp : public UbiProtocol {
@@ -20,7 +19,7 @@ class UbiHttp : public UbiProtocol {
     void reconnect(const char * host, int port);
     float parseHttpAnswer(const char* request_type, char* data);
     void readServerAnswer(char* response);
-    TCPClient _client_tcp_ubi;
+    TCPClient _client_http_ubi;
     int _timeout = 5000;
 };
 

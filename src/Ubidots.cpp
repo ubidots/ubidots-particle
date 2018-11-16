@@ -9,10 +9,10 @@
 ***************************************************************************/
 
 Ubidots::Ubidots(char* token, IotProtocol iot_protocol) {
-  UbiBuilder builder(UBI_INDUSTRIAL, token, UBI_TCP);
+  _iot_protocol = iot_protocol;
+  UbiBuilder builder(UBI_INDUSTRIAL, token, _iot_protocol);
   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
   _context = (ContextUbi *)malloc(MAX_VALUES * sizeof(ContextUbi));
-  _iot_protocol = iot_protocol;
   _ubiProtocol = builder.builder();
   _token = token;
   String particle_id_str = System.deviceID();
@@ -21,10 +21,10 @@ Ubidots::Ubidots(char* token, IotProtocol iot_protocol) {
 }
 
 Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iot_protocol) {
-  UbiBuilder builder(server, token, iot_protocol);
+  _iot_protocol = iot_protocol;
+  UbiBuilder builder(server, token, _iot_protocol);
   _dots = (Value *)malloc(MAX_VALUES * sizeof(Value));
   _context = (ContextUbi *)malloc(MAX_VALUES * sizeof(ContextUbi));
-  _iot_protocol = iot_protocol;
   _ubiProtocol = builder.builder();
   _token = token;
   String particle_id_str = System.deviceID();
@@ -118,6 +118,7 @@ bool Ubidots::send(const char* device_label, const char* device_name, Ubi_flags*
 }
 
 float Ubidots::get(const char* device_label, const char* variable_label) {
+  Serial.println(_iot_protocol);
   if (_iot_protocol == UBI_UDP || _iot_protocol == UBI_PARTICLE) {
     Serial.println("ERROR, data retrieval is only supported using TCP or HTTP protocols");
     return ERROR_VALUE;
