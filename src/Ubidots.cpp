@@ -205,13 +205,12 @@ void Ubidots::buildTcpPayload(char* payload, const char* device_label, const cha
     // Adds timestamp seconds
     if ((_dots + i)->dot_timestamp_seconds != NULL) {
       sprintf(payload, "%s@%lu", payload, (_dots + i)->dot_timestamp_seconds);
-    }
-
-    // Adds timestamp milliseconds
-    if ((_dots + i)->dot_timestamp_millis != NULL) {
-      sprintf(payload, "%s%d", payload, (_dots + i)->dot_timestamp_millis);
-    } else {
-      sprintf(payload, "%s000", payload);
+      // Adds timestamp milliseconds
+      if ((_dots + i)->dot_timestamp_millis != NULL) {
+        sprintf(payload, "%s%d", payload, (_dots + i)->dot_timestamp_millis);
+      } else {
+        sprintf(payload, "%s000", payload);
+      }
     }
 
     i++;
