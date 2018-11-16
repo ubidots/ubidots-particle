@@ -11,10 +11,10 @@ class Ubidots {
   public:
     explicit Ubidots(char* token, IotProtocol iot_protocol);
     explicit Ubidots(char* token, UbiServer server=UBI_INDUSTRIAL, IotProtocol iot_protocol=UBI_TCP);
-    void add(char *variable_id, float value);
-    void add(char *variable_id, float value, char *context);
-    void add(char *variable_id, float value, char *context, unsigned long dot_timestamp_seconds);
-    void add(char *variable_id, float value, char *context, unsigned long dot_timestamp_seconds, unsigned int dot_timestamp_millis);
+    void add(char *variable_label, float value);
+    void add(char *variable_label, float value, char *context);
+    void add(char *variable_label, float value, char *context, unsigned long dot_timestamp_seconds);
+    void add(char *variable_label, float value, char *context, unsigned long dot_timestamp_seconds, unsigned int dot_timestamp_millis);
     void addContext(char *key_label, char *key_value);
     void getContext(char* context_result);
     bool send();
