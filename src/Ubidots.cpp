@@ -57,7 +57,7 @@ void Ubidots::add(char *variable_label, float value, char *context, long unsigne
   return add(variable_label, value, context, dot_timestamp_seconds, NULL);
 }
 
-void Ubidots::add(char *variable_label, float value, char *context, long unsigned dot_timestamp_seconds, unsigned int dot_timestamp_millis) {
+void Ubidots::add(char *variable_label, float value, char *context, unsigned long dot_timestamp_seconds, unsigned int dot_timestamp_millis) {
   _dirty = true;
   (_dots + _current_value)->variable_label = variable_label;
   (_dots + _current_value)->dot_value = value;
