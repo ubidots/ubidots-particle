@@ -32,11 +32,11 @@ The default method is TCP, if you want to change it go to the features sections 
 ### Ubidots
 
 ```
-Ubidots(char* token, UbiServer server, IotProtocol iotProtocol)
+Ubidots(char* token, UbiServer server, IotProtocol iot_protocol)
 ```
 > @token, [Mandatory]. Your Ubidots unique account [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).  
 @server, [Optional], [Options] = [`UBI_INDUSTRIAL`, `UBI_EDUCATIONAL`], [Default] = `UBI_INDUSTRIAL`. The server to send data, set `UBI_EDUCATIONAL` if your account is educational type.  
-@iotProtocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data. UBI_PARTICLE sends data using webhooks, so make sure to follow the instructions to set up your webhook properly [here](https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks).  
+@iot_protocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data. UBI_PARTICLE sends data using webhooks, so make sure to follow the instructions to set up your webhook properly [here](https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks).  
 
 Creates an Ubidots instance.
 
