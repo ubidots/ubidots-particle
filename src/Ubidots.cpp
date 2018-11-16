@@ -150,7 +150,13 @@ void Ubidots::buildHttpPayload(char* payload) {
       sprintf(payload, "%s,\"timestamp\":%lu", payload, (_dots + i)->dot_timestamp_seconds);
       // Adds timestamp milliseconds
       if ((_dots + i)->dot_timestamp_millis != NULL) {
-        sprintf(payload, "%s%d", payload, (_dots + i)->dot_timestamp_millis);
+        char milliseconds[3];
+        int timestamp_millis = (_dots + i)->dot_timestamp_millis;
+        uint8_t units = timestamp_millis % 10;
+        uint8_t dec = (timestamp_millis / 10) % 10;
+        uint8_t hund = (timestamp_millis / 100) % 10;
+        sprintf(milliseconds, "%d%d%d", hund, dec, units);
+        sprintf(payload, "%s%s", payload, milliseconds);
       } else {
         sprintf(payload, "%s000", payload);
       }
@@ -207,7 +213,13 @@ void Ubidots::buildTcpPayload(char* payload, const char* device_label, const cha
       sprintf(payload, "%s@%lu", payload, (_dots + i)->dot_timestamp_seconds);
       // Adds timestamp milliseconds
       if ((_dots + i)->dot_timestamp_millis != NULL) {
-        sprintf(payload, "%s%d", payload, (_dots + i)->dot_timestamp_millis);
+        char milliseconds[3];
+        int timestamp_millis = (_dots + i)->dot_timestamp_millis;
+        uint8_t units = timestamp_millis % 10;
+        uint8_t dec = (timestamp_millis / 10) % 10;
+        uint8_t hund = (timestamp_millis / 100) % 10;
+        sprintf(milliseconds, "%d%d%d", hund, dec, units);
+        sprintf(payload, "%s%s", payload, milliseconds);
       } else {
         sprintf(payload, "%s000", payload);
       }
