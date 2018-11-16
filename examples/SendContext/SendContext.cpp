@@ -51,7 +51,7 @@ void loop() {
     free(context);
 
     if (ubidots.send("weather-station")) {  // Sends position to a device with label that matches the Particle Device Id
-      Serial.println("Position sent");
+      Serial.println("Values sent");
     }
     
     delay(5000);
