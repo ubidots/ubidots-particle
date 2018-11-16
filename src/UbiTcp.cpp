@@ -21,11 +21,13 @@ bool UbiTcp::sendData(const char* device_label, const char* device_name, char* p
     if (_debug) {
       Serial.println("Could not connect to the host");
     }
+    _client_tcp_ubi.stop();
     return false;
   }
 
   /* Waits for the host's answer */
   if (!waitServerAnswer()) {
+    _client_tcp_ubi.stop();
     return false;
   }
 
@@ -35,9 +37,11 @@ bool UbiTcp::sendData(const char* device_label, const char* device_name, char* p
   float value = parseTcpAnswer("POST", response);
   free(response);
   if (value != ERROR_VALUE){
+    _client_tcp_ubi.stop();
     return true;
   }
 
+  _client_tcp_ubi.stop();
   return false;
 
 }
@@ -74,12 +78,14 @@ float UbiTcp::get(const char* device_label, const char* variable_label) {
 
     /* Waits for the host's answer */
     if (!waitServerAnswer()) {
+      _client_tcp_ubi.stop();
       return ERROR_VALUE;
     }
 
     /* Reads the response from the server */
     char* response = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
     float value = parseTcpAnswer("LV", response);
+    _client_tcp_ubi.stop();
     free(response);
     return value;
   }
@@ -88,6 +94,7 @@ float UbiTcp::get(const char* device_label, const char* variable_label) {
     Serial.println("ERROR could not connect to the server");
   }
 
+  _client_tcp_ubi.stop();
   return ERROR_VALUE;
 }
 

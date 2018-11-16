@@ -125,6 +125,7 @@ float UbiHttp::get(const char* device_label, const char* variable_label) {
 
     /* Waits for the host's answer */
     if (!waitServerAnswer()) {
+      _client_tcp_ubi.stop();
       return ERROR_VALUE;
     }
 
@@ -134,6 +135,7 @@ float UbiHttp::get(const char* device_label, const char* variable_label) {
 
     /* Parses the answer */
     float value = parseHttpAnswer("LV", response);
+    _client_tcp_ubi.stop();
     free(response);
     return value;
   }
