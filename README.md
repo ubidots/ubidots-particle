@@ -23,7 +23,7 @@ Here you will learn how to send multiple values to the Ubidots API, you just nee
 
 This library creates by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle Core ID.
 
-The default method is UDP, if you want to change it go to the features sections and follow the example.
+The default method is TCP, if you want to change it go to the features sections and follow the example.
 
 # Documentation
 
@@ -46,20 +46,20 @@ Creates an Ubidots instance.
 void add(char *variable_label, float value, char *context, unsigned long dot_timestamp_seconds, unsigned int dot_timestamp_millis)
 ```
 > @variable_label, [Mandatory]. The label of the variable where the dot will be stored.
-@value, [Mandatory]. The value of the dot.
-@context, [Optional]. The dots' context.
-@dot_timestamp_seconds, [Optional]. The dots' timestamp in seconds. If the timestamp's milliseconds values is not set, the seconds will be multplied by 1000.
-@dot_timestamp_millis, [Optional]. The dots' timestamp number of milliseconds.
+@value, [Mandatory]. The value of the dot.  
+@context, [Optional]. The dots' context.  
+@dot_timestamp_seconds, [Optional]. The dots' timestamp in seconds. If the timestamp's milliseconds values is not set, the seconds will be multplied by 1000.  
+@dot_timestamp_millis, [Optional]. The dots' timestamp number of milliseconds.  
 
-Adds a dot with its related value, context and timestamp to be sent to a certain data source, once you use add() you can publish your variable using the ubidotsPublish() method. You can add up to 10 dots before to publish them. 
+Adds a dot with its related value, context and timestamp to be sent to a certain data source, once you use add(). You can add up to 10 dots before to publish them. 
 
 **Important:** The max payload lenght is 700 bytes, if your payload is greater it will not be properly sent. You can see on your serial console the payload to send if you call the ```setDebug(bool debug)``` method and pass a true value to it.
 
 ```
 float get(const char* device_label, const char* variable_label)
 ```
-> @device_label, [Mandatory]. The device label where the variable to retrieve values is.
-@variable_label, [Mandatory]. The variable label to retrieve values.
+> @device_label, [Mandatory]. The device label where the variable to retrieve values is.  
+@variable_label, [Mandatory]. The variable label to retrieve values.  
 
 Returns as float the last value of the dot from the variable.
 
@@ -74,9 +74,9 @@ Make available debug messages through the serial port.
 ```
 bool send(const char* device_label, const char* device_name, PublishFlags flags);
 ```
-> @device_label, [Optional]. The device label to send data. If not set, the Particle device Id will be used.
-@device_name, [Optional]. The device name that will be created if the device does not exist in your Ubidots account. If not set, the device_labe input parameter will be used. NOTE: Device name are supported right now only through UDP/TCP.
-@flags, [Optional], [Options] = [`PUBLIC`, `PRIVATE`, `WITH_ACK`, `NO_ACK`]. Particle webhook flags.
+> @device_label, [Optional]. The device label to send data. If not set, the Particle device Id will be used.  
+@device_name, [Optional]. The device name that will be created if the device does not exist in your Ubidots account. If not set, the device_labe input parameter will be used. NOTE: Device name are supported right now only through UDP/TCP.  
+@flags, [Optional], [Options] = [`PUBLIC`, `PRIVATE`, `WITH_ACK`, `NO_ACK`]. Particle webhook flags.  
 
 Sends all the data added using the add() method. Returns true if the data was sent.
 
