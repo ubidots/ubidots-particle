@@ -34,11 +34,11 @@ UbiProtocol * builderHttp() {
 }
 
 UbiProtocol * builderUdp() {
-  UbiProtocol * httpInstance = new UbiUdp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
-  return httpInstance;
+  UbiProtocol * udpInstance = new UbiUdp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
+  return udpInstance;
 }
 
 UbiProtocol * builderParticle() {
-  UbiProtocol * httpInstance = new UbiParticle(_host, NULL, NULL, _token);
-  return httpInstance;
+  UbiProtocol * particleInstance = new UbiParticle(_host, NULL, NULL, _token);
+  return particleInstance;
 }
