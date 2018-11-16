@@ -125,21 +125,6 @@ float Ubidots::get(const char* device_label, const char* variable_label) {
 
   float value = ERROR_VALUE;
 
-  // TCP
-  if (_iot_protocol == UBI_TCP) {
-    if (_debug) {
-      Serial.println("Getting data...");
-    }
-    value = _ubiProtocol->get(device_label, variable_label);
-
-    return value;
-  }
-
-  // HTTP
-  if (_debug) {
-    Serial.println("Getting data...");
-  }
-
   value = _ubiProtocol->get(device_label, variable_label);
 
   return value;
