@@ -34,9 +34,9 @@ The default method is TCP, if you want to change it go to the features sections 
 ```
 Ubidots(char* token, UbiServer server, IotProtocol iotProtocol)
 ```
-> @token, [Mandatory]. Your Ubidots unique account [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).
-@server, [Optional], [Options] = [`UBI_INDUSTRIAL`, `UBI_EDUCATIONAL`], [Default] = `UBI_INDUSTRIAL`. The server to send data, set `UBI_EDUCATIONAL` if your account is educational type.
-@iotProtocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data. UBI_PARTICLE sends data using webhooks, so make sure to follow the instructions to set up your webhook properly [here](https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks)
+> @token, [Mandatory]. Your Ubidots unique account [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).  
+@server, [Optional], [Options] = [`UBI_INDUSTRIAL`, `UBI_EDUCATIONAL`], [Default] = `UBI_INDUSTRIAL`. The server to send data, set `UBI_EDUCATIONAL` if your account is educational type.  
+@iotProtocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data. UBI_PARTICLE sends data using webhooks, so make sure to follow the instructions to set up your webhook properly [here](https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks).  
 
 Creates an Ubidots instance.
 
@@ -75,7 +75,7 @@ Make available debug messages through the serial port.
 bool send(const char* device_label, const char* device_name, PublishFlags flags);
 ```
 > @device_label, [Optional]. The device label to send data. If not set, the Particle device Id will be used.  
-@device_name, [Optional]. The device name that will be created if the device does not exist in your Ubidots account. If not set, the device_labe input parameter will be used. NOTE: Device name are supported right now only through UDP/TCP.  
+@device_name, [Optional]. The device name that will be created if the device does not exist in your Ubidots account. If not set, the device_labe input parameter will be used. NOTE: Device name are supported right now only through UDP/TCP, if you use another method, the device name will be the same already setup as device label.  
 @flags, [Optional], [Options] = [`PUBLIC`, `PRIVATE`, `WITH_ACK`, `NO_ACK`]. Particle webhook flags.  
 
 Sends all the data added using the add() method. Returns true if the data was sent.
