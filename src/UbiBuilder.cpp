@@ -47,7 +47,7 @@ UbiProtocol * UbiBuilder::builder() {
 }
 
 UbiProtocol * builderTcp() {
-  UbiProtocol * tcpInstance = new UbiTcp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
+  UbiProtocol * tcpInstance = new UbiTCP(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
   return tcpInstance;
 }
 

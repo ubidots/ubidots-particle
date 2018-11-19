@@ -25,14 +25,14 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "UbiTcp.h"
 #include "UbiConstants.h"
 
-UbiTcp::UbiTcp(const char* host, const int port, const char* user_agent, const char* token){
+UbiTCP::UbiTCP(const char* host, const int port, const char* user_agent, const char* token){
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
 }
 
-bool UbiTcp::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+bool UbiTCP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   /* Makes sure that the client is connected to Ubidots */
   _client_tcp_ubi.connect(_host, UBIDOTS_TCP_PORT);
   reconnect(_host, UBIDOTS_TCP_PORT);
@@ -69,7 +69,7 @@ bool UbiTcp::sendData(const char* device_label, const char* device_name, char* p
 
 }
 
-float UbiTcp::get(const char* device_label, const char* variable_label) {
+float UbiTCP::get(const char* device_label, const char* variable_label) {
   /* Connecting the client */
   _client_tcp_ubi.connect(_host, UBIDOTS_TCP_PORT);
   reconnect(_host, UBIDOTS_TCP_PORT);
@@ -127,7 +127,7 @@ float UbiTcp::get(const char* device_label, const char* variable_label) {
  *         false if timeout is reached.
  */
 
-void UbiTcp::reconnect(const char * host, const int port) {
+void UbiTCP::reconnect(const char * host, const int port) {
   uint8_t attempts = 0;
   while (!_client_tcp_ubi.connected() && attempts < 5) {
     if (_debug) {
@@ -148,7 +148,7 @@ void UbiTcp::reconnect(const char * host, const int port) {
  *         false if timeout is reached.
  */
 
-bool UbiTcp::waitServerAnswer() {
+bool UbiTCP::waitServerAnswer() {
   int timeout = 0;
   while(!_client_tcp_ubi.available() && timeout < _timeout) {
     timeout++;
@@ -169,7 +169,7 @@ bool UbiTcp::waitServerAnswer() {
  * @return true if there is an 'Ok' in the answer, false if not.
  */
 
-float UbiTcp::parseTcpAnswer(const char* request_type, char* response) {
+float UbiTCP::parseTcpAnswer(const char* request_type, char* response) {
   int j = 0;
 
   if (_debug){
@@ -218,6 +218,6 @@ float UbiTcp::parseTcpAnswer(const char* request_type, char* response) {
  * Makes available debug traces
  */
 
-void UbiTcp::setDebug(bool debug) {
+void UbiTCP::setDebug(bool debug) {
   _debug = debug;
 }
