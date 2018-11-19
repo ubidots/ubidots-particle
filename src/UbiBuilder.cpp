@@ -57,7 +57,7 @@ UbiProtocol * builderHttp() {
 }
 
 UbiProtocol * builderUdp() {
-  UbiProtocol * udpInstance = new UbiUdp(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
+  UbiProtocol * udpInstance = new UbiUDP(_host, UBIDOTS_TCP_PORT, USER_AGENT, _token);
   return udpInstance;
 }
 

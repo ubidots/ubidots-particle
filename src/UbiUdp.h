@@ -27,9 +27,9 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "UbiProtocol.h"
 #include "Particle.h"
 
-class UbiUdp : public UbiProtocol {
+class UbiUDP : public UbiProtocol {
   public:
-    UbiUdp(const char* host, const int port, const char* user_agent, const char* token);
+    UbiUDP(const char* host, const int port, const char* user_agent, const char* token);
     bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
     float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);

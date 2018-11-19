@@ -25,14 +25,14 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "UbiUdp.h"
 #include "UbiConstants.h"
 
-UbiUdp::UbiUdp(const char* host, const int port, const char* user_agent, const char* token){
+UbiUDP::UbiUDP(const char* host, const int port, const char* user_agent, const char* token){
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
 }
 
-bool UbiUdp::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+bool UbiUDP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   /* Obtains the remote host's IP */
   IPAddress serverIpAddress = getServerIp();
 
@@ -60,7 +60,7 @@ bool UbiUdp::sendData(const char* device_label, const char* device_name, char* p
   return true;
 }
 
-float UbiUdp::get(const char* device_label, const char* variable_label) {
+float UbiUDP::get(const char* device_label, const char* variable_label) {
   return ERROR_VALUE;
 }
 
@@ -68,7 +68,7 @@ float UbiUdp::get(const char* device_label, const char* variable_label) {
  * Makes available debug traces
  */
 
-void UbiUdp::setDebug(bool debug) {
+void UbiUDP::setDebug(bool debug) {
   _debug = debug;
 }
 
@@ -76,7 +76,7 @@ void UbiUdp::setDebug(bool debug) {
  * Obtains the remote host's IP
  */
 
-IPAddress UbiUdp::getServerIp() {
+IPAddress UbiUDP::getServerIp() {
   IPAddress serverIpAddress;
   HAL_IPAddress ip;
   network_interface_t t;
