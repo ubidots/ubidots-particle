@@ -27,7 +27,7 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "UbiTypes.h"
 class UbiProtocol {
   public:
-    virtual bool sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags) = 0;
+    virtual bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags) = 0;
     virtual float get(const char* device_label, const char* variable_label) = 0;
     virtual void setDebug(bool debug) = 0;
 };

@@ -32,7 +32,7 @@ UbiUdp::UbiUdp(const char* host, const int port, const char* user_agent, const c
   _port = port;
 }
 
-bool UbiUdp::sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags){
+bool UbiUdp::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   /* Obtains the remote host's IP */
   IPAddress serverIpAddress = getServerIp();
 

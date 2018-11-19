@@ -100,27 +100,27 @@ void Ubidots::add(char *variable_label, float value, char *context, unsigned lon
  */
 
 bool Ubidots::send() {
-  Ubi_flags *flags = new Ubi_flags();
+  UbiFlags *flags = new UbiFlags();
   return send(_default_device_label, _default_device_label, flags);
 }
 
 bool Ubidots::send(const char* device_label) {
-  Ubi_flags *flags = new Ubi_flags();
+  UbiFlags *flags = new UbiFlags();
   return send(device_label, device_label, flags);
 }
 
 bool Ubidots::send(const char* device_label, const char* device_name) {
-  Ubi_flags *flags = new Ubi_flags();
+  UbiFlags *flags = new UbiFlags();
   return send(device_label, device_name, flags);
 }
 
 bool Ubidots::send(const char* device_label, PublishFlags flag) {
-  Ubi_flags *flags = new Ubi_flags();
+  UbiFlags *flags = new UbiFlags();
   flags->particle_flag = flag;
   return send(device_label, device_label, flags);
 }
 
-bool Ubidots::send(const char* device_label, const char* device_name, Ubi_flags* flags) {
+bool Ubidots::send(const char* device_label, const char* device_name, UbiFlags* flags) {
   // Builds the payload
   char* payload = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
   if (_iot_protocol == UBI_TCP || _iot_protocol == UBI_UDP) {

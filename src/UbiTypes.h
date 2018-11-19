@@ -45,9 +45,9 @@ typedef enum {
   UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE
 } IotProtocol;
 
-typedef struct Ubi_flags {
-  Ubi_flags(): particle_flag(PUBLIC) {}
+typedef struct UbiFlags {
+  UbiFlags(): particle_flag(PUBLIC) {}
   PublishFlags particle_flag;
-} Ubi_flags;
+} UbiFlags;
 
 #endif

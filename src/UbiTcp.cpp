@@ -32,7 +32,7 @@ UbiTcp::UbiTcp(const char* host, const int port, const char* user_agent, const c
   _port = port;
 }
 
-bool UbiTcp::sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags){
+bool UbiTcp::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   /* Makes sure that the client is connected to Ubidots */
   _client_tcp_ubi.connect(_host, UBIDOTS_TCP_PORT);
   reconnect(_host, UBIDOTS_TCP_PORT);

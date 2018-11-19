@@ -32,7 +32,7 @@ UbiHttp::UbiHttp(const char* host, const int port, const char* user_agent, const
   _port = port;
 }
 
-bool UbiHttp::sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags){
+bool UbiHttp::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   reconnect(_host, _port);
   bool result = false;
 

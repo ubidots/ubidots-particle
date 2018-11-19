@@ -43,7 +43,7 @@ class Ubidots {
     bool send(const char* device_label);
     bool send(const char* device_label, const char* device_name);
     bool send(const char* device_label, PublishFlags flags);
-    bool send(const char* device_label, const char* device_name, Ubi_flags* flags);
+    bool send(const char* device_label, const char* device_name, UbiFlags* flags);
     float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);
   private:

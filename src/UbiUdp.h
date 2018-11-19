@@ -30,7 +30,7 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 class UbiUdp : public UbiProtocol {
   public:
     UbiUdp(const char* host, const int port, const char* user_agent, const char* token);
-    bool sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags);
+    bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
     float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);
   private:

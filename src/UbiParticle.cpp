@@ -35,7 +35,7 @@ UbiParticle::UbiParticle(const char* host, const int port, const char* user_agen
 * Wrapper of the Publish() method from particle to trigger webhooks
 */
 
-bool UbiParticle::sendData(const char* device_label, const char* device_name, char* payload, Ubi_flags* flags){
+bool UbiParticle::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   return Particle.publish(device_label, payload, flags->particle_flag);
 }
 
