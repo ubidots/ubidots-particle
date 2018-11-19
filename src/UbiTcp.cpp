@@ -57,7 +57,7 @@ bool UbiTCP::sendData(const char* device_label, const char* device_name, char* p
   /* Parses the host answer, returns true if it is 'Ok' */
   char* response = (char *) malloc(sizeof(char) * 100);
 
-  float value = parseTcpAnswer("POST", response);
+  float value = parseTCPAnswer("POST", response);
   free(response);
   if (value != ERROR_VALUE){
     _client_tcp_ubi.stop();
@@ -107,7 +107,7 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
 
     /* Reads the response from the server */
     char* response = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
-    float value = parseTcpAnswer("LV", response);
+    float value = parseTCPAnswer("LV", response);
     _client_tcp_ubi.stop();
     free(response);
     return value;
@@ -169,7 +169,7 @@ bool UbiTCP::waitServerAnswer() {
  * @return true if there is an 'Ok' in the answer, false if not.
  */
 
-float UbiTCP::parseTcpAnswer(const char* request_type, char* response) {
+float UbiTCP::parseTCPAnswer(const char* request_type, char* response) {
   int j = 0;
 
   if (_debug){

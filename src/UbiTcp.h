@@ -41,7 +41,7 @@ class UbiTCP : public UbiProtocol {
     TCPClient _client_tcp_ubi;
     int _timeout = 5000;
     bool waitServerAnswer();
-    float parseTcpAnswer(const char* request_type, char* response);
+    float parseTCPAnswer(const char* request_type, char* response);
     void reconnect(const char * host, const int port);
 };
 

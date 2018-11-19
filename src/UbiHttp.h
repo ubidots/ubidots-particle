@@ -26,9 +26,9 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 
 #include "UbiProtocol.h"
 
-class UbiHttp : public UbiProtocol {
+class UbiHTTP : public UbiProtocol {
   public:
-    UbiHttp(const char* host, const int port, const char* user_agent, const char* token);
+    UbiHTTP(const char* host, const int port, const char* user_agent, const char* token);
     bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
     float get(const char* device_label, const char* variable_label);
     void setDebug(bool debug);

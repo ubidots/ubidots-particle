@@ -25,14 +25,14 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "UbiHttp.h"
 #include "UbiConstants.h"
 
-UbiHttp::UbiHttp(const char* host, const int port, const char* user_agent, const char* token){
+UbiHTTP::UbiHTTP(const char* host, const int port, const char* user_agent, const char* token){
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
 }
 
-bool UbiHttp::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+bool UbiHTTP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
   reconnect(_host, _port);
   bool result = false;
 
@@ -104,7 +104,7 @@ bool UbiHttp::sendData(const char* device_label, const char* device_name, char* 
 
 }
 
-float UbiHttp::get(const char* device_label, const char* variable_label) {
+float UbiHTTP::get(const char* device_label, const char* variable_label) {
   _client_http_ubi.connect(_host, UBIDOTS_HTTP_PORT);
   reconnect(_host, UBIDOTS_HTTP_PORT);
   if (_client_http_ubi.connected()) {
@@ -176,7 +176,7 @@ float UbiHttp::get(const char* device_label, const char* variable_label) {
  *         false if timeout is reached.
  */
 
-void UbiHttp::reconnect(const char * host, const int port) {
+void UbiHTTP::reconnect(const char * host, const int port) {
   uint8_t attempts = 0;
   while (!_client_http_ubi.connected() && attempts < 5) {
     if (_debug) {
@@ -191,7 +191,7 @@ void UbiHttp::reconnect(const char * host, const int port) {
   }
 }
 
-float UbiHttp::parseHttpAnswer(const char* request_type, char* data) {
+float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
   float result = ERROR_VALUE;
 
   // LV
@@ -243,7 +243,7 @@ float UbiHttp::parseHttpAnswer(const char* request_type, char* data) {
  * @arg response [Mandatory] Pointer to store the server's answer
  */
 
-void UbiHttp::readServerAnswer(char* response){
+void UbiHTTP::readServerAnswer(char* response){
 
   // Fills with zeros
   for (int i = 0; i <= MAX_BUFFER_SIZE; i++){
@@ -280,7 +280,7 @@ void UbiHttp::readServerAnswer(char* response){
  *         false if timeout is reached.
  */
 
-bool UbiHttp::waitServerAnswer() {
+bool UbiHTTP::waitServerAnswer() {
   int timeout = 0;
   while(!_client_http_ubi.available() && timeout < _timeout) {
     timeout++;
@@ -299,6 +299,6 @@ bool UbiHttp::waitServerAnswer() {
  * Makes available debug traces
  */
 
-void UbiHttp::setDebug(bool debug) {
+void UbiHTTP::setDebug(bool debug) {
   _debug = debug;
 }

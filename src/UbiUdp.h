@@ -42,7 +42,7 @@ class UbiUDP : public UbiProtocol {
     UDP _client_udp_ubi;
     int _timeout = 5000;
     bool waitServerAnswer();
-    bool parseTcpAnswer(char* response);
+    bool parseTCPAnswer(char* response);
     void reconnect(const char * host, const int port);
     IPAddress getServerIp();
 };
