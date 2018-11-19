@@ -1,5 +1,6 @@
-// This example is to save multiple variables with context to the Ubidots API with TCP method
+// This example is to get the last value of variable from the Ubidots API
 
+// This example is to save multiple variables to the Ubidots API with TCP method
 
 /****************************************
  * Include Libraries
@@ -12,7 +13,7 @@
  ****************************************/
 
 #ifndef TOKEN
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
+#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
 #endif
 
 Ubidots ubidots(TOKEN);
@@ -31,22 +32,21 @@ Ubidots ubidots(TOKEN);
 
 void setup() {
   Serial.begin(115200);
-  //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+  ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
+
 void loop() {
   float value1 = analogRead(A0);
-  char context[25];
-  sprintf(context, "lat=1.2343$lng=132.1233"); //Sends latitude and longitude for watching position in a map
-  ubidots.add("Variable_Name_One", value1, context);  // Change for your variable name
+  unsigned long timestamp_seconds = Time.now();
+
+  ubidots.add("temperature", value1, NULL, timestamp_seconds);  // Change for your variable name
 
   bool bufferSent = false;
-  if(ubidots.isDirty()){  // There are stored values in buffer
-      bufferSent = ubidots.sendAll();
-  }
+  bufferSent = ubidots.send();  // Will send data to a device label that matches the device Id
 
   if(bufferSent){
-      // Do something if values were sent properly
-      Serial.println("Values sent by the device");
+    // Do something if values were sent properly
+    Serial.println("Values sent by the device");
   }
 
   delay(5000);

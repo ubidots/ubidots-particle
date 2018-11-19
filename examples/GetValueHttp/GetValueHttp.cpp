@@ -10,11 +10,8 @@
  * Define Constants
  ****************************************/
 
-#ifndef TOKEN
-#define TOKEN "...."  // Put here your Ubidots TOKEN
-#endif
-#ifndef VAR_ID
-#define VAR_ID "58d9153e762542576b721820"  // Put here your data source name
+#ifndef UBIDOTS_TOKEN
+#define UBIDOTS_TOKEN "...."  // Put here your Ubidots TOKEN
 #endif
 
 /****************************************
@@ -29,19 +26,23 @@
  ****************************************/
 
 
-Ubidots ubidots(TOKEN);
+Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
 
 void setup() {
     Serial.begin(115200);
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 void loop() {
-    char* context;
-    sprintf(context, "%s", "error");
-    context = ubidots.getVarContext(VAR_ID);
-    if(strcmp(context, "error") != 0){
-        // Do something if context is obtained properly
-        Serial.println(context);
+    /*
+    * Obtains values using TCP according to structure specified at
+    * https://ubidots.com/docs/hw
+    */
+    float value = ubidots.get("weather-station", "temperature");
+
+    // Evaluates the results obtained
+    if(value!=ERROR_VALUE){
+      Serial.print("value:");
+      Serial.println(value);
     }
     delay(5000);
 }

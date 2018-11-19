@@ -1,4 +1,6 @@
-// This example is to save values with a setted data source name
+// This example is to get the last value of variable from the Ubidots API
+
+// This example is to save multiple variables to the Ubidots API with TCP method
 
 /****************************************
  * Include Libraries
@@ -11,28 +13,28 @@
  ****************************************/
 
 #ifndef TOKEN
-#define TOKEN "Your_Token_Here"  // Put here your Ubidots TOKEN
-#endif
-#ifndef DEVICE_NAME
-#define DEVICE_NAME "test" // Put here your device name
+#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
 #endif
 
 Ubidots ubidots(TOKEN);
+
 
 /****************************************
  * Auxiliar Functions
  ****************************************/
 
-//
+//Put here your auxiliar functions
+
 
 /****************************************
  * Main Functions
  ****************************************/
 
-void setup() {  
+void setup() {
   Serial.begin(115200);
-  //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+  //ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
+
 void loop() {
   float value1 = analogRead(A0);
   float value2 = analogRead(A1);
@@ -40,12 +42,9 @@ void loop() {
   ubidots.add("Variable_Name_One", value1);  // Change for your variable name
   ubidots.add("Variable_Name_Two", value2);
   ubidots.add("Variable_Name_Three", value3);
-  ubidots.setDeviceName(DEVICE_NAME);
 
   bool bufferSent = false;
-  if(ubidots.isDirty()){  // There are stored values in buffer
-    bufferSent = ubidots.sendAll();
-  }
+  bufferSent = ubidots.send();  // Will send data to a device label that matches the device Id
 
   if(bufferSent){
     // Do something if values were sent properly

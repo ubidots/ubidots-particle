@@ -12,11 +12,9 @@
  * Define Constants
  ****************************************/
 
-#ifndef TOKEN
-#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
-#endif
+const char* WEBHOOK_NAME = "my-webhook";
 
-Ubidots ubidots(TOKEN);
+Ubidots ubidots("webhook", UBI_PARTICLE);
 
 
 /****************************************
@@ -32,7 +30,7 @@ Ubidots ubidots(TOKEN);
 
 void setup() {
   Serial.begin(115200);
-  //ubidots.setDebug(true);  //Uncomment this line for printing debug messages
+  ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
 
 void loop() {
@@ -42,12 +40,9 @@ void loop() {
   ubidots.add("Variable_Name_One", value1);  // Change for your variable name
   ubidots.add("Variable_Name_Two", value2);
   ubidots.add("Variable_Name_Three", value3);
-  ubidots.setMethod(TYPE_TCP);  //Set to TCP the way to send data
 
   bool bufferSent = false;
-  if(ubidots.isDirty()){  // There are stored values in buffer
-    bufferSent = ubidots.sendAll();
-  }
+  bufferSent = ubidots.send(WEBHOOK_NAME, PUBLIC);  // Will use particle webhooks to send data
 
   if(bufferSent){
     // Do something if values were sent properly
