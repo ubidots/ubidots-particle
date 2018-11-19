@@ -136,6 +136,7 @@ bool Ubidots::send(const char* device_label, const char* device_name, Ubi_flags*
 
   bool result = _ubiProtocol->sendData(device_label, device_name, payload, flags);
   free(payload);
+  delete flags;
   if (result) {
     _dirty = false;
     _current_value = 0;
