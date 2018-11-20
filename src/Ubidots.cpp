@@ -143,6 +143,8 @@ bool Ubidots::send(const char* device_label, const char* device_name, UbiFlags* 
     _dirty = false;
     _current_value = 0;
   }
+
+  _current_value = 0;
   return result;
 }
 
