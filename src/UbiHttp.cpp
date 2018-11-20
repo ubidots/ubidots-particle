@@ -17,7 +17,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Developed and maintained by Jose Garcia for Ubidots Inc
+Developed and maintained by Jose Garcia for IoT Services Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
@@ -226,7 +226,7 @@ float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
 
     index = (int)(pch2 - pch - 1);
 
-    memcpy(dst, pch + 1, index);
+    sprintf(dst, "%s", pch);
     dst[strlen(dst) - 1] = '\0';
 
     float result = atof(dst);
