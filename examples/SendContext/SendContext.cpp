@@ -11,7 +11,7 @@
  ****************************************/
 
 #ifndef UBIDOTS_TOKEN
-#define UBIDOTS_TOKEN "BBFF-pEN6UYy7zKxBLG6A3EAEbDHuausEoM"  // Put here your Ubidots TOKEN
+#define UBIDOTS_TOKEN ""  // Put here your Ubidots TOKEN
 #endif
 
 /****************************************
@@ -30,7 +30,7 @@ Ubidots ubidots(UBIDOTS_TOKEN);
 
 void setup() {
     Serial.begin(115200);
-    ubidots.setDebug(true); //Uncomment this line for printing debug messages
+    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 void loop() {
     float value = analogRead(A0);
@@ -41,16 +41,9 @@ void loop() {
 
     /* Reserves memory to store context array */
     char* context = (char *) malloc(sizeof(char) * 60);
-    sprintf(context, "");
-
-    Serial.println("context outside before");
-    Serial.println(context);
 
     /* Builds the context with the coordinates to send to Ubidots */
     ubidots.getContext(context);
-
-    Serial.println("context outside after");
-    Serial.println(context);
 
     /* Sends the position */
     ubidots.add("temperature", value, context);  // Change for your variable name
