@@ -40,7 +40,7 @@ void loop() {
     ubidots.addContext("time", "11:40:56 pm");
 
     /* Reserves memory to store context array */
-    char* context = (char *) malloc(sizeof(char) * 30);
+    char* context = (char *) malloc(sizeof(char) * 60);
 
     /* Builds the context with the coordinates to send to Ubidots */
     ubidots.getContext(context);
@@ -48,11 +48,11 @@ void loop() {
     /* Sends the position */
     ubidots.add("temperature", value, context);  // Change for your variable name
 
-    free(context);
-
     if (ubidots.send("weather-station")) {  // Sends position to a device with label that matches the Particle Device Id
       Serial.println("Values sent");
     }
+
+    free(context);
     
     delay(5000);
 }
