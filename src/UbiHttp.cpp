@@ -226,7 +226,7 @@ float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
 
     index = (int)(pch2 - pch - 1);
 
-    memcpy(dst, pch + 1, index);
+    sprintf(dst, "%s", pch);
     dst[strlen(dst) - 1] = '\0';
 
     float result = atof(dst);
