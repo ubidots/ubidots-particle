@@ -46,6 +46,8 @@ void Ubidots::builder(char* token, UbiServer server, IotProtocol iot_protocol) {
   _context = (ContextUbi *)malloc(MAX_VALUES * sizeof(ContextUbi));
   _ubiProtocol = builder.builder();
   _token = token;
+  _current_value=0;
+  _current_context=0;
   String particle_id_str = System.deviceID();
   _default_device_label = new char[particle_id_str.length() + 1];
   strcpy(_default_device_label, particle_id_str.c_str());
@@ -145,7 +147,6 @@ bool Ubidots::send(const char* device_label, const char* device_name, UbiFlags* 
 }
 
 float Ubidots::get(const char* device_label, const char* variable_label) {
-  Serial.println(_iot_protocol);
   if (_iot_protocol == UBI_UDP || _iot_protocol == UBI_PARTICLE) {
     Serial.println("ERROR, data retrieval is only supported using TCP or HTTP protocols");
     return ERROR_VALUE;
