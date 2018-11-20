@@ -17,7 +17,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Developed and maintained by Jose Garcia for Ubidots Inc
+Developed and maintained by Jose Garcia for IoT Services Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
