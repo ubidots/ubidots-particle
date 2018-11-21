@@ -1,10 +1,10 @@
 # Particle
 
-Here you will learn how to send multiple values to the Ubidots API, you just need the name and the value that you want to send. In addition you are able to get the last value from a variable of your Ubidots account.
+Here you will learn how to send data to Ubidots using Particle Photon or Electron devices. You just need the variable label and value that you want to send along with an Ubidots valid TOKEN. In addition you're able to get the last value of a variable from your Ubidots account.
 
 ## Requirements
 
-* [Particle Photon, Electron, Core](https://store.particle.io/)
+* [Particle Photon, Electron](https://store.particle.io/)
 * Micro USB cable
 * Internet connection
 * Note: For the last version of the library is necessary to have your particle device with firmware version 0.7.0 or above.
@@ -34,9 +34,9 @@ The default method is TCP, if you want to change it go to the features sections 
 ```
 Ubidots(char* token, UbiServer server, IotProtocol iot_protocol)
 ```
-> @token, [Mandatory]. Your Ubidots unique account [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).  
+> @token, [Required]. Your Ubidots unique account [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).  
 @server, [Optional], [Options] = [`UBI_INDUSTRIAL`, `UBI_EDUCATIONAL`], [Default] = `UBI_INDUSTRIAL`. The server to send data, set `UBI_EDUCATIONAL` if your account is educational type.  
-@iot_protocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data. UBI_PARTICLE sends data using webhooks, so make sure to follow the instructions to set up your webhook properly [here](https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks).  
+@iot_protocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data. `UBI_PARTICLE` sends data using webhooks, so make sure to follow the instructions to set up your webhook properly [here](https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks).  
 
 Creates an Ubidots instance.
 
@@ -45,36 +45,36 @@ Creates an Ubidots instance.
 ```
 void add(char *variable_label, float value, char *context, unsigned long dot_timestamp_seconds, unsigned int dot_timestamp_millis)
 ```
-> @variable_label, [Mandatory]. The label of the variable where the dot will be stored.
-@value, [Mandatory]. The value of the dot.  
-@context, [Optional]. The dots' context.  
-@dot_timestamp_seconds, [Optional]. The dots' timestamp in seconds. If the timestamp's milliseconds values is not set, the seconds will be multplied by 1000.  
-@dot_timestamp_millis, [Optional]. The dots' timestamp number of milliseconds.  
+> @variable_label, [Required]. The label of the variable where the dot will be stored.
+@value, [Required]. The value of the dot.  
+@context, [Optional]. The dot's context.  
+@dot_timestamp_seconds, [Optional]. The dot's timestamp in seconds.  
+@dot_timestamp_millis, [Optional]. The dot's timestamp number of milliseconds. If the timestamp's milliseconds values is not set, the seconds will be multplied by 1000.  
 
 Adds a dot with its related value, context and timestamp to be sent to a certain data source, once you use add(). You can add up to 10 dots before to publish them. 
 
-**Important:** The max payload lenght is 700 bytes, if your payload is greater it will not be properly sent. You can see on your serial console the payload to send if you call the ```setDebug(bool debug)``` method and pass a true value to it.
+**Important:** The max payload lenght is 700 bytes, if your payload is greater it won't be properly sent. You can see on your serial console the payload to send if you call the ```setDebug(bool debug)``` method and pass a true value to it.
 
 ```
 float get(const char* device_label, const char* variable_label)
 ```
-> @device_label, [Mandatory]. The device label where the variable to retrieve values is.  
-@variable_label, [Mandatory]. The variable label to retrieve values.  
+> @device_label, [Required]. The device label which contains the variable to retrieve values from.  
+@variable_label, [Required]. The variable label to retrieve values from.  
 
 Returns as float the last value of the dot from the variable.
 
 ```
 void addContext(char *key_label, char *key_value)
 ```
-> @key_label, [Mandatory]. The key context label to store values.  
-@key_value, [Mandatory]. The key pair value.  
+> @key_label, [Required]. The key context label to store values.  
+@key_value, [Required]. The key pair value.  
 
 Adds to local memory a new key-value context key. The method inputs must be char pointers. The method allows to store up to 10 key-value pairs.
 
 ```
 void getContext(char *context)
 ```
-> @context, [Mandatory]. A char pointer where the context will be stored.  
+> @context, [Required]. A char pointer where the context will be stored.  
 
 Builds the context according to the chosen protocol and stores it in the context char pointer.
 
@@ -82,15 +82,15 @@ Builds the context according to the chosen protocol and stores it in the context
 void setDebug(bool debug);;
 ```
 
-> @debug, [Mandatory]. Boolean type to turn off/on debug messages.
+> @debug, [Required]. Boolean type to turn off/on debug messages.
 
 Make available debug messages through the serial port.
 
 ```
 bool send(const char* device_label, const char* device_name, PublishFlags flags);
 ```
-> @device_label, [Optional]. The device label to send data. If not set, the Particle device Id will be used.  
-@device_name, [Optional]. The device name that will be created if the device does not exist in your Ubidots account. If not set, the device_labe input parameter will be used. NOTE: Device name are supported right now only through UDP/TCP, if you use another method, the device name will be the same already setup as device label.  
+> @device_label, [Optional], [Default] = PARTICLE DEVICE ID. The device label to send data. If not set, the PARTICLE DEVICE ID will be used.  
+@device_name, [Optional], [Default] = @device_label. The device name otherwise assigned if the device doesn't already exist in your Ubidots account. If not set, the device label parameter will be used. **NOTE**: Device name is only supported through TCP/UDP, if you use another protocol, the device name will be the same as device label.  
 @flags, [Optional], [Options] = [`PUBLIC`, `PRIVATE`, `WITH_ACK`, `NO_ACK`]. Particle webhook flags.  
 
 Sends all the data added using the add() method. Returns true if the data was sent.
