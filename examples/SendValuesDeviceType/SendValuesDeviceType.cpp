@@ -1,6 +1,7 @@
-// This example is to get the last value of variable from the Ubidots API
+// This example sends data to multiple variables to 
+// Ubidots through HTTP protocol, and uses Device Types feature
 
-// This example is to save multiple variables to the Ubidots API with TCP method
+// IMPORTANT: Device type are only supported through HTTP
 
 /****************************************
  * Include Libraries
@@ -9,15 +10,14 @@
 #include "Ubidots.h"
 
 /****************************************
- * Define Constants
+ * Define Instances and Constants
  ****************************************/
 
 const char * device_label = "my-device"; // edit here your device label
 const char * device_type = "my-type"; // edit here your device type label
-char * TOKEN = "..."; // edit here your account token
+char * TOKEN = "Your_Token"; // edit here your account token
 char * device;
 
-// IMPORTANT: Device type are only supported through HTTP
 Ubidots ubidots(TOKEN, UBI_HTTP);
 
 

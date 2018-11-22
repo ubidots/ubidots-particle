@@ -1,6 +1,5 @@
-// This example is to get the last value of variable from the Ubidots API
-
-// This example is to save multiple variables to the Ubidots API with TCP method
+// This example sends data along with timestamp in POSIX ms standard
+// to a variable to Ubidots API through HTTP, TCP or UDP protocol.
 
 /****************************************
  * Include Libraries
@@ -9,7 +8,7 @@
 #include "Ubidots.h"
 
 /****************************************
- * Define Constants
+ * Define Instances and Constants
  ****************************************/
 
 #ifndef TOKEN

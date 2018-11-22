@@ -1,4 +1,5 @@
-// This example is to get the last value of variable from the Ubidots API
+// This example retrieves last value of a variable from the Ubidots API
+// using HTTP protocol.
 
 /****************************************
  * Include Libraries
@@ -10,9 +11,12 @@
  * Define Constants
  ****************************************/
 
-#ifndef UBIDOTS_TOKEN
-#define UBIDOTS_TOKEN "...."  // Put here your Ubidots TOKEN
+#ifndef TOKEN
+#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
 #endif
+
+Ubidots ubidots(TOKEN, UBI_HTTP);
+
 
 /****************************************
  * Auxiliar Functions
@@ -25,23 +29,18 @@
  * Main Functions
  ****************************************/
 
-
-Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
-
 void setup() {
     Serial.begin(115200);
     //ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
+
 void loop() {
-    /*
-    * Obtains values using TCP according to structure specified at
-    * https://ubidots.com/docs/hw
-    */
+    /* Obtain last value from a variable as float using HTTP */
     float value = ubidots.get("weather-station", "temperature");
 
     // Evaluates the results obtained
     if(value!=ERROR_VALUE){
-      Serial.print("value:");
+      Serial.print("Value:");
       Serial.println(value);
     }
     delay(5000);
