@@ -11,11 +11,11 @@
  * Define Instances and Constants
  ****************************************/
 
-#ifndef TOKEN
-#define TOKEN "Your_Token"  // Put here your Ubidots TOKEN
+#ifndef UBIDOTS_TOKEN
+#define UBIDOTS_TOKEN "Your_Token"  // Put here your Ubidots TOKEN
 #endif
 
-Ubidots ubidots(TOKEN);
+Ubidots ubidots(UBIDOTS_TOKEN, UBI_TCP);
 
 
 /****************************************
