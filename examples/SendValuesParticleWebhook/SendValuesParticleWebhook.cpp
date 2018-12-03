@@ -1,6 +1,9 @@
-// This example is to get the last value of variable from the Ubidots API
+// This example sends data to multiple variables to 
+// Ubidots using Particle Webhooks
 
-// This example is to save multiple variables to the Ubidots API with TCP method
+// IMPORTANT NOTE: Be aware you need to first create a webhook
+// on Particle Console according to steps given in:
+// https://help.ubidots.com/connect-your-devices/connect-your-particle-device-to-ubidots-using-particle-webhooks
 
 /****************************************
  * Include Libraries
@@ -9,7 +12,7 @@
 #include "Ubidots.h"
 
 /****************************************
- * Define Constants
+ * Define Instances and Constants
  ****************************************/
 
 const char* WEBHOOK_NAME = "my-webhook";
@@ -30,7 +33,7 @@ Ubidots ubidots("webhook", UBI_PARTICLE);
 
 void setup() {
   Serial.begin(115200);
-  ubidots.setDebug(true);  // Uncomment this line for printing debug messages
+  //ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
 
 void loop() {

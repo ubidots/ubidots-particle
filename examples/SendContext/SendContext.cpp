@@ -1,4 +1,5 @@
-// This example is to get the last value of variable from the Ubidots API
+// This example sends data and context to a variable to 
+// Ubidots through TCP protocol.
 
 /****************************************
  * Include Libraries
@@ -7,12 +8,15 @@
 #include "Ubidots.h"
 
 /****************************************
- * Define Constants
+ * Define Instances and Constants
  ****************************************/
 
 #ifndef UBIDOTS_TOKEN
-#define UBIDOTS_TOKEN ""  // Put here your Ubidots TOKEN
+#define UBIDOTS_TOKEN "Your_Token"  // Put here your Ubidots TOKEN
 #endif
+
+Ubidots ubidots(UBIDOTS_TOKEN, UBI_TCP);
+
 
 /****************************************
  * Auxiliar Functions
@@ -25,13 +29,11 @@
  * Main Functions
  ****************************************/
 
-
-Ubidots ubidots(UBIDOTS_TOKEN);
-
 void setup() {
     Serial.begin(115200);
-    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+    //ubidots.setDebug(true); // Uncomment this line for printing debug messages
 }
+
 void loop() {
     float value = analogRead(A0);
 
@@ -42,17 +44,20 @@ void loop() {
     /* Reserves memory to store context array */
     char* context = (char *) malloc(sizeof(char) * 60);
 
-    /* Builds the context with the coordinates to send to Ubidots */
+    /* Builds the context with the array above to send to Ubidots */
     ubidots.getContext(context);
 
-    /* Sends the position */
+    /* Sends the variable with the context */
     ubidots.add("temperature", value, context);  // Change for your variable name
 
-    if (ubidots.send("weather-station")) {  // Sends position to a device with label that matches the Particle Device Id
-      Serial.println("Values sent");
+    bool bufferSent = false;
+    bufferSent = ubidots.send();  // Will send data to a device label that matches the device ID
+
+    if (bufferSent) {
+        // Do something if values were sent properly
+        Serial.println("Values sent by the device");
     }
 
     free(context);
-    
     delay(5000);
 }
