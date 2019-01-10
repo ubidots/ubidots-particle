@@ -45,6 +45,7 @@ bool UbiUDP::sendData(const char* device_label, const char* device_name, char* p
   }
 
   /* Sends data to Ubidots */
+  _client_udp_ubi.setBuffer(MAX_BUFFER_SIZE + 1);  // Sets the max buffer size to send data
   _client_udp_ubi.begin(UBIDOTS_TCP_PORT);
   if (! (_client_udp_ubi.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT)
       && _client_udp_ubi.write(payload)
