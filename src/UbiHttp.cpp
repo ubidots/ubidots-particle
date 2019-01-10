@@ -58,6 +58,7 @@ bool UbiHTTP::sendData(const char* device_label, const char* device_name, char* 
     _client_http_ubi.print(F("\r\n\r\n"));
     _client_http_ubi.print(payload);
     _client_http_ubi.print(F("\r\n"));
+    _client_http_ubi.flush();
 
     if (_debug) {
       Serial.println(F("Making request to Ubidots:\n"));
@@ -80,18 +81,22 @@ bool UbiHTTP::sendData(const char* device_label, const char* device_name, char* 
       Serial.print("\r\n\r\n");
       Serial.print(payload);
       Serial.print("\r\n");
-      _client_http_ubi.flush();
 
       Serial.println("waiting for server answer ...");
-      waitServerAnswer();
-      /* Reads the response from the server */
+    }
+
+    /* Reads the response from the server */
+    waitServerAnswer();
+
+    if (_debug) {
       Serial.println("\nUbidots' Server response:\n");
       while (_client_http_ubi.available()) {
         char c = _client_http_ubi.read();
         Serial.print(c);
       }
-      result = true;
     }
+
+    result = true;
 
   } else {
     if (_debug) {
