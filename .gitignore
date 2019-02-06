@@ -27,5 +27,9 @@
 *.out
 *.app
 
+# Testing
 test-developer/*
+
+# IDE settings
 .vscode/*
+.clang-format

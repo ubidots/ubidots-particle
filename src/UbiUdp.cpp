@@ -21,35 +21,39 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
-#include "Particle.h"
 #include "UbiUdp.h"
+#include "Particle.h"
 #include "UbiConstants.h"
 
-UbiUDP::UbiUDP(const char* host, const int port, const char* user_agent, const char* token){
+UbiUDP::UbiUDP(const char *host, const int port, const char *user_agent,
+               const char *token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
 }
 
-bool UbiUDP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+bool UbiUDP::sendData(const char *device_label, const char *device_name,
+                      char *payload, UbiFlags *flags) {
   /* Obtains the remote host's IP */
   IPAddress serverIpAddress = getServerIp();
 
-  if (! serverIpAddress){
+  if (!serverIpAddress) {
     if (_debug) {
-      Serial.println("ERROR, could not solve IP Address of the remote host, please check your DNS setup");
+      Serial.println(
+          "ERROR, could not solve IP Address of the remote host, please check "
+          "your DNS setup");
     }
     _client_udp_ubi.stop();
     return false;
   }
 
   /* Sends data to Ubidots */
-  _client_udp_ubi.setBuffer(MAX_BUFFER_SIZE + 1);  // Sets the max buffer size to send data
+  _client_udp_ubi.setBuffer(MAX_BUFFER_SIZE +
+                            1);  // Sets the max buffer size to send data
   _client_udp_ubi.begin(UBIDOTS_TCP_PORT);
-  if (! (_client_udp_ubi.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT)
-      && _client_udp_ubi.write(payload)
-      && _client_udp_ubi.endPacket())) {
+  if (!(_client_udp_ubi.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT) &&
+        _client_udp_ubi.write(payload) && _client_udp_ubi.endPacket())) {
     if (_debug) {
       Serial.println("ERROR sending values with UDP");
     }
@@ -61,7 +65,7 @@ bool UbiUDP::sendData(const char* device_label, const char* device_name, char* p
   return true;
 }
 
-float UbiUDP::get(const char* device_label, const char* variable_label) {
+float UbiUDP::get(const char *device_label, const char *variable_label) {
   return ERROR_VALUE;
 }
 
@@ -69,9 +73,7 @@ float UbiUDP::get(const char* device_label, const char* variable_label) {
  * Makes available debug traces
  */
 
-void UbiUDP::setDebug(bool debug) {
-  _debug = debug;
-}
+void UbiUDP::setDebug(bool debug) { _debug = debug; }
 
 /**
  * Obtains the remote host's IP
@@ -79,10 +81,18 @@ void UbiUDP::setDebug(bool debug) {
 
 IPAddress UbiUDP::getServerIp() {
   IPAddress serverIpAddress;
+#if (PLATFORM_ID == 12)  // Argon
+  serverIpAddress = WiFi.resolve(_host);
+  return serverIpAddress;
+#else
   HAL_IPAddress ip;
   network_interface_t t;
-  serverIpAddress = (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL)<0) ?
-       IPAddress(uint32_t(0)) : IPAddress(ip);
+  serverIpAddress =
+      (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL) == 0)
+          ? IPAddress(uint32_t(0))
+          : IPAddress(ip);
+  return serverIpAddress;
+#endif
 
   return serverIpAddress;
 }
