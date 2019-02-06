@@ -81,8 +81,11 @@ void UbiUDP::setDebug(bool debug) { _debug = debug; }
 
 IPAddress UbiUDP::getServerIp() {
   IPAddress serverIpAddress;
-#if (PLATFORM_ID == 12)  // Argon
+#if (PLATFORM_ID == 12 || PLATFORM_ID == 6)  // Argon(12), Photon(6)
   serverIpAddress = WiFi.resolve(_host);
+  return serverIpAddress;
+#elif (PLATFORM_ID == 13 || PLATFORM_ID == 10)  // Boron(13), Electron(10)
+  serverIpAddress = Cellular.resolve(_host);
   return serverIpAddress;
 #else
   HAL_IPAddress ip;
