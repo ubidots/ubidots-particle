@@ -1,7 +1,0 @@
-{
-  "files.associations": {
-    "*.tcc": "cpp",
-    "unordered_map": "cpp",
-    "string_view": "cpp"
-  }
-}
