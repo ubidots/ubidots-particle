@@ -27,8 +27,8 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #include "Particle.h"
 
 typedef struct Value {
-  char  *variable_label;
-  char  *dot_context;
+  char *variable_label;
+  char *dot_context;
   float dot_value;
   unsigned long dot_timestamp_seconds;
   unsigned int dot_timestamp_millis;
@@ -39,14 +39,12 @@ typedef struct ContextUbi {
   char *key_value;
 } ContextUbi;
 
-typedef const char* UbiServer;
+typedef const char *UbiServer;
 
-typedef enum {
-  UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE
-} IotProtocol;
+typedef enum { UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE, UBI_MESH } IotProtocol;
 
 typedef struct UbiFlags {
-  UbiFlags(): particle_flag(PUBLIC) {}
+  UbiFlags() : particle_flag(PUBLIC) {}
   PublishFlags particle_flag;
 } UbiFlags;
 
