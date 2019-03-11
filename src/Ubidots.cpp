@@ -22,10 +22,8 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 */
 
 #include "Ubidots.h"
-#include "UbiBuilder.h"
 #include "UbiConstants.h"
 #include "UbiProtocol.h"
-#include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
 #include "Ubidots.h"
 
@@ -33,12 +31,19 @@ Developed and maintained by Jose Garcia for IoT Services Inc
  * Overloaded constructors
  ***************************************************************************/
 
-Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iot_protocol) {
-  _iot_protocol = iot_protocol;
-#if iot_protocol != UBI_MESH
-  _protocol = new UbiProtocolHandler(token, server, iot_protocol);
-#else
-  _protocol = new UbiMesh();
+Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) {
+  _iotProtocol = iotProtocol;
+  _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
+  String particle_id_str = System.deviceID();
+  _default_device_label = new char[particle_id_str.length() + 1];
+  strcpy(_default_device_label, particle_id_str.c_str());
+  if (_iotProtocol != UBI_MESH) {
+    _protocol = new UbiProtocolHandler(token, server, _iotProtocol);
+  }
+#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM || \
+    PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON ||     \
+    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+  _protocolMesh = new UbiMesh();
 #endif
 }
 
@@ -73,13 +78,135 @@ void Ubidots::add(char* variable_label, float value, char* context,
 void Ubidots::add(char* variable_label, float value, char* context,
                   long unsigned dot_timestamp_seconds,
                   unsigned int dot_timestamp_millis) {
-#if _iot_protocol != UBI_MESH
+#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM || \
+    PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON ||     \
+    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+  if (_iotProtocol == UBI_MESH) {
+    _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
+                       dot_timestamp_millis);
+  } else {
+    _protocol->add(variable_label, value, context, dot_timestamp_seconds,
+                   dot_timestamp_millis);
+  }
+#else
   _protocol->add(variable_label, value, context, dot_timestamp_seconds,
                  dot_timestamp_millis);
 #endif
 }
 
+/**
+ * Sends data to Ubidots
+ * @arg device_label [Mandatory] device label where the dot will be stored
+ * @arg device_name [optional] Name of the device to be created (supported only
+ * for TCP/UDP)
+ * @arg flags [Optional] Particle publish flags for webhooks
+ */
+
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
+bool Ubidots::send() {
+  UbiFlags* flags = new UbiFlags();
+  return _protocol->send(_default_device_label, _default_device_label, flags);
+}
+
+bool Ubidots::send(const char* device_label) {
+  UbiFlags* flags = new UbiFlags();
+  return _protocol->send(device_label, device_label, flags);
+}
+
+bool Ubidots::send(const char* device_label, const char* device_name) {
+  UbiFlags* flags = new UbiFlags();
+  return _protocol->send(device_label, device_name, flags);
+}
+
+bool Ubidots::send(const char* device_label, PublishFlags flag) {
+  UbiFlags* flags = new UbiFlags();
+  flags->particle_flag = flag;
+  return _protocol->send(device_label, device_label, flags);
+}
+
+bool Ubidots::send(const char* device_label, const char* device_name,
+                   UbiFlags* flags) {
+  return _protocol->send(device_label, device_label, flags);
+}
+
+float Ubidots::get(const char* device_label, const char* variable_label) {
+  if (_iotProtocol != UBI_MESH) {
+    _protocol->get(device_label, variable_label);
+  } else {
+    Serial.println("Mesh devices do not support get data");
+  }
+}
+#endif
+
 void Ubidots::setDebug(bool debug) {
   _debug = debug;
+#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
+    PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
+    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+  if (_iotProtocol != UBI_MESH) {
+    _protocol->setDebug(debug);
+  } else {
+    _protocolMesh->setDebug(debug);
+  }
+#else
   _protocol->setDebug(debug);
+#endif
+}
+
+/*
+ * Adds to the context structure values to retrieve later it easily by the user
+ */
+
+void Ubidots::addContext(char* key_label, char* key_value) {
+  (_context + _current_context)->key_label = key_label;
+  (_context + _current_context)->key_value = key_value;
+  _current_context++;
+  if (_current_context >= MAX_VALUES) {
+    Serial.println(
+        F("You are adding more than the maximum of consecutive key-values "
+          "pairs"));
+    _current_context = MAX_VALUES;
+  }
+}
+
+/*
+ * Retrieves the actual stored context properly formatted
+ */
+
+void Ubidots::getContext(char* context_result) {
+  getContext(context_result, _iotProtocol);
+}
+
+void Ubidots::getContext(char* context_result, IotProtocol iotProtocol) {
+  // TCP context type
+  if (iotProtocol == UBI_TCP || iotProtocol == UBI_UDP) {
+    sprintf(context_result, "");
+    for (uint8_t i = 0; i < _current_context;) {
+      sprintf(context_result, "%s%s=%s", context_result,
+              (_context + i)->key_label, (_context + i)->key_value);
+      i++;
+      if (i < _current_context) {
+        sprintf(context_result, "%s$", context_result);
+      } else {
+        sprintf(context_result, "%s", context_result);
+        _current_context = 0;
+      }
+    }
+  }
+
+  // HTTP context type
+  if (iotProtocol == UBI_PARTICLE || iotProtocol == UBI_HTTP) {
+    sprintf(context_result, "");
+    for (uint8_t i = 0; i < _current_context;) {
+      sprintf(context_result, "%s\"%s\":\"%s\"", context_result,
+              (_context + i)->key_label, (_context + i)->key_value);
+      i++;
+      if (i < _current_context) {
+        sprintf(context_result, "%s,", context_result);
+      } else {
+        sprintf(context_result, "%s", context_result);
+        _current_context = 0;
+      }
+    }
+  }
 }

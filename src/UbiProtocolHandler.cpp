@@ -45,14 +45,9 @@ void UbiProtocolHandler::builder(char* token, UbiServer server,
   _iot_protocol = iot_protocol;
   UbiBuilder builder(server, token, _iot_protocol);
   _dots = (Value*)malloc(MAX_VALUES * sizeof(Value));
-  _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
   _ubiProtocol = builder.builder();
   _token = token;
   _current_value = 0;
-  _current_context = 0;
-  String particle_id_str = System.deviceID();
-  _default_device_label = new char[particle_id_str.length() + 1];
-  strcpy(_default_device_label, particle_id_str.c_str());
 }
 
 /***************************************************************************
@@ -96,28 +91,6 @@ void UbiProtocolHandler::add(char* variable_label, float value, char* context,
  * for TCP/UDP)
  * @arg flags [Optional] Particle publish flags for webhooks
  */
-
-bool UbiProtocolHandler::send() {
-  UbiFlags* flags = new UbiFlags();
-  return send(_default_device_label, _default_device_label, flags);
-}
-
-bool UbiProtocolHandler::send(const char* device_label) {
-  UbiFlags* flags = new UbiFlags();
-  return send(device_label, device_label, flags);
-}
-
-bool UbiProtocolHandler::send(const char* device_label,
-                              const char* device_name) {
-  UbiFlags* flags = new UbiFlags();
-  return send(device_label, device_name, flags);
-}
-
-bool UbiProtocolHandler::send(const char* device_label, PublishFlags flag) {
-  UbiFlags* flags = new UbiFlags();
-  flags->particle_flag = flag;
-  return send(device_label, device_label, flags);
-}
 
 bool UbiProtocolHandler::send(const char* device_label, const char* device_name,
                               UbiFlags* flags) {
@@ -278,60 +251,6 @@ void UbiProtocolHandler::buildTcpPayload(char* payload,
     Serial.println(payload);
     Serial.println("----------");
     Serial.println("");
-  }
-}
-
-/*
- * Adds to the context structure values to retrieve later it easily by the user
- */
-
-void UbiProtocolHandler::addContext(char* key_label, char* key_value) {
-  (_context + _current_context)->key_label = key_label;
-  (_context + _current_context)->key_value = key_value;
-  _current_context++;
-  if (_current_context >= MAX_VALUES) {
-    Serial.println(
-        F("You are adding more than the maximum of consecutive key-values "
-          "pairs"));
-    _current_context = MAX_VALUES;
-  }
-}
-
-/*
- * Retrieves the actual stored context properly formatted
- */
-
-void UbiProtocolHandler::getContext(char* context_result) {
-  // TCP context type
-  if (_iot_protocol == UBI_TCP || _iot_protocol == UBI_UDP) {
-    sprintf(context_result, "");
-    for (uint8_t i = 0; i < _current_context;) {
-      sprintf(context_result, "%s%s=%s", context_result,
-              (_context + i)->key_label, (_context + i)->key_value);
-      i++;
-      if (i < _current_context) {
-        sprintf(context_result, "%s$", context_result);
-      } else {
-        sprintf(context_result, "%s", context_result);
-        _current_context = 0;
-      }
-    }
-  }
-
-  // HTTP context type
-  if (_iot_protocol == UBI_PARTICLE || _iot_protocol == UBI_HTTP) {
-    sprintf(context_result, "");
-    for (uint8_t i = 0; i < _current_context;) {
-      sprintf(context_result, "%s\"%s\":\"%s\"", context_result,
-              (_context + i)->key_label, (_context + i)->key_value);
-      i++;
-      if (i < _current_context) {
-        sprintf(context_result, "%s,", context_result);
-      } else {
-        sprintf(context_result, "%s", context_result);
-        _current_context = 0;
-      }
-    }
   }
 }
 

@@ -26,15 +26,20 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
-#include "UbiMesh.h"
 #include "UbiProtocol.h"
 #include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
 
+#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
+    PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
+    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+#include "UbiMesh.h"
+#endif
+
 class Ubidots {
  public:
   explicit Ubidots(char* token, UbiServer server = UBI_INDUSTRIAL,
-                   IotProtocol iot_protocol = UBI_TCP);
+                   IotProtocol iotProtocol = UBI_TCP);
   void add(char* variable_label, float value);
   void add(char* variable_label, float value, char* context);
   void add(char* variable_label, float value, char* context,
@@ -42,8 +47,9 @@ class Ubidots {
   void add(char* variable_label, float value, char* context,
            unsigned long dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
-  // void addContext(char* key_label, char* key_value);
-  // void getContext(char* context_result);
+  void addContext(char* key_label, char* key_value);
+  void getContext(char* context_result);
+  void getContext(char* context_result, IotProtocol iotProtocol);
   bool send();
   bool send(const char* device_label);
   bool send(const char* device_label, const char* device_name);
@@ -53,14 +59,22 @@ class Ubidots {
   void setDebug(bool debug);
 
  private:
+  // Mesh devices protocol wrapper
 #if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
     PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
     PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
-  UbiMesh* _protocol;
-#else
+  UbiMesh* _protocolMesh;
+#endif
+
+  // Only non-Xenon devices support cloud communication
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   UbiProtocolHandler* _protocol;
 #endif
-  IotProtocol _iot_protocol;
+
+  ContextUbi* _context;
+  IotProtocol _iotProtocol;
+  int8_t _current_context = 0;
+  char* _default_device_label;
   bool _debug = false;
   void builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };
