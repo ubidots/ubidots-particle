@@ -26,16 +26,42 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
+#include "UbiMesh.h"
 #include "UbiProtocol.h"
+#include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
 
 class Ubidots {
  public:
   explicit Ubidots(char* token, UbiServer server = UBI_INDUSTRIAL,
                    IotProtocol iot_protocol = UBI_TCP);
+  void add(char* variable_label, float value);
+  void add(char* variable_label, float value, char* context);
+  void add(char* variable_label, float value, char* context,
+           unsigned long dot_timestamp_seconds);
+  void add(char* variable_label, float value, char* context,
+           unsigned long dot_timestamp_seconds,
+           unsigned int dot_timestamp_millis);
+  // void addContext(char* key_label, char* key_value);
+  // void getContext(char* context_result);
+  bool send();
+  bool send(const char* device_label);
+  bool send(const char* device_label, const char* device_name);
+  bool send(const char* device_label, PublishFlags flags);
+  bool send(const char* device_label, const char* device_name, UbiFlags* flags);
+  float get(const char* device_label, const char* variable_label);
+  void setDebug(bool debug);
 
  private:
+#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
+    PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
+    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+  UbiMesh* _protocol;
+#else
+  UbiProtocolHandler* _protocol;
+#endif
   IotProtocol _iot_protocol;
+  bool _debug = false;
   void builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };
 
