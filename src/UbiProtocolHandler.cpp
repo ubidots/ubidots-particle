@@ -70,19 +70,6 @@ FUNCTIONS TO SEND DATA
  * dot_timestamp_seconds, usefull for datalogger.
  */
 
-void UbiProtocolHandler::add(char* variable_label, float value) {
-  return add(variable_label, value, NULL, NULL, NULL);
-}
-
-void UbiProtocolHandler::add(char* variable_label, float value, char* context) {
-  return add(variable_label, value, context, NULL, NULL);
-}
-
-void UbiProtocolHandler::add(char* variable_label, float value, char* context,
-                             long unsigned dot_timestamp_seconds) {
-  return add(variable_label, value, context, dot_timestamp_seconds, NULL);
-}
-
 void UbiProtocolHandler::add(char* variable_label, float value, char* context,
                              unsigned long dot_timestamp_seconds,
                              unsigned int dot_timestamp_millis) {

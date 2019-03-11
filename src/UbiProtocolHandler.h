@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2019 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -34,10 +34,6 @@ class UbiProtocolHandler {
   explicit UbiProtocolHandler(char* token, IotProtocol iot_protocol);
   explicit UbiProtocolHandler(char* token, UbiServer server = UBI_INDUSTRIAL,
                               IotProtocol iot_protocol = UBI_TCP);
-  void add(char* variable_label, float value);
-  void add(char* variable_label, float value, char* context);
-  void add(char* variable_label, float value, char* context,
-           unsigned long dot_timestamp_seconds);
   void add(char* variable_label, float value, char* context,
            unsigned long dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
