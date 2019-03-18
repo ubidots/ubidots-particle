@@ -37,13 +37,15 @@ Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) {
   String particle_id_str = System.deviceID();
   _default_device_label = new char[particle_id_str.length() + 1];
   strcpy(_default_device_label, particle_id_str.c_str());
+  _protocolMesh = new UbiMesh(token);
+
+  // Only non-xenon devices may have cloud communication protocols
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   if (_iotProtocol != UBI_MESH) {
-    _protocol = new UbiProtocolHandler(token, server, _iotProtocol);
+    _protocol = new UbiProtocolHandler(token, server, iotProtocol);
+  } else {
+    _protocol = new UbiProtocolHandler(token, server, UBI_TCP);
   }
-#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM || \
-    PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON ||     \
-    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
-  _protocolMesh = new UbiMesh();
 #endif
 }
 
@@ -78,9 +80,7 @@ void Ubidots::add(char* variable_label, float value, char* context,
 void Ubidots::add(char* variable_label, float value, char* context,
                   long unsigned dot_timestamp_seconds,
                   unsigned int dot_timestamp_millis) {
-#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM || \
-    PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON ||     \
-    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   if (_iotProtocol == UBI_MESH) {
     _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
                        dot_timestamp_millis);
@@ -89,10 +89,19 @@ void Ubidots::add(char* variable_label, float value, char* context,
                    dot_timestamp_millis);
   }
 #else
-  _protocol->add(variable_label, value, context, dot_timestamp_seconds,
-                 dot_timestamp_millis);
+  _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
+                     dot_timestamp_millis);
 #endif
 }
+
+bool Ubidots::meshPublishToUbidots(const char* device_label,
+                                   const char* device_name,
+                                   IotProtocol iotProtocol) {
+  return _protocolMesh->meshPublishToUbidots(device_label, device_name,
+                                             iotProtocol);
+}
+
+void Ubidots::meshLoop() { _protocolMesh->meshLoop(); }
 
 /**
  * Sends data to Ubidots
@@ -102,7 +111,6 @@ void Ubidots::add(char* variable_label, float value, char* context,
  * @arg flags [Optional] Particle publish flags for webhooks
  */
 
-#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
 bool Ubidots::send() {
   UbiFlags* flags = new UbiFlags();
   return _protocol->send(_default_device_label, _default_device_label, flags);
@@ -130,26 +138,27 @@ bool Ubidots::send(const char* device_label, const char* device_name,
 }
 
 float Ubidots::get(const char* device_label, const char* variable_label) {
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   if (_iotProtocol != UBI_MESH) {
     _protocol->get(device_label, variable_label);
   } else {
     Serial.println("Mesh devices do not support get data");
   }
-}
+#else
+  Serial.println("Mesh devices do not support get data");
 #endif
+}
 
 void Ubidots::setDebug(bool debug) {
   _debug = debug;
-#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
-    PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
-    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   if (_iotProtocol != UBI_MESH) {
     _protocol->setDebug(debug);
   } else {
     _protocolMesh->setDebug(debug);
   }
 #else
-  _protocol->setDebug(debug);
+  _protocolMesh->setDebug(debug);
 #endif
 }
 

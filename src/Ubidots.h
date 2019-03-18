@@ -26,15 +26,10 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
+#include "UbiMesh.h"
 #include "UbiProtocol.h"
 #include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
-
-#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
-    PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
-    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
-#include "UbiMesh.h"
-#endif
 
 class Ubidots {
  public:
@@ -50,6 +45,9 @@ class Ubidots {
   void addContext(char* key_label, char* key_value);
   void getContext(char* context_result);
   void getContext(char* context_result, IotProtocol iotProtocol);
+  bool meshPublishToUbidots(const char* device_label, const char* device_name,
+                            IotProtocol iotProtocol);
+  void meshLoop();
   bool send();
   bool send(const char* device_label);
   bool send(const char* device_label, const char* device_name);
@@ -60,16 +58,10 @@ class Ubidots {
 
  private:
   // Mesh devices protocol wrapper
-#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_ARGON ||     \
-    PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON_SOM || \
-    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
   UbiMesh* _protocolMesh;
-#endif
 
   // Only non-Xenon devices support cloud communication
-#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   UbiProtocolHandler* _protocol;
-#endif
 
   ContextUbi* _context;
   IotProtocol _iotProtocol;

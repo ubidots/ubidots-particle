@@ -39,6 +39,20 @@ typedef struct ContextUbi {
   char *key_value;
 } ContextUbi;
 
+#if PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM || \
+    PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON ||     \
+    PLATFORM_ID == PLATFORM_ARGON_SOM || PLATFORM_ID == PLATFORM_BORON_SOM
+typedef struct MeshUbi {
+  char *deviceLabel;
+  char *deviceName;
+  char *variableLabel;
+  char *dotContext;
+  float dotValue;
+  unsigned long dotTimestampSeconds;
+  unsigned int dotTimestampMillis;
+} MeshUbi;
+#endif
+
 typedef const char *UbiServer;
 
 typedef enum { UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE, UBI_MESH } IotProtocol;

@@ -24,21 +24,36 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiMesh_H_
 #define _UbiMesh_H_
 
+#include <iterator>
+#include <map>
 #include "Particle.h"
 #include "UbiConstants.h"
 #include "UbiProtocol.h"
 #include "UbiTypes.h"
+#include "string.h"
+
+typedef std::map<uint8_t, char*> meshMap;
 
 class UbiMesh {
  public:
-  explicit UbiMesh();
+  explicit UbiMesh(char* token);
   void add(const char* variable_label, float value, const char* context,
            long unsigned dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
-  bool setDebug(bool debug);
+  bool meshPublish(const char* channel, const char* data);
+  bool meshPublish(const char* channel, const char* data, int timeout);
+  bool meshPublishToUbidots(const char* device_label, const char* device_name,
+                            IotProtocol iot_protocol);
+  void setDebug(bool debug);
+  void meshLoop();
 
  private:
   bool _debug;
+  char _meshPayload[256];
+  bool _MeshReconnect(int timeout);
+  static void _ubiPublishHandler(const char* event, const char* data);
+  char* _token;
+  MeshUbi* _dots;
 };
 
 #endif

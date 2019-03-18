@@ -22,23 +22,124 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 */
 
 #include "UbiMesh.h"
+#include "UbiProtocolHandler.h"
 
 /**************************************************************************
  * Overloaded constructors
  ***************************************************************************/
 
-UbiMesh::UbiMesh(){};
+UbiMesh::UbiMesh(char* token) {
+  _token = token;
+  _dots = (MeshUbi*)malloc(sizeof(MeshUbi));
+};
 
 void UbiMesh::add(const char* variable_label, float value, const char* context,
                   long unsigned dot_timestamp_seconds,
-                  unsigned int dot_timestamp_millis){};
+                  unsigned int dot_timestamp_millis) {
+  sprintf(_meshPayload, "");
+  // char* _context;
+  // context = !NULL ? sprintf(_context, "%s", context) : sprintf(_context, "
+  // ");
+  sprintf(_meshPayload, "%s|%f|%s|%lu|%d", variable_label, value, context,
+          dot_timestamp_seconds, dot_timestamp_millis);
+}
+
+/**************************************************************************
+ * Mesh handler functions
+ ***************************************************************************/
+
+bool UbiMesh::meshPublish(const char* channel, const char* data) {
+  return meshPublish(channel, data, 5000);
+}
+
+bool UbiMesh::meshPublish(const char* channel, const char* data, int timeout) {
+  if (!Mesh.ready()) {
+    _MeshReconnect(timeout);
+  }
+
+  if (!Mesh.ready()) {
+    return false;
+  }
+
+  return Mesh.publish(channel, data);
+}
+
+bool UbiMesh::meshPublishToUbidots(const char* device_label,
+                                   const char* device_name,
+                                   IotProtocol iotProtocol) {
+  if (strlen(_meshPayload) <= 0) {
+    if (_debug) {
+      Serial.println(
+          "You have not added any variable value, please call the add()"
+          "method first");
+    }
+    return false;
+  }
+  char payload[256];
+  sprintf(payload, "%s|%s|%s", device_label, device_name, _meshPayload);
+  return meshPublish(UBIDOTS_MESH_CHANNEL, payload);
+}
+
+void UbiMesh::meshLoop() {
+  if (!Mesh.ready()) {
+    _MeshReconnect(5000);
+  }
+  Mesh.subscribe(UBIDOTS_MESH_CHANNEL, _ubiPublishHandler);
+}
 
 /**************************************************************************
  * Other functions
  ***************************************************************************/
 
 /*
+  Checks Mesh network connection status
+*/
+
+bool UbiMesh::_MeshReconnect(int timeout) {
+  int _timeout = 0;
+
+  // Waits up to the set timeout to begin a socket exchange
+  while (!Mesh.ready() && _timeout < 5000) {
+    Mesh.connect();
+    _timeout++;
+    delay(1);
+  }
+
+  if (!Mesh.ready()) {
+    if (_debug) {
+      Serial.println(
+          "A problem has raised with the device trying to open a Mesh"
+          "socket");
+    }
+    return false;
+  }
+
+  return true;
+}
+
+/*
   Makes debug messages available
 */
 
-bool UbiMesh::setDebug(bool debug) { _debug = debug; }
+void UbiMesh::setDebug(bool debug) { _debug = debug; }
+
+void UbiMesh::_ubiPublishHandler(const char* event, const char* data) {
+  Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
+  uint8_t i = 0;
+  char* _data = const_cast<char*>(data);
+  char* pch;
+  const char _meshDelimiter[2] = "|";
+  pch = strtok(_data, _meshDelimiter);
+
+  std::map<uint8_t, char*> meshMap;
+
+  while (pch != NULL) {
+    meshMap.insert(std::pair<uint8_t, char*>(i, pch));
+    i++;
+    pch = strtok(NULL, _meshDelimiter);
+  }
+
+  if (meshMap.find(0) != meshMap.end()) {
+    Serial.println(meshMap[0]);
+  }
+}
