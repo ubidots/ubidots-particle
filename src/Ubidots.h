@@ -45,10 +45,11 @@ class Ubidots {
   void addContext(char* key_label, char* key_value);
   void getContext(char* context_result);
   void getContext(char* context_result, IotProtocol iotProtocol);
-  bool meshPublishToUbidots(const char* device_label, const char* device_name,
-                            IotProtocol iotProtocol);
+  bool meshPublishToUbidots();
+  bool meshPublishToUbidots(const char* device_label);
+  bool meshPublishToUbidots(const char* device_label, const char* device_name);
   void meshLoop();
-  void setMeshProtocol(IotProtocol iotProtocol);
+  void setCloudProtocol(IotProtocol iotProtocol);
   bool send();
   bool send(const char* device_label);
   bool send(const char* device_label, const char* device_name);

@@ -28,7 +28,12 @@ Developed and maintained by Jose Garcia for Ubidots Inc
  * Overloaded constructors
  ***************************************************************************/
 
-UbiMesh::UbiMesh(char* token) { _tokenMesh = token; };
+UbiMesh::UbiMesh(char* token) {
+  _tokenMesh = token;
+  String particle_id_str = System.deviceID();
+  _default_device_label = new char[particle_id_str.length() + 1];
+  strcpy(_default_device_label, particle_id_str.c_str());
+};
 
 void UbiMesh::add(const char* variable_label, float value) {
   add(variable_label, value, NULL, NULL, NULL);
@@ -88,9 +93,16 @@ bool UbiMesh::meshPublish(const char* channel, const char* data, int timeout) {
   return Mesh.publish(channel, data);
 }
 
+bool UbiMesh::meshPublishToUbidots() {
+  return meshPublishToUbidots(_default_device_label);
+}
+
+bool UbiMesh::meshPublishToUbidots(const char* device_label) {
+  return meshPublishToUbidots(device_label, device_label);
+}
+
 bool UbiMesh::meshPublishToUbidots(const char* device_label,
-                                   const char* device_name,
-                                   IotProtocol iotProtocol) {
+                                   const char* device_name) {
   if (strlen(_meshPayload) <= 0) {
     if (_debug) {
       Serial.println(
@@ -177,7 +189,7 @@ void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   free(dots);
 }
 
-void UbiMesh::setMeshProtocol(IotProtocol iotProtocol) {
+void UbiMesh::setCloudProtocol(IotProtocol iotProtocol) {
   iotProtocolMesh = iotProtocol;
 }
 

@@ -48,9 +48,10 @@ class UbiMesh {
            unsigned int dot_timestamp_millis);
   bool meshPublish(const char* channel, const char* data);
   bool meshPublish(const char* channel, const char* data, int timeout);
-  bool meshPublishToUbidots(const char* device_label, const char* device_name,
-                            IotProtocol iot_protocol);
-  void setMeshProtocol(IotProtocol iotProtocol);
+  bool meshPublishToUbidots();
+  bool meshPublishToUbidots(const char* device_label);
+  bool meshPublishToUbidots(const char* device_label, const char* device_name);
+  void setCloudProtocol(IotProtocol iotProtocol);
   void buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots);
   static void ubiPublishHandler(const char* event, const char* data);
   void setDebug(bool debug);
@@ -58,6 +59,7 @@ class UbiMesh {
 
  private:
   bool _debug;
+  char* _default_device_label;
   void _addDeviceToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addVariableToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addValueToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);

@@ -91,17 +91,23 @@ void Ubidots::add(char* variable_label, float value, char* context,
 #endif
 }
 
+bool Ubidots::meshPublishToUbidots() {
+  return _protocolMesh->meshPublishToUbidots();
+}
+
+bool Ubidots::meshPublishToUbidots(const char* device_label) {
+  return _protocolMesh->meshPublishToUbidots(device_label);
+}
+
 bool Ubidots::meshPublishToUbidots(const char* device_label,
-                                   const char* device_name,
-                                   IotProtocol iotProtocol) {
-  return _protocolMesh->meshPublishToUbidots(device_label, device_name,
-                                             iotProtocol);
+                                   const char* device_name) {
+  return _protocolMesh->meshPublishToUbidots(device_label, device_name);
 }
 
 void Ubidots::meshLoop() { _protocolMesh->meshLoop(); }
 
-void Ubidots::setMeshProtocol(IotProtocol iotProtocol) {
-  _protocolMesh->setMeshProtocol(iotProtocol);
+void Ubidots::setCloudProtocol(IotProtocol iotProtocol) {
+  _protocolMesh->setCloudProtocol(iotProtocol);
 }
 
 /**
