@@ -35,6 +35,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 typedef std::map<uint8_t, char*> meshMap;
 static IotProtocol iotProtocolMesh = UBI_HTTP;
 static char* _tokenMesh;
+static bool _debugMesh = false;
 
 class UbiMesh {
  public:
@@ -58,7 +59,6 @@ class UbiMesh {
   void meshLoop();
 
  private:
-  bool _debug;
   char* _default_device_label;
   void _addDeviceToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addVariableToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);

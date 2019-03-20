@@ -104,7 +104,7 @@ bool UbiMesh::meshPublishToUbidots(const char* device_label) {
 bool UbiMesh::meshPublishToUbidots(const char* device_label,
                                    const char* device_name) {
   if (strlen(_meshPayload) <= 0) {
-    if (_debug) {
+    if (_debugMesh) {
       Serial.println(
           "You have not added any variable value, please call the add()"
           "method first");
@@ -142,7 +142,7 @@ bool UbiMesh::_MeshReconnect(int timeout) {
   }
 
   if (!Mesh.ready()) {
-    if (_debug) {
+    if (_debugMesh) {
       Serial.println(
           "A problem has raised with the device trying to open a Mesh"
           "socket");
@@ -157,7 +157,7 @@ bool UbiMesh::_MeshReconnect(int timeout) {
   Makes debug messages available
 */
 
-void UbiMesh::setDebug(bool debug) { _debug = debug; }
+void UbiMesh::setDebug(bool debug) { _debugMesh = debug; }
 
 void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
