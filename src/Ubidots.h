@@ -48,6 +48,7 @@ class Ubidots {
   bool meshPublishToUbidots(const char* device_label, const char* device_name,
                             IotProtocol iotProtocol);
   void meshLoop();
+  void setMeshProtocol(IotProtocol iotProtocol);
   bool send();
   bool send(const char* device_label);
   bool send(const char* device_label, const char* device_name);

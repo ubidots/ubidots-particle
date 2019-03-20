@@ -31,6 +31,7 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 UbiMesh::UbiMesh(char* token) {
   _token = token;
   _dots = (MeshUbi*)malloc(sizeof(MeshUbi));
+  _tokenMesh = token;
 };
 
 void UbiMesh::add(const char* variable_label, float value, const char* context,
@@ -84,7 +85,7 @@ void UbiMesh::meshLoop() {
   if (!Mesh.ready()) {
     _MeshReconnect(5000);
   }
-  Mesh.subscribe(UBIDOTS_MESH_CHANNEL, _ubiPublishHandler);
+  Mesh.subscribe(UBIDOTS_MESH_CHANNEL, ubiPublishHandler);
 }
 
 /**************************************************************************
@@ -123,7 +124,7 @@ bool UbiMesh::_MeshReconnect(int timeout) {
 
 void UbiMesh::setDebug(bool debug) { _debug = debug; }
 
-void UbiMesh::_ubiPublishHandler(const char* event, const char* data) {
+void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
   uint8_t i = 0;
   char* _data = const_cast<char*>(data);
@@ -139,7 +140,75 @@ void UbiMesh::_ubiPublishHandler(const char* event, const char* data) {
     pch = strtok(NULL, _meshDelimiter);
   }
 
+  UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
+  MeshUbi* dots = _protocolInternalMesh->buildDots(meshMap);
+  UbiProtocolHandler* _meshCloudHandler =
+      new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
+  UbiFlags* flags = new UbiFlags();
+  _meshCloudHandler->setDebug(true);
+  _meshCloudHandler->add("aaa", 1, NULL, NULL, NULL);
+  _meshCloudHandler->send("bbb", "bbb", flags);
+  delete _protocolInternalMesh;
+  delete _meshCloudHandler;
+}
+
+void UbiMesh::setMeshProtocol(IotProtocol iotProtocol) {
+  iotProtocolMesh = iotProtocol;
+}
+
+MeshUbi* UbiMesh::buildDots(std::map<uint8_t, char*>& meshMap) {
+  MeshUbi* dots;
+  _addDeviceToDot(meshMap, dots);
+  _addVariableToDot(meshMap, dots);
+  _addValueToDot(meshMap, dots);
+  _addContextToDot(meshMap, dots);
+  _addTimestampToDot(meshMap, dots);
+
+  return dots;
+}
+
+void UbiMesh::_addDeviceToDot(std::map<uint8_t, char*>& meshMap,
+                              MeshUbi* _dots) {
   if (meshMap.find(0) != meshMap.end()) {
-    Serial.println(meshMap[0]);
+    _dots->deviceLabel = meshMap[0];
+  }
+  if (meshMap.find(1) != meshMap.end()) {
+    meshMap[1] != NULL ? _dots->deviceName = meshMap[1]
+                       : _dots->deviceName = " ";
+  }
+}
+
+void UbiMesh::_addVariableToDot(std::map<uint8_t, char*>& meshMap,
+                                MeshUbi* _dots) {
+  if (meshMap.find(2) != meshMap.end()) {
+    _dots->variableLabel = meshMap[2];
+  }
+}
+
+void UbiMesh::_addValueToDot(std::map<uint8_t, char*>& meshMap,
+                             MeshUbi* _dots) {
+  if (meshMap.find(3) != meshMap.end()) {
+    _dots->dotValue = atof(meshMap[3]);
+  }
+}
+
+void UbiMesh::_addContextToDot(std::map<uint8_t, char*>& meshMap,
+                               MeshUbi* _dots) {
+  if (meshMap.find(4) != meshMap.end()) {
+    meshMap[4] != NULL ? _dots->dotContext = meshMap[4]
+                       : _dots->dotContext = " ";
+  }
+}
+
+void UbiMesh::_addTimestampToDot(std::map<uint8_t, char*>& meshMap,
+                                 MeshUbi* _dots) {
+  if (meshMap.find(5) != meshMap.end()) {
+    meshMap[5] != NULL ? _dots->dotTimestampSeconds = atoll(meshMap[5])
+                       : _dots->dotTimestampSeconds = 0;
+  }
+
+  if (meshMap.find(6) != meshMap.end()) {
+    meshMap[6] != NULL ? _dots->dotTimestampSeconds = atoll(meshMap[6])
+                       : _dots->dotTimestampSeconds = 0;
   }
 }

@@ -33,6 +33,8 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #include "string.h"
 
 typedef std::map<uint8_t, char*> meshMap;
+static IotProtocol iotProtocolMesh = UBI_HTTP;
+static char* _tokenMesh;
 
 class UbiMesh {
  public:
@@ -44,14 +46,21 @@ class UbiMesh {
   bool meshPublish(const char* channel, const char* data, int timeout);
   bool meshPublishToUbidots(const char* device_label, const char* device_name,
                             IotProtocol iot_protocol);
+  void setMeshProtocol(IotProtocol iotProtocol);
+  MeshUbi* buildDots(std::map<uint8_t, char*>& meshMap);
+  static void ubiPublishHandler(const char* event, const char* data);
   void setDebug(bool debug);
   void meshLoop();
 
  private:
   bool _debug;
+  void _addDeviceToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
+  void _addVariableToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
+  void _addValueToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
+  void _addContextToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
+  void _addTimestampToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   char _meshPayload[256];
   bool _MeshReconnect(int timeout);
-  static void _ubiPublishHandler(const char* event, const char* data);
   char* _token;
   MeshUbi* _dots;
 };

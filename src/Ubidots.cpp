@@ -103,6 +103,10 @@ bool Ubidots::meshPublishToUbidots(const char* device_label,
 
 void Ubidots::meshLoop() { _protocolMesh->meshLoop(); }
 
+void Ubidots::setMeshProtocol(IotProtocol iotProtocol) {
+  _protocolMesh->setMeshProtocol(iotProtocol);
+}
+
 /**
  * Sends data to Ubidots
  * @arg device_label [Mandatory] device label where the dot will be stored
