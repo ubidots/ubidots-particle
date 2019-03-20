@@ -54,7 +54,9 @@ class UbiMesh {
   bool meshPublishToUbidots(const char* device_label, const char* device_name);
   void setCloudProtocol(IotProtocol iotProtocol);
   void buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots);
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   static void ubiPublishHandler(const char* event, const char* data);
+#endif
   void setDebug(bool debug);
   void meshLoop();
 

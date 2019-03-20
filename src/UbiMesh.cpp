@@ -25,6 +25,43 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "UbiProtocolHandler.h"
 
 /**************************************************************************
+ * Static Functions
+ ***************************************************************************/
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
+void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
+  if (_debugMesh) {
+    Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
+  }
+  uint8_t i = 0;
+  char* _data = const_cast<char*>(data);
+  char* pch;
+  const char _meshDelimiter[2] = "|";
+  pch = strtok(_data, _meshDelimiter);
+
+  std::map<uint8_t, char*> meshMap;
+
+  while (pch != NULL) {
+    meshMap.insert(std::pair<uint8_t, char*>(i, pch));
+    i++;
+    pch = strtok(NULL, _meshDelimiter);
+  }
+
+  UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
+  MeshUbi* dots = (MeshUbi*)malloc(sizeof(MeshUbi));
+  _protocolInternalMesh->buildDots(meshMap, dots);
+  UbiProtocolHandler* _meshCloudHandler =
+      new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
+  _meshCloudHandler->setDebug(true);
+  _meshCloudHandler->add(dots->variableLabel, dots->dotValue, dots->dotContext,
+                         dots->dotTimestampSeconds, dots->dotTimestampMillis);
+  _meshCloudHandler->send(dots->deviceLabel, dots->deviceName);
+  delete _protocolInternalMesh;
+  delete _meshCloudHandler;
+  free(dots);
+}
+#endif
+
+/**************************************************************************
  * Overloaded constructors
  ***************************************************************************/
 
@@ -117,10 +154,17 @@ bool UbiMesh::meshPublishToUbidots(const char* device_label,
 }
 
 void UbiMesh::meshLoop() {
+// Only non Xenon Devices should subscribe to the Ubidots events channel
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   if (!Mesh.ready()) {
     _MeshReconnect(5000);
   }
   Mesh.subscribe(UBIDOTS_MESH_CHANNEL, ubiPublishHandler);
+#else
+  Serial.println(
+      "[Warning] The meshLoop() method does not implement any routine in your "
+      "device");
+#endif
 }
 
 /**************************************************************************
@@ -158,36 +202,6 @@ bool UbiMesh::_MeshReconnect(int timeout) {
 */
 
 void UbiMesh::setDebug(bool debug) { _debugMesh = debug; }
-
-void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
-  Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
-  uint8_t i = 0;
-  char* _data = const_cast<char*>(data);
-  char* pch;
-  const char _meshDelimiter[2] = "|";
-  pch = strtok(_data, _meshDelimiter);
-
-  std::map<uint8_t, char*> meshMap;
-
-  while (pch != NULL) {
-    meshMap.insert(std::pair<uint8_t, char*>(i, pch));
-    i++;
-    pch = strtok(NULL, _meshDelimiter);
-  }
-
-  UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
-  MeshUbi* dots = (MeshUbi*)malloc(sizeof(MeshUbi));
-  _protocolInternalMesh->buildDots(meshMap, dots);
-  UbiProtocolHandler* _meshCloudHandler =
-      new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
-  _meshCloudHandler->setDebug(true);
-  _meshCloudHandler->add(dots->variableLabel, dots->dotValue, dots->dotContext,
-                         dots->dotTimestampSeconds, dots->dotTimestampMillis);
-  _meshCloudHandler->send(dots->deviceLabel, dots->deviceName);
-  delete _protocolInternalMesh;
-  delete _meshCloudHandler;
-  free(dots);
-}
 
 void UbiMesh::setCloudProtocol(IotProtocol iotProtocol) {
   iotProtocolMesh = iotProtocol;
