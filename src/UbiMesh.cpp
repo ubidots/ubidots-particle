@@ -169,7 +169,7 @@ void UbiMesh::_addDeviceToDot(std::map<uint8_t, char*>& meshMap,
     dots->deviceLabel = meshMap[0];
   }
   if (meshMap.find(1) != meshMap.end()) {
-    meshMap[1] != NULL ? dots->deviceName = meshMap[1] : dots->deviceName = " ";
+    dots->deviceName = meshMap[1];
   }
 }
 
@@ -189,7 +189,7 @@ void UbiMesh::_addValueToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* dots) {
 void UbiMesh::_addContextToDot(std::map<uint8_t, char*>& meshMap,
                                MeshUbi* dots) {
   if (meshMap.find(4) != meshMap.end()) {
-    meshMap[4] != NULL ? dots->dotContext = meshMap[4] : dots->dotContext = " ";
+    dots->dotContext = meshMap[4];
   }
 }
 
@@ -197,11 +197,11 @@ void UbiMesh::_addTimestampToDot(std::map<uint8_t, char*>& meshMap,
                                  MeshUbi* dots) {
   if (meshMap.find(5) != meshMap.end()) {
     meshMap[5] != NULL ? dots->dotTimestampSeconds = atoll(meshMap[5])
-                       : dots->dotTimestampSeconds = 0;
+                       : dots->dotTimestampSeconds = NULL;
   }
 
   if (meshMap.find(6) != meshMap.end()) {
     meshMap[6] != NULL ? dots->dotTimestampSeconds = atoll(meshMap[6])
-                       : dots->dotTimestampSeconds = 0;
+                       : dots->dotTimestampSeconds = NULL;
   }
 }

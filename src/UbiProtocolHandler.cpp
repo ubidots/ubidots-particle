@@ -42,6 +42,10 @@ UbiProtocolHandler::UbiProtocolHandler(char* token, UbiServer server,
 
 void UbiProtocolHandler::builder(char* token, UbiServer server,
                                  IotProtocol iot_protocol) {
+  String particle_id_str = System.deviceID();
+  _default_device_label = new char[particle_id_str.length() + 1];
+  strcpy(_default_device_label, particle_id_str.c_str());
+  _flags = new UbiFlags();
   _iot_protocol = iot_protocol;
   UbiBuilder builder(server, token, _iot_protocol);
   _dots = (Value*)malloc(MAX_VALUES * sizeof(Value));
@@ -92,6 +96,24 @@ void UbiProtocolHandler::add(char* variable_label, float value, char* context,
  * @arg flags [Optional] Particle publish flags for webhooks
  */
 
+bool UbiProtocolHandler::send() {
+  return send(_default_device_label, _default_device_label, _flags);
+}
+
+bool UbiProtocolHandler::send(const char* device_label) {
+  return send(device_label, device_label, _flags);
+}
+
+bool UbiProtocolHandler::send(const char* device_label,
+                              const char* device_name) {
+  return send(device_label, device_name, _flags);
+}
+
+bool UbiProtocolHandler::send(const char* device_label, PublishFlags flag) {
+  _flags->particle_flag = flag;
+  return send(device_label, device_label, _flags);
+}
+
 bool UbiProtocolHandler::send(const char* device_label, const char* device_name,
                               UbiFlags* flags) {
   // Builds the payload
@@ -110,7 +132,6 @@ bool UbiProtocolHandler::send(const char* device_label, const char* device_name,
   bool result =
       _ubiProtocol->sendData(device_label, device_name, payload, flags);
   free(payload);
-  delete flags;
   if (result) {
     _dirty = false;
     _current_value = 0;

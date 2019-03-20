@@ -67,7 +67,6 @@ class Ubidots {
   ContextUbi* _context;
   IotProtocol _iotProtocol;
   int8_t _current_context = 0;
-  char* _default_device_label;
   bool _debug = false;
   void builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };

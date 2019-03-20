@@ -37,12 +37,18 @@ class UbiProtocolHandler {
   void add(char* variable_label, float value, char* context,
            unsigned long dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
+  bool send();
+  bool send(const char* device_label);
+  bool send(const char* device_label, const char* device_name);
+  bool send(const char* device_label, PublishFlags flags);
   bool send(const char* device_label, const char* device_name, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
 
  private:
+  char* _default_device_label;
   UbiProtocol* _ubiProtocol;
+  UbiFlags* _flags;
   const char* _token;
   Value* _dots;
   int8_t _current_value = 0;

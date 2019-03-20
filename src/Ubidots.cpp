@@ -34,9 +34,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) {
   _iotProtocol = iotProtocol;
   _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
-  String particle_id_str = System.deviceID();
-  _default_device_label = new char[particle_id_str.length() + 1];
-  strcpy(_default_device_label, particle_id_str.c_str());
   _protocolMesh = new UbiMesh(token);
 
   // Only non-xenon devices may have cloud communication protocols
@@ -115,30 +112,23 @@ void Ubidots::setMeshProtocol(IotProtocol iotProtocol) {
  * @arg flags [Optional] Particle publish flags for webhooks
  */
 
-bool Ubidots::send() {
-  UbiFlags* flags = new UbiFlags();
-  return _protocol->send(_default_device_label, _default_device_label, flags);
-}
+bool Ubidots::send() { return _protocol->send(); }
 
 bool Ubidots::send(const char* device_label) {
-  UbiFlags* flags = new UbiFlags();
-  return _protocol->send(device_label, device_label, flags);
+  return _protocol->send(device_label);
 }
 
 bool Ubidots::send(const char* device_label, const char* device_name) {
-  UbiFlags* flags = new UbiFlags();
-  return _protocol->send(device_label, device_name, flags);
+  return _protocol->send(device_label, device_name);
 }
 
 bool Ubidots::send(const char* device_label, PublishFlags flag) {
-  UbiFlags* flags = new UbiFlags();
-  flags->particle_flag = flag;
-  return _protocol->send(device_label, device_label, flags);
+  return _protocol->send(device_label, flag);
 }
 
 bool Ubidots::send(const char* device_label, const char* device_name,
                    UbiFlags* flags) {
-  return _protocol->send(device_label, device_label, flags);
+  return _protocol->send(device_label, device_name, flags);
 }
 
 float Ubidots::get(const char* device_label, const char* variable_label) {
