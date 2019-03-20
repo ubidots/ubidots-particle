@@ -47,7 +47,7 @@ class UbiMesh {
   bool meshPublishToUbidots(const char* device_label, const char* device_name,
                             IotProtocol iot_protocol);
   void setMeshProtocol(IotProtocol iotProtocol);
-  MeshUbi* buildDots(std::map<uint8_t, char*>& meshMap);
+  void buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots);
   static void ubiPublishHandler(const char* event, const char* data);
   void setDebug(bool debug);
   void meshLoop();
@@ -61,7 +61,6 @@ class UbiMesh {
   void _addTimestampToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   char _meshPayload[256];
   bool _MeshReconnect(int timeout);
-  char* _token;
   MeshUbi* _dots;
 };
 

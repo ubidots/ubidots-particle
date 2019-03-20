@@ -28,11 +28,7 @@ Developed and maintained by Jose Garcia for Ubidots Inc
  * Overloaded constructors
  ***************************************************************************/
 
-UbiMesh::UbiMesh(char* token) {
-  _token = token;
-  _dots = (MeshUbi*)malloc(sizeof(MeshUbi));
-  _tokenMesh = token;
-};
+UbiMesh::UbiMesh(char* token) { _tokenMesh = token; };
 
 void UbiMesh::add(const char* variable_label, float value, const char* context,
                   long unsigned dot_timestamp_seconds,
@@ -141,74 +137,71 @@ void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   }
 
   UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
-  MeshUbi* dots = _protocolInternalMesh->buildDots(meshMap);
+  MeshUbi* dots = (MeshUbi*)malloc(sizeof(MeshUbi));
+  _protocolInternalMesh->buildDots(meshMap, dots);
   UbiProtocolHandler* _meshCloudHandler =
       new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
   UbiFlags* flags = new UbiFlags();
   _meshCloudHandler->setDebug(true);
-  _meshCloudHandler->add("aaa", 1, NULL, NULL, NULL);
-  _meshCloudHandler->send("bbb", "bbb", flags);
+  _meshCloudHandler->add(dots->variableLabel, dots->dotValue, dots->dotContext,
+                         dots->dotTimestampSeconds, dots->dotTimestampMillis);
+  _meshCloudHandler->send(dots->deviceLabel, dots->deviceName, flags);
   delete _protocolInternalMesh;
   delete _meshCloudHandler;
+  free(dots);
 }
 
 void UbiMesh::setMeshProtocol(IotProtocol iotProtocol) {
   iotProtocolMesh = iotProtocol;
 }
 
-MeshUbi* UbiMesh::buildDots(std::map<uint8_t, char*>& meshMap) {
-  MeshUbi* dots;
+void UbiMesh::buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots) {
   _addDeviceToDot(meshMap, dots);
   _addVariableToDot(meshMap, dots);
   _addValueToDot(meshMap, dots);
   _addContextToDot(meshMap, dots);
   _addTimestampToDot(meshMap, dots);
-
-  return dots;
 }
 
 void UbiMesh::_addDeviceToDot(std::map<uint8_t, char*>& meshMap,
-                              MeshUbi* _dots) {
+                              MeshUbi* dots) {
   if (meshMap.find(0) != meshMap.end()) {
-    _dots->deviceLabel = meshMap[0];
+    dots->deviceLabel = meshMap[0];
   }
   if (meshMap.find(1) != meshMap.end()) {
-    meshMap[1] != NULL ? _dots->deviceName = meshMap[1]
-                       : _dots->deviceName = " ";
+    meshMap[1] != NULL ? dots->deviceName = meshMap[1] : dots->deviceName = " ";
   }
 }
 
 void UbiMesh::_addVariableToDot(std::map<uint8_t, char*>& meshMap,
-                                MeshUbi* _dots) {
+                                MeshUbi* dots) {
   if (meshMap.find(2) != meshMap.end()) {
-    _dots->variableLabel = meshMap[2];
+    dots->variableLabel = meshMap[2];
   }
 }
 
-void UbiMesh::_addValueToDot(std::map<uint8_t, char*>& meshMap,
-                             MeshUbi* _dots) {
+void UbiMesh::_addValueToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* dots) {
   if (meshMap.find(3) != meshMap.end()) {
-    _dots->dotValue = atof(meshMap[3]);
+    dots->dotValue = atof(meshMap[3]);
   }
 }
 
 void UbiMesh::_addContextToDot(std::map<uint8_t, char*>& meshMap,
-                               MeshUbi* _dots) {
+                               MeshUbi* dots) {
   if (meshMap.find(4) != meshMap.end()) {
-    meshMap[4] != NULL ? _dots->dotContext = meshMap[4]
-                       : _dots->dotContext = " ";
+    meshMap[4] != NULL ? dots->dotContext = meshMap[4] : dots->dotContext = " ";
   }
 }
 
 void UbiMesh::_addTimestampToDot(std::map<uint8_t, char*>& meshMap,
-                                 MeshUbi* _dots) {
+                                 MeshUbi* dots) {
   if (meshMap.find(5) != meshMap.end()) {
-    meshMap[5] != NULL ? _dots->dotTimestampSeconds = atoll(meshMap[5])
-                       : _dots->dotTimestampSeconds = 0;
+    meshMap[5] != NULL ? dots->dotTimestampSeconds = atoll(meshMap[5])
+                       : dots->dotTimestampSeconds = 0;
   }
 
   if (meshMap.find(6) != meshMap.end()) {
-    meshMap[6] != NULL ? _dots->dotTimestampSeconds = atoll(meshMap[6])
-                       : _dots->dotTimestampSeconds = 0;
+    meshMap[6] != NULL ? dots->dotTimestampSeconds = atoll(meshMap[6])
+                       : dots->dotTimestampSeconds = 0;
   }
 }
