@@ -141,11 +141,10 @@ void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   _protocolInternalMesh->buildDots(meshMap, dots);
   UbiProtocolHandler* _meshCloudHandler =
       new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
-  UbiFlags* flags = new UbiFlags();
   _meshCloudHandler->setDebug(true);
   _meshCloudHandler->add(dots->variableLabel, dots->dotValue, dots->dotContext,
                          dots->dotTimestampSeconds, dots->dotTimestampMillis);
-  _meshCloudHandler->send(dots->deviceLabel, dots->deviceName, flags);
+  _meshCloudHandler->send(dots->deviceLabel, dots->deviceName);
   delete _protocolInternalMesh;
   delete _meshCloudHandler;
   free(dots);
