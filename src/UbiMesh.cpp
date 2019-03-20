@@ -30,15 +30,42 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 
 UbiMesh::UbiMesh(char* token) { _tokenMesh = token; };
 
+void UbiMesh::add(const char* variable_label, float value) {
+  add(variable_label, value, NULL, NULL, NULL);
+}
+void UbiMesh::add(const char* variable_label, float value,
+                  const char* context) {
+  add(variable_label, value, context, NULL, NULL);
+}
+void UbiMesh::add(const char* variable_label, float value, const char* context,
+                  long unsigned dot_timestamp_seconds) {
+  add(variable_label, value, context, dot_timestamp_seconds, NULL);
+}
+
 void UbiMesh::add(const char* variable_label, float value, const char* context,
                   long unsigned dot_timestamp_seconds,
                   unsigned int dot_timestamp_millis) {
-  sprintf(_meshPayload, "");
-  // char* _context;
-  // context = !NULL ? sprintf(_context, "%s", context) : sprintf(_context, "
-  // ");
-  sprintf(_meshPayload, "%s|%f|%s|%lu|%d", variable_label, value, context,
-          dot_timestamp_seconds, dot_timestamp_millis);
+  char _context[100];
+  char _dot_timestamp_seconds[11];
+  char _dot_timestamp_millis[4];
+
+  if (context != NULL && strlen(context) > 100) {
+    Serial.println("[WARNING] Your Mesh context length must be lower than 100");
+  }
+
+  context != NULL ? sprintf(_context, "%s", context)
+                  : sprintf(_context, "%s", " ");
+
+  dot_timestamp_seconds != NULL
+      ? sprintf(_dot_timestamp_seconds, "%lu", dot_timestamp_seconds)
+      : sprintf(_dot_timestamp_seconds, "%s", " ");
+
+  dot_timestamp_millis != NULL
+      ? sprintf(_dot_timestamp_millis, "%d", dot_timestamp_millis)
+      : sprintf(_dot_timestamp_millis, "%s", " ");
+
+  sprintf(_meshPayload, "%s|%f|%s|%s|%s", variable_label, value, _context,
+          _dot_timestamp_seconds, _dot_timestamp_millis);
 }
 
 /**************************************************************************
@@ -188,19 +215,20 @@ void UbiMesh::_addValueToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* dots) {
 void UbiMesh::_addContextToDot(std::map<uint8_t, char*>& meshMap,
                                MeshUbi* dots) {
   if (meshMap.find(4) != meshMap.end()) {
-    dots->dotContext = meshMap[4];
+    strcmp(meshMap[4], " ") != 0 ? dots->dotContext = meshMap[4]
+                                 : dots->dotContext = NULL;
   }
 }
 
 void UbiMesh::_addTimestampToDot(std::map<uint8_t, char*>& meshMap,
                                  MeshUbi* dots) {
   if (meshMap.find(5) != meshMap.end()) {
-    meshMap[5] != NULL ? dots->dotTimestampSeconds = atoll(meshMap[5])
-                       : dots->dotTimestampSeconds = NULL;
+    strcmp(meshMap[5], " ") != 0 ? dots->dotTimestampSeconds = atoll(meshMap[5])
+                                 : dots->dotTimestampSeconds = NULL;
   }
 
   if (meshMap.find(6) != meshMap.end()) {
-    meshMap[6] != NULL ? dots->dotTimestampSeconds = atoll(meshMap[6])
-                       : dots->dotTimestampSeconds = NULL;
+    strcmp(meshMap[6], " ") != 0 ? dots->dotTimestampSeconds = atoll(meshMap[6])
+                                 : dots->dotTimestampSeconds = NULL;
   }
 }

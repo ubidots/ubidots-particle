@@ -39,6 +39,10 @@ static char* _tokenMesh;
 class UbiMesh {
  public:
   explicit UbiMesh(char* token);
+  void add(const char* variable_label, float value);
+  void add(const char* variable_label, float value, const char* context);
+  void add(const char* variable_label, float value, const char* context,
+           long unsigned dot_timestamp_seconds);
   void add(const char* variable_label, float value, const char* context,
            long unsigned dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
