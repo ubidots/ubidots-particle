@@ -48,7 +48,6 @@ class UbiProtocolHandler {
  private:
   char* _default_device_label;
   UbiProtocol* _ubiProtocol;
-  UbiFlags* _flags;
   const char* _token;
   Value* _dots;
   int8_t _current_value = 0;
