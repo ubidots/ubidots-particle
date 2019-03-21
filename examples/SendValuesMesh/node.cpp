@@ -35,5 +35,7 @@ void loop() {
   ubidots.add("variable-label", value);
   ubidots.meshPublishToUbidots();
   Serial.println("finished");
-  delay(5000);
+  /* WARNING a very high sample rate may give you issues in your gateway routine
+   */
+  delay(20000);
 }
