@@ -249,12 +249,13 @@ void UbiMesh::_addContextToDot(std::map<uint8_t, char*>& meshMap,
 void UbiMesh::_addTimestampToDot(std::map<uint8_t, char*>& meshMap,
                                  MeshUbi* dots) {
   if (meshMap.find(5) != meshMap.end()) {
+    Serial.println("entra");
     strcmp(meshMap[5], " ") != 0 ? dots->dotTimestampSeconds = atoll(meshMap[5])
                                  : dots->dotTimestampSeconds = NULL;
   }
 
   if (meshMap.find(6) != meshMap.end()) {
-    strcmp(meshMap[6], " ") != 0 ? dots->dotTimestampSeconds = atoll(meshMap[6])
-                                 : dots->dotTimestampSeconds = NULL;
+    strcmp(meshMap[6], " ") != 0 ? dots->dotTimestampMillis = atoll(meshMap[6])
+                                 : dots->dotTimestampMillis = NULL;
   }
 }
