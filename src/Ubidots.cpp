@@ -31,7 +31,15 @@ Developed and maintained by Jose Garcia for IoT Services Inc
  * Overloaded constructors
  ***************************************************************************/
 
+Ubidots::Ubidots(char* token, IotProtocol iotProtocol) {
+  _builder(token, UBI_INDUSTRIAL, iotProtocol);
+}
+
 Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) {
+  _builder(token, server, iotProtocol);
+}
+
+void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
   _iotProtocol = iotProtocol;
   _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
   _protocolMesh = new UbiMesh(token);

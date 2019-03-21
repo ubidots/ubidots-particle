@@ -33,6 +33,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 class Ubidots {
  public:
+  explicit Ubidots(char* token, IotProtocol iotProtocol = UBI_TCP);
   explicit Ubidots(char* token, UbiServer server = UBI_INDUSTRIAL,
                    IotProtocol iotProtocol = UBI_TCP);
   void add(char* variable_label, float value);
@@ -69,7 +70,7 @@ class Ubidots {
   IotProtocol _iotProtocol;
   int8_t _current_context = 0;
   bool _debug = false;
-  void builder(char* token, UbiServer server, IotProtocol iot_protocol);
+  void _builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };
 
 #endif
