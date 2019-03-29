@@ -54,6 +54,14 @@ void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
 #endif
 }
 
+Ubidots::~Ubidots() {
+  free(_context);
+  delete _protocolMesh;
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
+  delete _protocol;
+#endif
+}
+
 /***************************************************************************
 FUNCTIONS TO SEND DATA
 ***************************************************************************/

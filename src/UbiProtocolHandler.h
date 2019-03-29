@@ -44,6 +44,7 @@ class UbiProtocolHandler {
   bool send(const char* device_label, const char* device_name, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
+  ~UbiProtocolHandler();
 
  private:
   char* _default_device_label;
