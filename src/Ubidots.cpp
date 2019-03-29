@@ -54,6 +54,10 @@ void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
 #endif
 }
 
+/**************************************************************************
+ * Destructor
+ ***************************************************************************/
+
 Ubidots::~Ubidots() {
   free(_context);
   delete _protocolMesh;

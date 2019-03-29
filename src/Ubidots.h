@@ -58,6 +58,7 @@ class Ubidots {
   bool send(const char* device_label, const char* device_name, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
+  ~Ubidots();
 
  private:
   // Mesh devices protocol wrapper
