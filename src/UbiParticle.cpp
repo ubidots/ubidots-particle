@@ -21,21 +21,37 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
-#include "Particle.h"
 #include "UbiParticle.h"
+#include "Particle.h"
 #include "UbiConstants.h"
 
-UbiParticle::UbiParticle(const char* host, const int port, const char* user_agent, const char* token){
+/**************************************************************************
+ * Overloaded constructors
+ ***************************************************************************/
+
+UbiParticle::UbiParticle(const char* host, const int port,
+                         const char* user_agent, const char* token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
 }
 
-/*
-* Wrapper of the Publish() method from particle to trigger webhooks
-*/
+/**************************************************************************
+ * Destructor
+ ***************************************************************************/
 
-bool UbiParticle::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+UbiParticle::~UbiParticle() {
+  delete[] _host;
+  delete[] _user_agent;
+  delete[] _token;
+}
+
+/*
+ * Wrapper of the Publish() method from particle to trigger webhooks
+ */
+
+bool UbiParticle::sendData(const char* device_label, const char* device_name,
+                           char* payload, UbiFlags* flags) {
   return Particle.publish(device_label, payload, flags->particle_flag);
 }
 
@@ -44,6 +60,4 @@ float UbiParticle::get(const char* device_label, const char* variable_label) {
   return ERROR_VALUE;
 }
 
-void UbiParticle::setDebug(bool debug){
-  _debug = debug;
-}
+void UbiParticle::setDebug(bool debug) { _debug = debug; }
