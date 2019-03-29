@@ -21,23 +21,40 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
-#include "Particle.h"
 #include "UbiHttp.h"
+#include "Particle.h"
 #include "UbiConstants.h"
 
-UbiHTTP::UbiHTTP(const char* host, const int port, const char* user_agent, const char* token){
+/**************************************************************************
+ * Overloaded constructors
+ ***************************************************************************/
+
+UbiHTTP::UbiHTTP(const char* host, const int port, const char* user_agent,
+                 const char* token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
 }
 
-bool UbiHTTP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+/**************************************************************************
+ * Destructor
+ ***************************************************************************/
+
+UbiHTTP::~UbiHTTP() {
+  delete[] _host;
+  delete[] _user_agent;
+  delete[] _token;
+}
+
+bool UbiHTTP::sendData(const char* device_label, const char* device_name,
+                       char* payload, UbiFlags* flags) {
   reconnect(_host, _port);
   bool result = false;
 
   if (_client_http_ubi.connected()) {  // Connect to the host
-    /* Builds the request POST - Please reference this link to know all the request's structures https://ubidots.com/docs/api/ */
+    /* Builds the request POST - Please reference this link to know all the
+     * request's structures https://ubidots.com/docs/api/ */
     _client_http_ubi.print(F("POST /api/v1.6/devices/"));
     _client_http_ubi.print(device_label);
     _client_http_ubi.print(F(" HTTP/1.1\r\n"));
@@ -106,14 +123,14 @@ bool UbiHTTP::sendData(const char* device_label, const char* device_name, char* 
 
   _client_http_ubi.stop();
   return result;
-
 }
 
 float UbiHTTP::get(const char* device_label, const char* variable_label) {
   _client_http_ubi.connect(_host, UBIDOTS_HTTP_PORT);
   reconnect(_host, UBIDOTS_HTTP_PORT);
   if (_client_http_ubi.connected()) {
-    /* Builds the request GET - Please reference this link to know all the request's structures HTTPS://ubidots.com/docs/api/ */
+    /* Builds the request GET - Please reference this link to know all the
+     * request's structures HTTPS://ubidots.com/docs/api/ */
     _client_http_ubi.print(F("GET /api/v1.6/devices/"));
     _client_http_ubi.print(device_label);
     _client_http_ubi.print("/");
@@ -157,7 +174,7 @@ float UbiHTTP::get(const char* device_label, const char* variable_label) {
     }
 
     /* Reads the response from the server */
-    char* response = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
+    char* response = (char*)malloc(sizeof(char) * MAX_BUFFER_SIZE);
     readServerAnswer(response);
 
     /* Parses the answer */
@@ -181,7 +198,7 @@ float UbiHTTP::get(const char* device_label, const char* variable_label) {
  *         false if timeout is reached.
  */
 
-void UbiHTTP::reconnect(const char * host, const int port) {
+void UbiHTTP::reconnect(const char* host, const int port) {
   uint8_t attempts = 0;
   while (!_client_http_ubi.connected() && attempts < 5) {
     if (_debug) {
@@ -191,6 +208,9 @@ void UbiHTTP::reconnect(const char * host, const int port) {
       Serial.println(attempts);
     }
     _client_http_ubi.connect(host, port);
+    if (_debug) {
+      Serial.println("Attempt finished");
+    }
     attempts += 1;
     delay(1000);
   }
@@ -201,15 +221,16 @@ float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
 
   // LV
   if (request_type == "LV") {
-    char* parsed = (char *) malloc(sizeof(char) * 20);
-    char* dst = (char *) malloc(sizeof(char) * 20);
-    int len = strlen(data); // Length of the answer char array from the server
+    char* parsed = (char*)malloc(sizeof(char) * 20);
+    char* dst = (char*)malloc(sizeof(char) * 20);
+    int len = strlen(data);  // Length of the answer char array from the server
 
     for (int i = 0; i < len - 2; i++) {
-      if ((data[i] == '\r') && (data[i+1] == '\n') && (data[i+2] == '\r') && (data[i+3] == '\n')) {
-          strncpy(parsed, data+i+4, 20);  // Copies the result to the parsed
-          parsed[20] = '\0';
-          break;
+      if ((data[i] == '\r') && (data[i + 1] == '\n') && (data[i + 2] == '\r') &&
+          (data[i + 3] == '\n')) {
+        strncpy(parsed, data + i + 4, 20);  // Copies the result to the parsed
+        parsed[20] = '\0';
+        break;
       }
     }
 
@@ -218,12 +239,12 @@ float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
     uint8_t index = 0;
 
     // Creates pointers to split the value
-    char *pch = strchr(parsed, '\n');
+    char* pch = strchr(parsed, '\n');
     if (pch == NULL) {
       return result;
     }
 
-    char *pch2 = strchr(pch+1, '\n');
+    char* pch2 = strchr(pch + 1, '\n');
 
     if (pch2 == NULL) {
       return result;
@@ -248,14 +269,13 @@ float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
  * @arg response [Mandatory] Pointer to store the server's answer
  */
 
-void UbiHTTP::readServerAnswer(char* response){
-
+void UbiHTTP::readServerAnswer(char* response) {
   // Fills with zeros
-  for (int i = 0; i <= MAX_BUFFER_SIZE; i++){
+  for (int i = 0; i <= MAX_BUFFER_SIZE; i++) {
     response[i] = '\0';
   }
 
-  if (_debug){
+  if (_debug) {
     Serial.println("----------");
     Serial.println("Server's response:");
   }
@@ -273,10 +293,9 @@ void UbiHTTP::readServerAnswer(char* response){
     }
   }
 
-  if (_debug){
+  if (_debug) {
     Serial.println("\n----------");
   }
-
 }
 
 /**
@@ -287,7 +306,7 @@ void UbiHTTP::readServerAnswer(char* response){
 
 bool UbiHTTP::waitServerAnswer() {
   int timeout = 0;
-  while(!_client_http_ubi.available() && timeout < _timeout) {
+  while (!_client_http_ubi.available() && timeout < _timeout) {
     timeout++;
     delay(1);
     if (timeout > _timeout - 1) {
@@ -304,6 +323,4 @@ bool UbiHTTP::waitServerAnswer() {
  * Makes available debug traces
  */
 
-void UbiHTTP::setDebug(bool debug) {
-  _debug = debug;
-}
+void UbiHTTP::setDebug(bool debug) { _debug = debug; }
