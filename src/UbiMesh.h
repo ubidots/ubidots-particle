@@ -59,17 +59,16 @@ class UbiMesh {
 #endif
   void setDebug(bool debug);
   void meshLoop();
+  ~UbiMesh();
 
  private:
   char* _default_device_label;
+  char _meshPayload[256];
   void _addDeviceToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addVariableToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addValueToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addContextToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addTimestampToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
-  char _meshPayload[256];
   bool _MeshReconnect(int timeout);
-  MeshUbi* _dots;
 };
-
 #endif

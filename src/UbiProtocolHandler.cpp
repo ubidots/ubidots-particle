@@ -53,6 +53,17 @@ void UbiProtocolHandler::builder(char* token, UbiServer server,
   _current_value = 0;
 }
 
+/**************************************************************************
+ * Overloaded destructor
+ ***************************************************************************/
+
+UbiProtocolHandler::~UbiProtocolHandler() {
+  delete[] _default_device_label;
+
+  free(_dots);
+  delete _ubiProtocol;
+}
+
 /***************************************************************************
 FUNCTIONS TO SEND DATA
 ***************************************************************************/

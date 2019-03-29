@@ -46,17 +46,17 @@ void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
     pch = strtok(NULL, _meshDelimiter);
   }
 
-  UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
   MeshUbi* dots = (MeshUbi*)malloc(sizeof(MeshUbi));
-  _protocolInternalMesh->buildDots(meshMap, dots);
+  UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
   UbiProtocolHandler* _meshCloudHandler =
       new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
+  _protocolInternalMesh->buildDots(meshMap, dots);
   _meshCloudHandler->setDebug(true);
   _meshCloudHandler->add(dots->variableLabel, dots->dotValue, dots->dotContext,
                          dots->dotTimestampSeconds, dots->dotTimestampMillis);
   _meshCloudHandler->send(dots->deviceLabel, dots->deviceName);
-  delete _protocolInternalMesh;
   delete _meshCloudHandler;
+  delete _protocolInternalMesh;
   free(dots);
 }
 #endif
@@ -71,6 +71,16 @@ UbiMesh::UbiMesh(char* token) {
   _default_device_label = new char[particle_id_str.length() + 1];
   strcpy(_default_device_label, particle_id_str.c_str());
 };
+
+/**************************************************************************
+ * Destructor
+ ***************************************************************************/
+
+UbiMesh::~UbiMesh() { delete[] _default_device_label; }
+
+/**************************************************************************
+ * Overloaded Values Add functions
+ ***************************************************************************/
 
 void UbiMesh::add(const char* variable_label, float value) {
   add(variable_label, value, NULL, NULL, NULL);
