@@ -45,6 +45,8 @@ UbiUDP::~UbiUDP() {
   delete[] _host;
   delete[] _user_agent;
   delete[] _token;
+  _client_udp_ubi.flush();
+  _client_udp_ubi.stop();
 }
 
 bool UbiUDP::sendData(const char *device_label, const char *device_name,

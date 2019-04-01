@@ -45,6 +45,8 @@ UbiTCP::~UbiTCP() {
   delete[] _host;
   delete[] _user_agent;
   delete[] _token;
+  _client_tcp_ubi.flush();
+  _client_tcp_ubi.stop();
 }
 
 bool UbiTCP::sendData(const char* device_label, const char* device_name,

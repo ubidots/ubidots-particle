@@ -45,6 +45,8 @@ UbiHTTP::~UbiHTTP() {
   delete[] _host;
   delete[] _user_agent;
   delete[] _token;
+  _client_http_ubi.flush();
+  _client_http_ubi.stop();
 }
 
 bool UbiHTTP::sendData(const char* device_label, const char* device_name,
