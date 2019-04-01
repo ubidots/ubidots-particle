@@ -27,7 +27,10 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 /**************************************************************************
  * Static Functions
  ***************************************************************************/
-#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
+#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM && \
+    PLATFORM_ID != PLATFORM_PHOTON_DEV &&                                 \
+    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION &&                          \
+    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
 void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   if (_debugMesh) {
     Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
@@ -129,6 +132,9 @@ bool UbiMesh::meshPublish(const char* channel, const char* data) {
 }
 
 bool UbiMesh::meshPublish(const char* channel, const char* data, int timeout) {
+#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
+    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
+    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
   if (!Mesh.ready()) {
     _MeshReconnect(timeout);
   }
@@ -138,6 +144,9 @@ bool UbiMesh::meshPublish(const char* channel, const char* data, int timeout) {
   }
 
   return Mesh.publish(channel, data);
+#else
+  return false;
+#endif
 }
 
 bool UbiMesh::meshPublishToUbidots() {
@@ -150,6 +159,9 @@ bool UbiMesh::meshPublishToUbidots(const char* device_label) {
 
 bool UbiMesh::meshPublishToUbidots(const char* device_label,
                                    const char* device_name) {
+#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
+    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
+    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
   if (strlen(_meshPayload) <= 0) {
     if (_debugMesh) {
       Serial.println(
@@ -161,11 +173,15 @@ bool UbiMesh::meshPublishToUbidots(const char* device_label,
   char payload[256];
   sprintf(payload, "%s|%s|%s", device_label, device_name, _meshPayload);
   return meshPublish(UBIDOTS_MESH_CHANNEL, payload);
+#else
+  Serial.println(
+      "[WARNING] Your device does not support to publish using Mesh");
+#endif
 }
 
 void UbiMesh::meshLoop() {
 // Only non Xenon Devices should subscribe to the Ubidots events channel
-#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON
   if (!Mesh.ready()) {
     _MeshReconnect(5000);
   }
@@ -186,6 +202,9 @@ void UbiMesh::meshLoop() {
 */
 
 bool UbiMesh::_MeshReconnect(int timeout) {
+#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
+    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
+    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
   int _timeout = 0;
 
   // Waits up to the set timeout to begin a socket exchange
@@ -205,6 +224,9 @@ bool UbiMesh::_MeshReconnect(int timeout) {
   }
 
   return true;
+#else
+  return false;
+#endif
 }
 
 /*
