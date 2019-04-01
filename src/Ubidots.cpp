@@ -110,10 +110,7 @@ void Ubidots::add(char* variable_label, float value, char* context,
 void Ubidots::add(char* variable_label, float value, char* context,
                   long unsigned dot_timestamp_seconds,
                   unsigned int dot_timestamp_millis) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON
   if (_iotProtocol == UBI_MESH) {
     _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
                        dot_timestamp_millis);
@@ -122,11 +119,21 @@ void Ubidots::add(char* variable_label, float value, char* context,
                         dot_timestamp_millis);
   }
 
+#elif PLATFORM_ID == PLATFORM_PHOTON_DEV ||      \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || \
+    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+  if (_iotProtocol != UBI_MESH) {
+    _cloudProtocol->add(variable_label, value, context, dot_timestamp_seconds,
+                        dot_timestamp_millis);
+  } else {
+    Serial.println(
+        "[WARNING] please choose a different cloud protocol of Mesh in the "
+        "Ubidots constructor");
+  }
 // Xenon only supports Mesh cloud protocol
 #elif PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
   _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
                      dot_timestamp_millis);
-
 #else
   Serial.println("[WARNING] Your board does not support the add() method");
 #endif
@@ -282,15 +289,17 @@ float Ubidots::get(const char* device_label, const char* variable_label) {
 
 void Ubidots::setDebug(bool debug) {
   _debug = debug;
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON
   if (_iotProtocol != UBI_MESH) {
     _cloudProtocol->setDebug(debug);
   } else {
     _protocolMesh->setDebug(debug);
   }
-#else
+#elif PLATFORM_ID == PLATFORM_PHOTON_DEV ||      \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || \
+    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+  _cloudProtocol->setDebug(debug);
+#elif PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
   _protocolMesh->setDebug(debug);
 #endif
 }
