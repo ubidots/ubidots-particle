@@ -49,6 +49,7 @@ class UbiHTTP : public UbiProtocol {
   float parseHttpAnswer(const char* request_type, char* data);
   void readServerAnswer(char* response);
   int _timeout = 5000;
+  uint8_t _maxReconnectAttempts = 5;
 };
 
 #endif

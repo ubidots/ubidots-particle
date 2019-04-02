@@ -45,8 +45,6 @@ UbiHTTP::~UbiHTTP() {
   delete[] _host;
   delete[] _user_agent;
   delete[] _token;
-  _client_http_ubi.flush();
-  _client_http_ubi.stop();
 }
 
 bool UbiHTTP::sendData(const char* device_label, const char* device_name,
@@ -202,7 +200,7 @@ float UbiHTTP::get(const char* device_label, const char* variable_label) {
 
 void UbiHTTP::reconnect(const char* host, const int port) {
   uint8_t attempts = 0;
-  while (!_client_http_ubi.connected() && attempts < 5) {
+  while (!_client_http_ubi.connected() && attempts < _maxReconnectAttempts) {
     if (_debug) {
       Serial.print("Trying to connect to ");
       Serial.print(host);
