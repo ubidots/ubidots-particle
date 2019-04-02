@@ -45,8 +45,6 @@ UbiTCP::~UbiTCP() {
   delete[] _host;
   delete[] _user_agent;
   delete[] _token;
-  _client_tcp_ubi.flush();
-  _client_tcp_ubi.stop();
 }
 
 bool UbiTCP::sendData(const char* device_label, const char* device_name,
@@ -147,13 +145,15 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
 
 void UbiTCP::reconnect(const char* host, const int port) {
   uint8_t attempts = 0;
-  while (!_client_tcp_ubi.connected() && attempts < 5) {
+  Serial.println("Attempting to reconnect");
+  while (!_client_tcp_ubi.status() && attempts < 1) {
     if (_debug) {
       Serial.print("Trying to connect to ");
       Serial.print(host);
       Serial.print(" , attempt number: ");
       Serial.println(attempts);
     }
+    _client_tcp_ubi.stop();
     _client_tcp_ubi.connect(host, port);
     attempts += 1;
     delay(1000);
