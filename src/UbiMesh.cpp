@@ -31,36 +31,64 @@ Developed and maintained by Jose Garcia for Ubidots Inc
     PLATFORM_ID != PLATFORM_PHOTON_DEV &&                                 \
     PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION &&                          \
     PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
+bool UbiMesh::isThrottled() {
+  // Simple throttling routine for TCP and HTTP
+  bool throttled = true;
+  if (iotProtocolMesh == UBI_HTTP || iotProtocolMesh == UBI_TCP) {
+    if (millis() - time_now > 20000) {
+      throttled = false;
+      time_now = millis();
+    }
+  }
+
+  if (iotProtocolMesh == UBI_UDP || iotProtocolMesh == UBI_PARTICLE) {
+    throttled = false;
+  }
+
+  return throttled;
+}
+
 void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
-  if (_debugMesh) {
-    Serial.printlnf("event=%s data=%s", event, data ? data : "NULL");
-  }
-  uint8_t i = 0;
-  char* _data = const_cast<char*>(data);
-  char* pch;
-  const char _meshDelimiter[2] = "|";
-  pch = strtok(_data, _meshDelimiter);
+  bool throttled = isThrottled();
 
-  std::map<uint8_t, char*> meshMap;
-
-  while (pch != NULL) {
-    meshMap.insert(std::pair<uint8_t, char*>(i, pch));
-    i++;
-    pch = strtok(NULL, _meshDelimiter);
+  if (throttled) {
+    if (_debugMesh) {
+      Serial.println(
+          "[WARNING] your sample time reached the throttling of 20 s, please "
+          "set a higher sample time or use UDP or Particle Webhooks to send "
+          "data");
+    }
   }
 
-  MeshUbi* dots = (MeshUbi*)malloc(sizeof(MeshUbi));
-  UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
-  UbiProtocolHandler* _meshCloudHandler =
-      new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
-  _protocolInternalMesh->buildDots(meshMap, dots);
-  _meshCloudHandler->setDebug(true);
-  _meshCloudHandler->add(dots->variableLabel, dots->dotValue, dots->dotContext,
-                         dots->dotTimestampSeconds, dots->dotTimestampMillis);
-  _meshCloudHandler->send(dots->deviceLabel, dots->deviceName);
-  delete _meshCloudHandler;
-  delete _protocolInternalMesh;
-  free(dots);
+  if (!throttled) {
+    uint8_t i = 0;
+    char* _data = const_cast<char*>(data);
+    char* pch;
+    const char _meshDelimiter[2] = "|";
+    pch = strtok(_data, _meshDelimiter);
+
+    std::map<uint8_t, char*> meshMap;
+
+    while (pch != NULL) {
+      meshMap.insert(std::pair<uint8_t, char*>(i, pch));
+      i++;
+      pch = strtok(NULL, _meshDelimiter);
+    }
+
+    MeshUbi* dots = (MeshUbi*)malloc(sizeof(MeshUbi));
+    UbiMesh* _protocolInternalMesh = new UbiMesh(_tokenMesh);
+    UbiProtocolHandler* _meshCloudHandler =
+        new UbiProtocolHandler(_tokenMesh, iotProtocolMesh);
+    _protocolInternalMesh->buildDots(meshMap, dots);
+    _meshCloudHandler->setDebug(true);
+    _meshCloudHandler->add(dots->variableLabel, dots->dotValue,
+                           dots->dotContext, dots->dotTimestampSeconds,
+                           dots->dotTimestampMillis);
+    _meshCloudHandler->send(dots->deviceLabel, dots->deviceName);
+    delete _meshCloudHandler;
+    delete _protocolInternalMesh;
+    free(dots);
+  }
 }
 #endif
 
@@ -138,12 +166,12 @@ bool UbiMesh::meshPublish(const char* channel, const char* data, int timeout) {
   if (!Mesh.ready()) {
     _MeshReconnect(timeout);
   }
-
   if (!Mesh.ready()) {
     return false;
   }
 
-  return Mesh.publish(channel, data);
+  bool result = Mesh.publish(channel, data);
+  return result;
 #else
   return false;
 #endif

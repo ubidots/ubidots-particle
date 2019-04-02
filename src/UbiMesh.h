@@ -33,9 +33,10 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #include "string.h"
 
 typedef std::map<uint8_t, char*> meshMap;
-static IotProtocol iotProtocolMesh = UBI_HTTP;
+static IotProtocol iotProtocolMesh = UBI_UDP;
 static char* _tokenMesh;
 static bool _debugMesh = false;
+static unsigned long time_now = millis();
 
 class UbiMesh {
  public:
@@ -56,6 +57,7 @@ class UbiMesh {
   void buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots);
 #if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   static void ubiPublishHandler(const char* event, const char* data);
+  static bool isThrottled();
 #endif
   void setDebug(bool debug);
   void meshLoop();
