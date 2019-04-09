@@ -209,7 +209,13 @@ bool Ubidots::send() {
     PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
     PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
     PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
-  return _cloudProtocol->send();
+  if (_iotProtocol != UBI_MESH) {
+    return _cloudProtocol->send();
+  } else {
+    Serial.println(
+        "[WARNING] The Mesh Protocol is not supported in this device for "
+        "sending data");
+  }
 #else
   Serial.println(
       "[WARNING] Your board does not support the send() "
