@@ -215,6 +215,7 @@ bool Ubidots::send() {
     Serial.println(
         "[WARNING] The Mesh Protocol is not supported in this device for "
         "sending data");
+    return false;
   }
 #else
   Serial.println(
@@ -233,6 +234,7 @@ bool Ubidots::send(const char* device_label) {
   Serial.println(
       "[WARNING] Your board does not support the send() "
       "method");
+  return false;
 #endif
 }
 
@@ -246,6 +248,7 @@ bool Ubidots::send(const char* device_label, const char* device_name) {
   Serial.println(
       "[WARNING] Your board does not support the send() "
       "method");
+  return false;
 #endif
 }
 
@@ -259,6 +262,7 @@ bool Ubidots::send(const char* device_label, PublishFlags flag) {
   Serial.println(
       "[WARNING] Your board does not support the send() "
       "method");
+  return false;
 #endif
 }
 
@@ -273,6 +277,7 @@ bool Ubidots::send(const char* device_label, const char* device_name,
   Serial.println(
       "[WARNING] Your board does not support the send() "
       "method");
+  return false;
 #endif
 }
 
@@ -287,9 +292,11 @@ float Ubidots::get(const char* device_label, const char* variable_label) {
     Serial.println(
         "[Warning] To retrieve data, please set a valid cloud protocol in the "
         "Ubidots constructor");
+    return ERROR_VALUE;
   }
 #else
-  Serial.println("[Warningn] Your board does not support the get() method");
+  Serial.println("[Warning] Your board does not support the get() method");
+  return ERROR_VALUE;
 #endif
 }
 
