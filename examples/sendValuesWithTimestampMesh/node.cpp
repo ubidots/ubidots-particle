@@ -33,8 +33,8 @@ void loop() {
   float value1 = analogRead(A0);
   unsigned long timestamp_seconds = 1553126110L;
 
-  ubidots.add("temperature", value1, NULL,
-              timestamp_seconds);  // Change for your variable name
+  // Change for your variable name
+  ubidots.add("temperature", value1, NULL, timestamp_seconds);
 
   /* Will send data to a device label that matches the device ID */
   ubidots.meshPublishToUbidots();
