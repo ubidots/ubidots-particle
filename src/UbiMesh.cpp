@@ -35,7 +35,7 @@ bool UbiMesh::isThrottled() {
   // Simple throttling routine for TCP and HTTP
   bool throttled = true;
   if (iotProtocolMesh == UBI_HTTP || iotProtocolMesh == UBI_TCP) {
-    if (millis() - time_now > 20000) {
+    if (millis() - time_now > _throttlingTime) {
       throttled = false;
       time_now = millis();
     }
@@ -51,16 +51,12 @@ bool UbiMesh::isThrottled() {
 void UbiMesh::ubiPublishHandler(const char* event, const char* data) {
   bool throttled = isThrottled();
 
-  if (throttled) {
-    if (_debugMesh) {
-      Serial.println(
-          "[WARNING] your sample time reached the throttling of 20 s, please "
-          "set a higher sample time or use UDP or Particle Webhooks to send "
-          "data");
-    }
-  }
-
-  if (!throttled) {
+  if (throttled && _debugMesh) {
+    Serial.println(
+        "[WARNING] your sample time reached the throttling of 20 s, please "
+        "set a higher sample time or use UDP or Particle Webhooks to send "
+        "data");
+  } else {
     uint8_t i = 0;
     char* _data = const_cast<char*>(data);
     char* pch;

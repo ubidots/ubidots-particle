@@ -72,5 +72,6 @@ class UbiMesh {
   void _addContextToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addTimestampToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   bool _MeshReconnect(int timeout);
+  int _throttlingTime = 20000;
 };
 #endif
