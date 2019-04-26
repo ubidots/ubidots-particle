@@ -29,8 +29,7 @@ void setup() {
   // Uncomment this line to choose a different cloud Protocol to send data
   // ubidots.setCloudProtocol(UBI_HTTP);
 
-  // Uncomment this line for printing debug messages
-  ubidots.setDebug(true);
+  // ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
 
 void loop() { ubidots.meshLoop(); }
