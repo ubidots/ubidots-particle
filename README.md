@@ -72,6 +72,7 @@ float get(const char* device_label, const char* variable_label)
 > @variable_label, [Required]. The variable label to retrieve values from.
 
 Returns as float the last value of the dot from the variable.
+IotProtocol getCloudProtocol()
 
 ```
 void addContext(char *key_label, char *key_value)
@@ -136,6 +137,12 @@ Sets the cloud protocol for sending data once the internal Mesh handler is invok
 
 **NOTE**  
 If you set http or tcp as cloud protocol, a throttling of 20 seconds will be implemented in the gateway, so be sure that your sample rate is higher than this period. If you are using multiple Mesh nodes (a.k.a Xenon), **please use UDP or Particle Webhooks** to send data.
+
+```
+IotProtocol getCloudProtocol();
+```
+
+Retrieves the actual cloud protocol used to send data from the Mesh gateway.
 
 # Examples
 
