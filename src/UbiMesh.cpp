@@ -259,9 +259,19 @@ bool UbiMesh::_MeshReconnect(int timeout) {
 
 void UbiMesh::setDebug(bool debug) { _debugMesh = debug; }
 
+/*
+  Sets the cloud protocol to be used by the Mesh gateway
+*/
+
 void UbiMesh::setCloudProtocol(IotProtocol iotProtocol) {
   iotProtocolMesh = iotProtocol;
 }
+
+/*
+  Gets the actual cloud protocol to used by the Mesh gateway
+*/
+
+IotProtocol UbiMesh::getCloudProtocol() { return iotProtocolMesh; }
 
 void UbiMesh::buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots) {
   _addDeviceToDot(meshMap, dots);

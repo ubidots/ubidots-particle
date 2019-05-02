@@ -36,6 +36,7 @@ typedef std::map<uint8_t, char*> meshMap;
 static IotProtocol iotProtocolMesh = UBI_UDP;
 static char* _tokenMesh;
 static bool _debugMesh = false;
+static int _throttlingTime = 20000;
 static unsigned long time_now = millis();
 
 class UbiMesh {
@@ -54,6 +55,7 @@ class UbiMesh {
   bool meshPublishToUbidots(const char* device_label);
   bool meshPublishToUbidots(const char* device_label, const char* device_name);
   void setCloudProtocol(IotProtocol iotProtocol);
+  IotProtocol getCloudProtocol();
   void buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots);
 #if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
   static void ubiPublishHandler(const char* event, const char* data);
@@ -72,6 +74,5 @@ class UbiMesh {
   void _addContextToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   void _addTimestampToDot(std::map<uint8_t, char*>& meshMap, MeshUbi* _dots);
   bool _MeshReconnect(int timeout);
-  int _throttlingTime = 20000;
 };
 #endif
