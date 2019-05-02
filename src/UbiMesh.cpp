@@ -27,10 +27,7 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 /**************************************************************************
  * Static Functions
  ***************************************************************************/
-#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM && \
-    PLATFORM_ID != PLATFORM_PHOTON_DEV &&                                 \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION &&                          \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON
 bool UbiMesh::isThrottled() {
   // Simple throttling routine for TCP and HTTP
   bool throttled = true;
@@ -156,9 +153,8 @@ bool UbiMesh::meshPublish(const char* channel, const char* data) {
 }
 
 bool UbiMesh::meshPublish(const char* channel, const char* data, int timeout) {
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
+    PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
   if (!Mesh.ready()) {
     _MeshReconnect(timeout);
   }
@@ -183,9 +179,8 @@ bool UbiMesh::meshPublishToUbidots(const char* device_label) {
 
 bool UbiMesh::meshPublishToUbidots(const char* device_label,
                                    const char* device_name) {
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
+    PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
   if (strlen(_meshPayload) <= 0) {
     if (_debugMesh) {
       Serial.println(
@@ -226,9 +221,8 @@ void UbiMesh::meshLoop() {
 */
 
 bool UbiMesh::_MeshReconnect(int timeout) {
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
+    PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
   int _timeout = 0;
 
   // Waits up to the set timeout to begin a socket exchange
