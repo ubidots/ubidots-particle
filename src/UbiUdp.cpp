@@ -25,12 +25,28 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 #include "Particle.h"
 #include "UbiConstants.h"
 
+/**************************************************************************
+ * Overloaded constructors
+ ***************************************************************************/
+
 UbiUDP::UbiUDP(const char *host, const int port, const char *user_agent,
                const char *token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
+}
+
+/**************************************************************************
+ * Destructor
+ ***************************************************************************/
+
+UbiUDP::~UbiUDP() {
+  delete[] _host;
+  delete[] _user_agent;
+  delete[] _token;
+  _client_udp_ubi.flush();
+  _client_udp_ubi.stop();
 }
 
 bool UbiUDP::sendData(const char *device_label, const char *device_name,

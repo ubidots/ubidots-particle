@@ -26,24 +26,30 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "UbiProtocol.h"
 
+static TCPClient _client_http_ubi;
+
 class UbiHTTP : public UbiProtocol {
-  public:
-    UbiHTTP(const char* host, const int port, const char* user_agent, const char* token);
-    bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
-    float get(const char* device_label, const char* variable_label);
-    void setDebug(bool debug);
-  private:
-    const char *_host;
-    const char *_user_agent;
-    const char *_token;
-    int _port;
-    bool _debug = false;
-    bool waitServerAnswer();
-    void reconnect(const char * host, int port);
-    float parseHttpAnswer(const char* request_type, char* data);
-    void readServerAnswer(char* response);
-    TCPClient _client_http_ubi;
-    int _timeout = 5000;
+ public:
+  UbiHTTP(const char* host, const int port, const char* user_agent,
+          const char* token);
+  bool sendData(const char* device_label, const char* device_name,
+                char* payload, UbiFlags* flags);
+  float get(const char* device_label, const char* variable_label);
+  void setDebug(bool debug);
+  ~UbiHTTP();
+
+ private:
+  const char* _host;
+  const char* _user_agent;
+  const char* _token;
+  int _port;
+  bool _debug = false;
+  bool waitServerAnswer();
+  void reconnect(const char* host, int port);
+  float parseHttpAnswer(const char* request_type, char* data);
+  void readServerAnswer(char* response);
+  int _timeout = 5000;
+  uint8_t _maxReconnectAttempts = 5;
 };
 
 #endif

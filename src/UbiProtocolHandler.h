@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2019 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -21,40 +21,22 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
-#ifndef _Ubidots_H_
-#define _Ubidots_H_
+#ifndef _UbiProtocolHandler_H_
+#define _UbiProtocolHandler_H_
 
 #include "Particle.h"
 #include "UbiConstants.h"
 #include "UbiProtocol.h"
-#include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
-#include "UbiMesh.h"
-#endif
 
-class Ubidots {
+class UbiProtocolHandler {
  public:
-  explicit Ubidots(char* token, IotProtocol iotProtocol = UBI_TCP);
-  explicit Ubidots(char* token, UbiServer server = UBI_INDUSTRIAL,
-                   IotProtocol iotProtocol = UBI_TCP);
-  void add(char* variable_label, float value);
-  void add(char* variable_label, float value, char* context);
-  void add(char* variable_label, float value, char* context,
-           unsigned long dot_timestamp_seconds);
+  explicit UbiProtocolHandler(char* token, IotProtocol iot_protocol);
+  explicit UbiProtocolHandler(char* token, UbiServer server = UBI_INDUSTRIAL,
+                              IotProtocol iot_protocol = UBI_TCP);
   void add(char* variable_label, float value, char* context,
            unsigned long dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
-  void addContext(char* key_label, char* key_value);
-  void getContext(char* context_result);
-  void getContext(char* context_result, IotProtocol iotProtocol);
-  bool meshPublishToUbidots();
-  bool meshPublishToUbidots(const char* device_label);
-  bool meshPublishToUbidots(const char* device_label, const char* device_name);
-  void meshLoop();
-  void setCloudProtocol(IotProtocol iotProtocol);
   bool send();
   bool send(const char* device_label);
   bool send(const char* device_label, const char* device_name);
@@ -62,24 +44,21 @@ class Ubidots {
   bool send(const char* device_label, const char* device_name, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
-  ~Ubidots();
+  ~UbiProtocolHandler();
 
  private:
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
-  // Mesh devices protocol wrapper
-  UbiMesh* _protocolMesh;
-#endif
-
-  // Only non-Xenon devices support cloud communication
-  UbiProtocolHandler* _cloudProtocol;
-
-  ContextUbi* _context;
-  IotProtocol _iotProtocol;
-  int8_t _current_context = 0;
-  bool _debug = false;
-  void _builder(char* token, UbiServer server, IotProtocol iot_protocol);
+  char* _default_device_label;
+  UbiProtocol* _ubiProtocol;
+  const char* _token;
+  Value* _dots;
+  int8_t _current_value = 0;
+  bool _dirty = false;
+  bool _debug;
+  IotProtocol _iot_protocol;
+  void buildHttpPayload(char* payload);
+  void buildTcpPayload(char* payload, const char* device_label,
+                       const char* device_name);
+  void builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };
 
 #endif

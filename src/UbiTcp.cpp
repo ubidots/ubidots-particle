@@ -21,18 +21,34 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
-#include "Particle.h"
 #include "UbiTcp.h"
+#include "Particle.h"
 #include "UbiConstants.h"
 
-UbiTCP::UbiTCP(const char* host, const int port, const char* user_agent, const char* token){
+/**************************************************************************
+ * Overloaded constructors
+ ***************************************************************************/
+
+UbiTCP::UbiTCP(const char* host, const int port, const char* user_agent,
+               const char* token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
   _port = port;
 }
 
-bool UbiTCP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags){
+/**************************************************************************
+ * Destructor
+ ***************************************************************************/
+
+UbiTCP::~UbiTCP() {
+  delete[] _host;
+  delete[] _user_agent;
+  delete[] _token;
+}
+
+bool UbiTCP::sendData(const char* device_label, const char* device_name,
+                      char* payload, UbiFlags* flags) {
   /* Makes sure that the client is connected to Ubidots */
   _client_tcp_ubi.connect(_host, UBIDOTS_TCP_PORT);
   reconnect(_host, UBIDOTS_TCP_PORT);
@@ -55,18 +71,17 @@ bool UbiTCP::sendData(const char* device_label, const char* device_name, char* p
   }
 
   /* Parses the host answer, returns true if it is 'Ok' */
-  char* response = (char *) malloc(sizeof(char) * 100);
+  char* response = (char*)malloc(sizeof(char) * 100);
 
   float value = parseTCPAnswer("POST", response);
   free(response);
-  if (value != ERROR_VALUE){
+  if (value != ERROR_VALUE) {
     _client_tcp_ubi.stop();
     return true;
   }
 
   _client_tcp_ubi.stop();
   return false;
-
 }
 
 float UbiTCP::get(const char* device_label, const char* variable_label) {
@@ -75,7 +90,8 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
   reconnect(_host, UBIDOTS_TCP_PORT);
 
   if (_client_tcp_ubi.connected()) {
-    /* Builds the request POST - Please reference this link to know all the request's structures https://ubidots.com/docs/api/ */
+    /* Builds the request POST - Please reference this link to know all the
+     * request's structures https://ubidots.com/docs/api/ */
     _client_tcp_ubi.print(_user_agent);
     _client_tcp_ubi.print("|LV|");
     _client_tcp_ubi.print(_token);
@@ -85,7 +101,7 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
     _client_tcp_ubi.print(variable_label);
     _client_tcp_ubi.print("|end");
 
-    if (_debug){
+    if (_debug) {
       Serial.println("----");
       Serial.println("Payload for request:");
       Serial.print(_user_agent);
@@ -106,7 +122,7 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
     }
 
     /* Reads the response from the server */
-    char* response = (char *) malloc(sizeof(char) * MAX_BUFFER_SIZE);
+    char* response = (char*)malloc(sizeof(char) * MAX_BUFFER_SIZE);
     float value = parseTCPAnswer("LV", response);
     _client_tcp_ubi.stop();
     free(response);
@@ -127,15 +143,17 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
  *         false if timeout is reached.
  */
 
-void UbiTCP::reconnect(const char * host, const int port) {
+void UbiTCP::reconnect(const char* host, const int port) {
   uint8_t attempts = 0;
-  while (!_client_tcp_ubi.connected() && attempts < 5) {
+  Serial.println("Attempting to reconnect");
+  while (!_client_tcp_ubi.status() && attempts < 1) {
     if (_debug) {
       Serial.print("Trying to connect to ");
       Serial.print(host);
       Serial.print(" , attempt number: ");
       Serial.println(attempts);
     }
+    _client_tcp_ubi.stop();
     _client_tcp_ubi.connect(host, port);
     attempts += 1;
     delay(1000);
@@ -150,7 +168,7 @@ void UbiTCP::reconnect(const char * host, const int port) {
 
 bool UbiTCP::waitServerAnswer() {
   int timeout = 0;
-  while(!_client_tcp_ubi.available() && timeout < _timeout) {
+  while (!_client_tcp_ubi.available() && timeout < _timeout) {
     timeout++;
     delay(1);
     if (timeout > _timeout - 1) {
@@ -172,7 +190,7 @@ bool UbiTCP::waitServerAnswer() {
 float UbiTCP::parseTCPAnswer(const char* request_type, char* response) {
   int j = 0;
 
-  if (_debug){
+  if (_debug) {
     Serial.println("----------");
     Serial.println("Server's response:");
   }
@@ -189,7 +207,7 @@ float UbiTCP::parseTCPAnswer(const char* request_type, char* response) {
     }
   }
 
-  if (_debug){
+  if (_debug) {
     Serial.println("\n----------");
   }
 
@@ -198,7 +216,7 @@ float UbiTCP::parseTCPAnswer(const char* request_type, char* response) {
 
   // POST
   if (request_type == "POST") {
-    char *pch = strstr(response, "OK");
+    char* pch = strstr(response, "OK");
     if (pch != NULL) {
       result = 1;
     }
@@ -206,7 +224,7 @@ float UbiTCP::parseTCPAnswer(const char* request_type, char* response) {
   }
 
   // LV
-  char *pch = strchr(response, '|');
+  char* pch = strchr(response, '|');
   if (pch != NULL) {
     result = atof(pch + 1);
   }
@@ -218,6 +236,4 @@ float UbiTCP::parseTCPAnswer(const char* request_type, char* response) {
  * Makes available debug traces
  */
 
-void UbiTCP::setDebug(bool debug) {
-  _debug = debug;
-}
+void UbiTCP::setDebug(bool debug) { _debug = debug; }

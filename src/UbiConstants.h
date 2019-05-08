@@ -24,11 +24,12 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiConstants_H_
 #define _UbiConstants_H_
 
-#include "UbiTypes.h"
 #include "Particle.h"
+#include "UbiTypes.h"
 
-const char * const UBIDOTS_SERVER = "industrial.api.ubidots.com";
-const char * const USER_AGENT = "UbidotsParticle/3.0";
+const char* const UBIDOTS_SERVER = "industrial.api.ubidots.com";
+const char* const USER_AGENT = "UbidotsParticle/3.1";
+const char* const UBIDOTS_MESH_CHANNEL = "ubidots-mesh";
 const int UBIDOTS_HTTP_PORT = 80;
 const int UBIDOTS_TCP_PORT = 9012;
 const uint8_t MAX_VALUES = 10;
