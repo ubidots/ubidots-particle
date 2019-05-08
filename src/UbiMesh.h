@@ -57,7 +57,7 @@ class UbiMesh {
   void setCloudProtocol(IotProtocol iotProtocol);
   IotProtocol getCloudProtocol();
   void buildDots(std::map<uint8_t, char*>& meshMap, MeshUbi* dots);
-#if PLATFORM_ID != PLATFORM_XENON && PLATFORM_ID != PLATFORM_XENON_SOM
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON
   static void ubiPublishHandler(const char* event, const char* data);
   static bool isThrottled();
 #endif
