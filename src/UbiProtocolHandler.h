@@ -59,6 +59,7 @@ class UbiProtocolHandler {
   void buildTcpPayload(char* payload, const char* device_label,
                        const char* device_name);
   void builder(char* token, UbiServer server, IotProtocol iot_protocol);
+  void _floatToChar(char* value_str, float value);
 };
 
 #endif
