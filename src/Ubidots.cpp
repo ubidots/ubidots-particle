@@ -41,14 +41,16 @@ Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) {
 void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
   _iotProtocol = iotProtocol;
   _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
+
 // Electron and photon do not support Mesh
 #if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
     PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
     PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
   _protocolMesh = new UbiMesh(token);
+#endif
 
-  // Only non-xenon devices may have cloud communication protocols
-#elif PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
+// Only non-xenon devices may have cloud communication protocols
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
     PLATFORM_ID == PLATFORM_PHOTON_DEV ||                               \
     PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                        \
     PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
