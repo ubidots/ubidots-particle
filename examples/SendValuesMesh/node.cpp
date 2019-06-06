@@ -13,7 +13,7 @@
 #endif
 
 Ubidots ubidots(UBIDOTS_TOKEN, UBI_INDUSTRIAL, UBI_MESH);
-//Ubidots ubidots(UBIDOTS_TOKEN,UBI_EDUCATIONAL ,UBI_MESH); Uncomment this line if you're an Educational user.
+//Ubidots ubidots(UBIDOTS_TOKEN, UBI_EDUCATIONAL, UBI_MESH); Uncomment this line if you're an Educational user.
 
 /****************************************
  * Auxiliar Functions
