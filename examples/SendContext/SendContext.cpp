@@ -16,7 +16,7 @@
 #endif
 
 Ubidots ubidots(UBIDOTS_TOKEN, UBI_TCP);
-
+//Ubidots ubidots(UBIDOTS_TOKEN, UBI_EDUCATIONAL, UBI_TCP); Replace the above line if you're an Ubidots for Education user.
 
 /****************************************
  * Auxiliar Functions

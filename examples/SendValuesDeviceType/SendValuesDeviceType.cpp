@@ -22,7 +22,7 @@ char * device = (char *) malloc(sizeof(char) * 30);;
 #endif
 
 Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
-
+//Ubidots ubidots(UBIDOTS_TOKEN, UBI_EDUCATIONAL, UBI_HTTP); Replace the above line if you're an Ubidots for Education user.
 
 /****************************************
  * Auxiliar Functions
