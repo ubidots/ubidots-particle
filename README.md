@@ -4,7 +4,7 @@ Here you will learn how to send data to Ubidots using Particle Photon or Electro
 
 ## Requirements
 
-- [Particle Photon, Electron](https://store.particle.io/)
+- [Particle Device](https://store.particle.io/)
 - Micro USB cable
 - Internet connection
 - Note: For the last version of the library is necessary to have your particle device with firmware version 0.7.0 or above.
@@ -20,7 +20,7 @@ Here you will learn how to send data to Ubidots using Particle Photon or Electro
    - In contributed library write Ubidots and select the Ubidots library.
    - Click on **INCLUDE IN APP**. And return to "MYAPP.ino"
 
-This library creates by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle Core ID.
+This library creates by default new Data Source. The name of this data source will be "Particle" by default, and his label will be you Particle ID.
 
 The default method is TCP, if you want to change it go to the features sections and follow the example.
 
