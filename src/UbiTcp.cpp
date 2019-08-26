@@ -146,7 +146,7 @@ float UbiTCP::get(const char* device_label, const char* variable_label) {
 void UbiTCP::reconnect(const char* host, const int port) {
   uint8_t attempts = 0;
   Serial.println("Attempting to reconnect");
-  while (!_client_tcp_ubi.status() && attempts < 1) {
+  while (!_client_tcp_ubi.status() && attempts < 5) {
     if (_debug) {
       Serial.print("Trying to connect to ");
       Serial.print(host);
