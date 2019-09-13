@@ -57,16 +57,14 @@ bool UbiUDP::sendData(const char *device_label, const char *device_name,
   if (!serverIpAddress) {
     if (_debug) {
       Serial.println(
-          "ERROR, could not solve IP Address of the remote host, please check "
-          "your DNS setup");
+          "[Warning] Could not solve IP Address of the remote host, with your DNS setup. \
+          \nUsing default Industrial Ubidots IP: 169.55.61.243");
     }
-    _client_udp_ubi.stop();
-    return false;
+    serverIpAddress = IPAddress(169,55,61,243);
   }
 
   /* Sends data to Ubidots */
-  _client_udp_ubi.setBuffer(MAX_BUFFER_SIZE +
-                            1);  // Sets the max buffer size to send data
+  _client_udp_ubi.setBuffer(MAX_BUFFER_SIZE + 1);  // Sets the max buffer size to send data
   _client_udp_ubi.begin(UBIDOTS_TCP_PORT);
   if (!(_client_udp_ubi.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT) &&
         _client_udp_ubi.write(payload) && _client_udp_ubi.endPacket())) {
@@ -96,22 +94,20 @@ void UbiUDP::setDebug(bool debug) { _debug = debug; }
  */
 
 IPAddress UbiUDP::getServerIp() {
-  IPAddress serverIpAddress;
 #if (PLATFORM_ID == 12 || PLATFORM_ID == 6)  // Argon(12), Photon(6)
-  serverIpAddress = WiFi.resolve(_host);
-  return serverIpAddress;
+  return = WiFi.resolve(_host);
 #elif (PLATFORM_ID == 13 || PLATFORM_ID == 10)  // Boron(13), Electron(10)
-  serverIpAddress = Cellular.resolve(_host);
-  return serverIpAddress;
+  return Cellular.resolve(_host);
 #else
   HAL_IPAddress ip;
   network_interface_t t;
-  serverIpAddress =
-      (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL) == 0)
-          ? IPAddress(uint32_t(0))
-          : IPAddress(ip);
-  return serverIpAddress;
+  if (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL) == 0) {
+    return ip;
+  }
+  else {
+    return IPAddress(169,55,61,243);
+  }
 #endif
 
-  return serverIpAddress;
+  return IPAddress(169,55,61,243);
 }
