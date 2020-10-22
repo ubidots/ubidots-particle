@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -22,6 +22,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 */
 
 #include "Ubidots.h"
+
 #include "UbiConstants.h"
 #include "UbiProtocol.h"
 #include "UbiTypes.h"
@@ -30,30 +31,23 @@ Developed and maintained by Jose Garcia for IoT Services Inc
  * Overloaded constructors
  ***************************************************************************/
 
-Ubidots::Ubidots(char* token, IotProtocol iotProtocol) {
-  _builder(token, UBI_INDUSTRIAL, iotProtocol);
-}
+Ubidots::Ubidots(char* token, IotProtocol iotProtocol) { _builder(token, UBI_INDUSTRIAL, iotProtocol); }
 
-Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) {
-  _builder(token, server, iotProtocol);
-}
+Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) { _builder(token, server, iotProtocol); }
 
 void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
   _iotProtocol = iotProtocol;
   _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
 
 // Electron and photon do not support Mesh
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
+#if PLATFORM_ID != PLATFORM_PHOTON_DEV && PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
     PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
   _protocolMesh = new UbiMesh(token);
 #endif
 
 // Only non-xenon devices may have cloud communication protocols
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                               \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                        \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   if (_iotProtocol != UBI_MESH) {
     _cloudProtocol = new UbiProtocolHandler(token, server, iotProtocol);
   } else {
@@ -69,14 +63,11 @@ void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
 
 Ubidots::~Ubidots() {
   free(_context);
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV &&        \
-    PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
+#if PLATFORM_ID != PLATFORM_PHOTON_DEV && PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
     PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
   delete _protocolMesh;
-#elif PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                               \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                        \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#elif PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   delete _cloudProtocol;
 #endif
 }
@@ -96,37 +87,27 @@ FUNCTIONS TO SEND DATA
  * dot_timestamp_seconds, usefull for datalogger.
  */
 
-void Ubidots::add(char* variable_label, float value) {
-  add(variable_label, value, NULL, NULL, NULL);
-}
+void Ubidots::add(char* variable_label, float value) { add(variable_label, value, NULL, NULL, NULL); }
 
-void Ubidots::add(char* variable_label, float value, char* context) {
-  add(variable_label, value, context, NULL, NULL);
-}
+void Ubidots::add(char* variable_label, float value, char* context) { add(variable_label, value, context, NULL, NULL); }
 
-void Ubidots::add(char* variable_label, float value, char* context,
-                  long unsigned dot_timestamp_seconds) {
+void Ubidots::add(char* variable_label, float value, char* context, long unsigned dot_timestamp_seconds) {
   add(variable_label, value, context, dot_timestamp_seconds, NULL);
 }
 
-void Ubidots::add(char* variable_label, float value, char* context,
-                  long unsigned dot_timestamp_seconds,
+void Ubidots::add(char* variable_label, float value, char* context, long unsigned dot_timestamp_seconds,
                   unsigned int dot_timestamp_millis) {
 #if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON
   if (_iotProtocol == UBI_MESH) {
-    _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
-                       dot_timestamp_millis);
+    _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds, dot_timestamp_millis);
   } else {
-    _cloudProtocol->add(variable_label, value, context, dot_timestamp_seconds,
-                        dot_timestamp_millis);
+    _cloudProtocol->add(variable_label, value, context, dot_timestamp_seconds, dot_timestamp_millis);
   }
 
-#elif PLATFORM_ID == PLATFORM_PHOTON_DEV ||      \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || \
+#elif PLATFORM_ID == PLATFORM_PHOTON_DEV || PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || \
     PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   if (_iotProtocol != UBI_MESH) {
-    _cloudProtocol->add(variable_label, value, context, dot_timestamp_seconds,
-                        dot_timestamp_millis);
+    _cloudProtocol->add(variable_label, value, context, dot_timestamp_seconds, dot_timestamp_millis);
   } else {
     Serial.println(
         "[WARNING] please choose a different cloud protocol of Mesh in the "
@@ -134,16 +115,15 @@ void Ubidots::add(char* variable_label, float value, char* context,
   }
 // Xenon only supports Mesh cloud protocol
 #elif PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
-  _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds,
-                     dot_timestamp_millis);
+  _protocolMesh->add(variable_label, value, context, dot_timestamp_seconds, dot_timestamp_millis);
 #else
   Serial.println("[WARNING] Your board does not support the add() method");
 #endif
 }
 
 bool Ubidots::meshPublishToUbidots() {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON || \
+    PLATFORM_ID == PLATFORM_XENON_SOM
   return _protocolMesh->meshPublishToUbidots();
 #else
   Serial.println(
@@ -154,8 +134,8 @@ bool Ubidots::meshPublishToUbidots() {
 }
 
 bool Ubidots::meshPublishToUbidots(const char* device_label) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON || \
+    PLATFORM_ID == PLATFORM_XENON_SOM
   return _protocolMesh->meshPublishToUbidots(device_label);
 #else
   Serial.println(
@@ -165,10 +145,9 @@ bool Ubidots::meshPublishToUbidots(const char* device_label) {
 #endif
 }
 
-bool Ubidots::meshPublishToUbidots(const char* device_label,
-                                   const char* device_name) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
+bool Ubidots::meshPublishToUbidots(const char* device_label, const char* device_name) {
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_XENON || \
+    PLATFORM_ID == PLATFORM_XENON_SOM
   return _protocolMesh->meshPublishToUbidots(device_label, device_name);
 #else
   Serial.println(
@@ -207,10 +186,8 @@ void Ubidots::setCloudProtocol(IotProtocol iotProtocol) {
  */
 
 bool Ubidots::send() {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   if (_iotProtocol != UBI_MESH) {
     return _cloudProtocol->send();
   } else {
@@ -227,10 +204,8 @@ bool Ubidots::send() {
 }
 
 bool Ubidots::send(const char* device_label) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   return _cloudProtocol->send(device_label);
 #else
   Serial.println(
@@ -241,10 +216,8 @@ bool Ubidots::send(const char* device_label) {
 }
 
 bool Ubidots::send(const char* device_label, const char* device_name) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   return _cloudProtocol->send(device_label, device_name);
 #else
   Serial.println(
@@ -255,10 +228,8 @@ bool Ubidots::send(const char* device_label, const char* device_name) {
 }
 
 bool Ubidots::send(const char* device_label, PublishFlags flag) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   return _cloudProtocol->send(device_label, flag);
 #else
   Serial.println(
@@ -268,12 +239,9 @@ bool Ubidots::send(const char* device_label, PublishFlags flag) {
 #endif
 }
 
-bool Ubidots::send(const char* device_label, const char* device_name,
-                   UbiFlags* flags) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+bool Ubidots::send(const char* device_label, const char* device_name, UbiFlags* flags) {
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   return _cloudProtocol->send(device_label, device_name, flags);
 #else
   Serial.println(
@@ -284,10 +252,8 @@ bool Ubidots::send(const char* device_label, const char* device_name,
 }
 
 float Ubidots::get(const char* device_label, const char* variable_label) {
-#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || \
-    PLATFORM_ID == PLATFORM_PHOTON_DEV ||                             \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION ||                      \
-    PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
+#if PLATFORM_ID == PLATFORM_ARGON || PLATFORM_ID == PLATFORM_BORON || PLATFORM_ID == PLATFORM_PHOTON_DEV || \
+    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   if (_iotProtocol != UBI_MESH) {
     _cloudProtocol->get(device_label, variable_label);
   } else {
@@ -310,8 +276,7 @@ void Ubidots::setDebug(bool debug) {
   } else {
     _protocolMesh->setDebug(debug);
   }
-#elif PLATFORM_ID == PLATFORM_PHOTON_DEV ||      \
-    PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || \
+#elif PLATFORM_ID == PLATFORM_PHOTON_DEV || PLATFORM_ID == PLATFORM_PHOTON_PRODUCTION || \
     PLATFORM_ID == PLATFORM_ELECTRON_PRODUCTION
   _cloudProtocol->setDebug(debug);
 #elif PLATFORM_ID == PLATFORM_XENON || PLATFORM_ID == PLATFORM_XENON_SOM
@@ -339,17 +304,14 @@ void Ubidots::addContext(char* key_label, char* key_value) {
  * Retrieves the actual stored context properly formatted
  */
 
-void Ubidots::getContext(char* context_result) {
-  getContext(context_result, _iotProtocol);
-}
+void Ubidots::getContext(char* context_result) { getContext(context_result, _iotProtocol); }
 
 void Ubidots::getContext(char* context_result, IotProtocol iotProtocol) {
   // TCP context type
   if (iotProtocol == UBI_TCP || iotProtocol == UBI_UDP) {
     sprintf(context_result, "");
     for (uint8_t i = 0; i < _current_context;) {
-      sprintf(context_result, "%s%s=%s", context_result,
-              (_context + i)->key_label, (_context + i)->key_value);
+      sprintf(context_result, "%s%s=%s", context_result, (_context + i)->key_label, (_context + i)->key_value);
       i++;
       if (i < _current_context) {
         sprintf(context_result, "%s$", context_result);
@@ -364,8 +326,7 @@ void Ubidots::getContext(char* context_result, IotProtocol iotProtocol) {
   if (iotProtocol == UBI_PARTICLE || iotProtocol == UBI_HTTP) {
     sprintf(context_result, "");
     for (uint8_t i = 0; i < _current_context;) {
-      sprintf(context_result, "%s\"%s\":\"%s\"", context_result,
-              (_context + i)->key_label, (_context + i)->key_value);
+      sprintf(context_result, "%s\"%s\":\"%s\"", context_result, (_context + i)->key_label, (_context + i)->key_value);
       i++;
       if (i < _current_context) {
         sprintf(context_result, "%s,", context_result);

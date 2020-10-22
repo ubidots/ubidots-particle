@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -30,10 +30,8 @@ static TCPClient _client_http_ubi;
 
 class UbiHTTP : public UbiProtocol {
  public:
-  UbiHTTP(const char* host, const int port, const char* user_agent,
-          const char* token);
-  bool sendData(const char* device_label, const char* device_name,
-                char* payload, UbiFlags* flags);
+  UbiHTTP(const char* host, const int port, const char* user_agent, const char* token);
+  bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
   ~UbiHTTP();

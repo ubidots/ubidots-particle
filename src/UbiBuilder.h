@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -25,6 +25,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #define _UbiBuilder_H_
 
 #include <map>
+
 #include "Particle.h"
 #include "UbiConstants.h"
 #include "UbiProtocol.h"
@@ -45,8 +46,7 @@ const char* _token;
 
 class UbiBuilder {
  public:
-  explicit UbiBuilder(const char* host, const char* token,
-                      IotProtocol iotProtocol);
+  explicit UbiBuilder(const char* host, const char* token, IotProtocol iotProtocol);
   UbiProtocol* builder();
 
  private:
