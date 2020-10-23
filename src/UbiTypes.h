@@ -51,7 +51,7 @@ typedef struct MeshUbi {
 
 typedef const char *UbiServer;
 
-typedef enum { UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE, UBI_MESH } IotProtocol;
+typedef enum { UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE } IotProtocol;
 
 typedef struct UbiFlags {
   UbiFlags() : particle_flag(PUBLIC) {}
