@@ -24,6 +24,10 @@ This library creates by default new Data Source. The name of this data source wi
 
 The default method is TCP, if you want to change it go to the features sections and follow the example.
 
+## Warning: About Particle Mesh
+
+After the [announcement](https://blog.particle.io/mesh-deprecation/) of the deprecation of the Particle Mesh IoT protocol, as Particle is no longer producing Mesh units, Ubidots has decided to stop to support it out of the box in this library. If you need to still use the Mesh IoT protocol in your project in conjunction with our library, please compile your project through the Particle CLI with the version [v3.1.4](https://github.com/ubidots/ubidots-particle/releases/tag/3.1.4) of this library.
+
 # Documentation
 
 ## Constructor
