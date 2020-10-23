@@ -24,7 +24,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiConstants_H_
 #define _UbiConstants_H_
 
-#include "Particle.h"
 #include "UbiTypes.h"
 
 const char* const UBIDOTS_SERVER = "industrial.api.ubidots.com";

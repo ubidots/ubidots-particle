@@ -24,16 +24,15 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiTcp_H_
 #define _UbiTcp_H_
 
+#include "UbiConstants.h"
 #include "UbiProtocol.h"
 
 static TCPClient _client_tcp_ubi;
 
 class UbiTCP : public UbiProtocol {
  public:
-  UbiTCP(const char* host, const int port, const char* user_agent,
-         const char* token);
-  bool sendData(const char* device_label, const char* device_name,
-                char* payload, UbiFlags* flags);
+  UbiTCP(const char* host, const int port, const char* user_agent, const char* token);
+  bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
   ~UbiTCP();

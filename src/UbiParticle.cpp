@@ -23,9 +23,6 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 
 #include "UbiParticle.h"
 
-#include "Particle.h"
-#include "UbiConstants.h"
-
 /**************************************************************************
  * Overloaded constructors
  ***************************************************************************/

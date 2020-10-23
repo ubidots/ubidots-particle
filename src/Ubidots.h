@@ -29,10 +29,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #include "UbiProtocol.h"
 #include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV && PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
-#include "UbiMesh.h"
-#endif
 
 class Ubidots {
  public:
@@ -46,11 +42,6 @@ class Ubidots {
   void addContext(char* key_label, char* key_value);
   void getContext(char* context_result);
   void getContext(char* context_result, IotProtocol iotProtocol);
-  bool meshPublishToUbidots();
-  bool meshPublishToUbidots(const char* device_label);
-  bool meshPublishToUbidots(const char* device_label, const char* device_name);
-  void meshLoop();
-  void setCloudProtocol(IotProtocol iotProtocol);
   bool send();
   bool send(const char* device_label);
   bool send(const char* device_label, const char* device_name);
@@ -61,13 +52,6 @@ class Ubidots {
   ~Ubidots();
 
  private:
-#if PLATFORM_ID != PLATFORM_PHOTON_DEV && PLATFORM_ID != PLATFORM_PHOTON_PRODUCTION && \
-    PLATFORM_ID != PLATFORM_ELECTRON_PRODUCTION
-  // Mesh devices protocol wrapper
-  UbiMesh* _protocolMesh;
-#endif
-
-  // Only non-Xenon devices support cloud communication
   UbiProtocolHandler* _cloudProtocol;
 
   ContextUbi* _context;

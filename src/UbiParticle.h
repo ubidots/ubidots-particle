@@ -24,6 +24,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiParticle_H_
 #define _UbiParticle_H_
 
+#include "UbiConstants.h"
 #include "UbiProtocol.h"
 
 class UbiParticle : public UbiProtocol {

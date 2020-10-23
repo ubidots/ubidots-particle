@@ -23,9 +23,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "UbiTcp.h"
 
-#include "Particle.h"
-#include "UbiConstants.h"
-
 /**************************************************************************
  * Overloaded constructors
  ***************************************************************************/

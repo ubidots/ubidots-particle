@@ -24,7 +24,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiUdp_H_
 #define _UbiUdp_H_
 
-#include "Particle.h"
+#include "UbiConstants.h"
 #include "UbiProtocol.h"
 
 static UDP _client_udp_ubi;
