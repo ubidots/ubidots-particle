@@ -26,7 +26,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include <map>
 
-#include "Particle.h"
 #include "UbiConstants.h"
 #include "UbiHttp.h"
 #include "UbiParticle.h"
