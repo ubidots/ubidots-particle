@@ -26,12 +26,9 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include <map>
 
-#include "UbiConstants.h"
 #include "UbiHttp.h"
 #include "UbiParticle.h"
-#include "UbiProtocol.h"
 #include "UbiTcp.h"
-#include "UbiTypes.h"
 #include "UbiUdp.h"
 
 UbiProtocol* builderTcp();

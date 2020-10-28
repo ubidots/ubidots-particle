@@ -39,16 +39,6 @@ typedef struct ContextUbi {
   char *key_value;
 } ContextUbi;
 
-typedef struct MeshUbi {
-  char *deviceLabel;
-  char *deviceName;
-  char *variableLabel;
-  char *dotContext;
-  float dotValue;
-  unsigned long dotTimestampSeconds;
-  unsigned int dotTimestampMillis;
-} MeshUbi;
-
 typedef const char *UbiServer;
 
 typedef enum { UBI_HTTP, UBI_TCP, UBI_UDP, UBI_PARTICLE } IotProtocol;
