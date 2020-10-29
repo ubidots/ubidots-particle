@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -22,15 +22,12 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 */
 
 #include "UbiUdp.h"
-#include "Particle.h"
-#include "UbiConstants.h"
 
 /**************************************************************************
  * Overloaded constructors
  ***************************************************************************/
 
-UbiUDP::UbiUDP(const char *host, const int port, const char *user_agent,
-               const char *token) {
+UbiUDP::UbiUDP(const char *host, const int port, const char *user_agent, const char *token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
@@ -49,8 +46,7 @@ UbiUDP::~UbiUDP() {
   _client_udp_ubi.stop();
 }
 
-bool UbiUDP::sendData(const char *device_label, const char *device_name,
-                      char *payload, UbiFlags *flags) {
+bool UbiUDP::sendData(const char *device_label, const char *device_name, char *payload, UbiFlags *flags) {
   /* Obtains the remote host's IP */
   IPAddress serverIpAddress = getServerIp();
 
@@ -60,14 +56,14 @@ bool UbiUDP::sendData(const char *device_label, const char *device_name,
           "[Warning] Could not solve IP Address of the remote host, with your DNS setup. \
           \nUsing default Industrial Ubidots IP: 169.55.61.243");
     }
-    serverIpAddress = IPAddress(169,55,61,243);
+    serverIpAddress = IPAddress(169, 55, 61, 243);
   }
 
   /* Sends data to Ubidots */
   _client_udp_ubi.setBuffer(MAX_BUFFER_SIZE + 1);  // Sets the max buffer size to send data
   _client_udp_ubi.begin(UBIDOTS_TCP_PORT);
-  if (!(_client_udp_ubi.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT) &&
-        _client_udp_ubi.write(payload) && _client_udp_ubi.endPacket())) {
+  if (!(_client_udp_ubi.beginPacket(serverIpAddress, UBIDOTS_TCP_PORT) && _client_udp_ubi.write(payload) &&
+        _client_udp_ubi.endPacket())) {
     if (_debug) {
       Serial.println("ERROR sending values with UDP");
     }
@@ -79,9 +75,7 @@ bool UbiUDP::sendData(const char *device_label, const char *device_name,
   return true;
 }
 
-float UbiUDP::get(const char *device_label, const char *variable_label) {
-  return ERROR_VALUE;
-}
+float UbiUDP::get(const char *device_label, const char *variable_label) { return ERROR_VALUE; }
 
 /**
  * Makes available debug traces
@@ -103,11 +97,10 @@ IPAddress UbiUDP::getServerIp() {
   network_interface_t t;
   if (inet_gethostbyname(_host, strlen(_host), &ip, t, NULL) == 0) {
     return ip;
-  }
-  else {
-    return IPAddress(169,55,61,243);
+  } else {
+    return IPAddress(169, 55, 61, 243);
   }
 #endif
 
-  return IPAddress(169,55,61,243);
+  return IPAddress(169, 55, 61, 243);
 }

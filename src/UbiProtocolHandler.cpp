@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -22,6 +22,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 */
 
 #include "UbiProtocolHandler.h"
+
 #include "UbiBuilder.h"
 #include "UbiConstants.h"
 #include "UbiProtocol.h"
@@ -35,13 +36,11 @@ UbiProtocolHandler::UbiProtocolHandler(char* token, IotProtocol iot_protocol) {
   builder(token, UBI_INDUSTRIAL, iot_protocol);
 }
 
-UbiProtocolHandler::UbiProtocolHandler(char* token, UbiServer server,
-                                       IotProtocol iot_protocol) {
+UbiProtocolHandler::UbiProtocolHandler(char* token, UbiServer server, IotProtocol iot_protocol) {
   builder(token, server, iot_protocol);
 }
 
-void UbiProtocolHandler::builder(char* token, UbiServer server,
-                                 IotProtocol iot_protocol) {
+void UbiProtocolHandler::builder(char* token, UbiServer server, IotProtocol iot_protocol) {
   String particle_id_str = System.deviceID();
   _default_device_label = new char[particle_id_str.length() + 1];
   strcpy(_default_device_label, particle_id_str.c_str());
@@ -79,8 +78,7 @@ FUNCTIONS TO SEND DATA
  * dot_timestamp_seconds, usefull for datalogger.
  */
 
-void UbiProtocolHandler::add(char* variable_label, float value, char* context,
-                             unsigned long dot_timestamp_seconds,
+void UbiProtocolHandler::add(char* variable_label, float value, char* context, unsigned long dot_timestamp_seconds,
                              unsigned int dot_timestamp_millis) {
   _dirty = true;
   (_dots + _current_value)->variable_label = variable_label;
@@ -91,8 +89,7 @@ void UbiProtocolHandler::add(char* variable_label, float value, char* context,
   _current_value++;
   if (_current_value > MAX_VALUES) {
     if (_debug) {
-      Serial.println(
-          F("You are sending more than the maximum of consecutive variables"));
+      Serial.println(F("You are sending more than the maximum of consecutive variables"));
     }
     _current_value = MAX_VALUES;
   }
@@ -116,8 +113,7 @@ bool UbiProtocolHandler::send(const char* device_label) {
   return send(device_label, device_label, flags);
 }
 
-bool UbiProtocolHandler::send(const char* device_label,
-                              const char* device_name) {
+bool UbiProtocolHandler::send(const char* device_label, const char* device_name) {
   UbiFlags* flags = new UbiFlags();
   return send(device_label, device_name, flags);
 }
@@ -128,8 +124,7 @@ bool UbiProtocolHandler::send(const char* device_label, PublishFlags flag) {
   return send(device_label, device_label, flags);
 }
 
-bool UbiProtocolHandler::send(const char* device_label, const char* device_name,
-                              UbiFlags* flags) {
+bool UbiProtocolHandler::send(const char* device_label, const char* device_name, UbiFlags* flags) {
   // Builds the payload
   char* payload = (char*)malloc(sizeof(char) * MAX_BUFFER_SIZE);
   if (_iot_protocol == UBI_TCP || _iot_protocol == UBI_UDP) {
@@ -155,11 +150,9 @@ bool UbiProtocolHandler::send(const char* device_label, const char* device_name,
   return result;
 }
 
-float UbiProtocolHandler::get(const char* device_label,
-                              const char* variable_label) {
+float UbiProtocolHandler::get(const char* device_label, const char* variable_label) {
   if (_iot_protocol == UBI_UDP || _iot_protocol == UBI_PARTICLE) {
-    Serial.println(
-        "ERROR, data retrieval is only supported using TCP or HTTP protocols");
+    Serial.println("ERROR, data retrieval is only supported using TCP or HTTP protocols");
     return ERROR_VALUE;
   }
 
@@ -184,13 +177,11 @@ void UbiProtocolHandler::buildHttpPayload(char* payload) {
   for (uint8_t i = 0; i < _current_value;) {
     char str_value[20];
     _floatToChar(str_value, (_dots + i)->dot_value);
-    sprintf(payload, "%s\"%s\":{\"value\":%s", payload,
-            (_dots + i)->variable_label, str_value);
+    sprintf(payload, "%s\"%s\":{\"value\":%s", payload, (_dots + i)->variable_label, str_value);
 
     // Adds timestamp seconds
     if ((_dots + i)->dot_timestamp_seconds != NULL) {
-      sprintf(payload, "%s,\"timestamp\":%lu", payload,
-              (_dots + i)->dot_timestamp_seconds);
+      sprintf(payload, "%s,\"timestamp\":%lu", payload, (_dots + i)->dot_timestamp_seconds);
       // Adds timestamp milliseconds
       if ((_dots + i)->dot_timestamp_millis != NULL) {
         char milliseconds[3];
@@ -207,8 +198,7 @@ void UbiProtocolHandler::buildHttpPayload(char* payload) {
 
     // Adds dot context
     if ((_dots + i)->dot_context != NULL) {
-      sprintf(payload, "%s,\"context\": {%s}", payload,
-              (_dots + i)->dot_context);
+      sprintf(payload, "%s,\"context\": {%s}", payload, (_dots + i)->dot_context);
     }
 
     sprintf(payload, "%s}", payload);
@@ -238,9 +228,7 @@ void UbiProtocolHandler::buildHttpPayload(char* payload) {
  * timestamp.
  */
 
-void UbiProtocolHandler::buildTcpPayload(char* payload,
-                                         const char* device_label,
-                                         const char* device_name) {
+void UbiProtocolHandler::buildTcpPayload(char* payload, const char* device_label, const char* device_name) {
   sprintf(payload, "");
   sprintf(payload, "%s|POST|%s|", USER_AGENT, _token);
   sprintf(payload, "%s%s:%s", payload, device_label, device_name);
@@ -249,8 +237,7 @@ void UbiProtocolHandler::buildTcpPayload(char* payload,
   for (uint8_t i = 0; i < _current_value;) {
     char str_value[20];
     _floatToChar(str_value, (_dots + i)->dot_value);
-    sprintf(payload, "%s%s:%s", payload, (_dots + i)->variable_label,
-            str_value);
+    sprintf(payload, "%s%s:%s", payload, (_dots + i)->variable_label, str_value);
 
     // Adds dot context
     if ((_dots + i)->dot_context != NULL) {

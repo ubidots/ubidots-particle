@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -26,10 +26,10 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "UbiTypes.h"
 class UbiProtocol {
-  public:
-    virtual bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags) = 0;
-    virtual float get(const char* device_label, const char* variable_label) = 0;
-    virtual void setDebug(bool debug) = 0;
+ public:
+  virtual bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags) = 0;
+  virtual float get(const char* device_label, const char* variable_label) = 0;
+  virtual void setDebug(bool debug) = 0;
 };
 
 #endif

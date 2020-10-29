@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -22,15 +22,12 @@ Developed and maintained by Jose Garcia for Ubidots Inc
 */
 
 #include "UbiParticle.h"
-#include "Particle.h"
-#include "UbiConstants.h"
 
 /**************************************************************************
  * Overloaded constructors
  ***************************************************************************/
 
-UbiParticle::UbiParticle(const char* host, const int port,
-                         const char* user_agent, const char* token) {
+UbiParticle::UbiParticle(const char* host, const int port, const char* user_agent, const char* token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
@@ -50,8 +47,7 @@ UbiParticle::~UbiParticle() {
  * Wrapper of the Publish() method from particle to trigger webhooks
  */
 
-bool UbiParticle::sendData(const char* device_label, const char* device_name,
-                           char* payload, UbiFlags* flags) {
+bool UbiParticle::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags) {
   return Particle.publish(device_label, payload, flags->particle_flag);
 }
 

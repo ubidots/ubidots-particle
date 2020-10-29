@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -24,17 +24,15 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiUdp_H_
 #define _UbiUdp_H_
 
-#include "Particle.h"
+#include "UbiConstants.h"
 #include "UbiProtocol.h"
 
 static UDP _client_udp_ubi;
 
 class UbiUDP : public UbiProtocol {
  public:
-  UbiUDP(const char* host, const int port, const char* user_agent,
-         const char* token);
-  bool sendData(const char* device_label, const char* device_name,
-                char* payload, UbiFlags* flags);
+  UbiUDP(const char* host, const int port, const char* user_agent, const char* token);
+  bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
   ~UbiUDP();

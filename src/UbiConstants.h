@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2018 Ubidots.
+Copyright (c) 2013-2020 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -24,7 +24,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiConstants_H_
 #define _UbiConstants_H_
 
-#include "Particle.h"
 #include "UbiTypes.h"
 
 const char* const UBIDOTS_SERVER = "industrial.api.ubidots.com";

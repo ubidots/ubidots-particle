@@ -22,15 +22,12 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 */
 
 #include "UbiHttp.h"
-#include "Particle.h"
-#include "UbiConstants.h"
 
 /**************************************************************************
  * Overloaded constructors
  ***************************************************************************/
 
-UbiHTTP::UbiHTTP(const char* host, const int port, const char* user_agent,
-                 const char* token) {
+UbiHTTP::UbiHTTP(const char* host, const int port, const char* user_agent, const char* token) {
   _host = host;
   _user_agent = user_agent;
   _token = token;
@@ -47,8 +44,7 @@ UbiHTTP::~UbiHTTP() {
   delete[] _token;
 }
 
-bool UbiHTTP::sendData(const char* device_label, const char* device_name,
-                       char* payload, UbiFlags* flags) {
+bool UbiHTTP::sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags) {
   reconnect(_host, _port);
   bool result = false;
 
@@ -226,8 +222,7 @@ float UbiHTTP::parseHttpAnswer(const char* request_type, char* data) {
     int len = strlen(data);  // Length of the answer char array from the server
 
     for (int i = 0; i < len - 2; i++) {
-      if ((data[i] == '\r') && (data[i + 1] == '\n') && (data[i + 2] == '\r') &&
-          (data[i + 3] == '\n')) {
+      if ((data[i] == '\r') && (data[i + 1] == '\n') && (data[i + 2] == '\r') && (data[i + 3] == '\n')) {
         strncpy(parsed, data + i + 4, 20);  // Copies the result to the parsed
         parsed[20] = '\0';
         break;
