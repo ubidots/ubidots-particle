@@ -16,33 +16,30 @@
 #endif
 
 Ubidots ubidots(UBIDOTS_TOKEN, UBI_HTTP);
-//Ubidots ubidots(UBIDOTS_TOKEN, UBI_EDUCATIONAL, UBI_HTTP); Replace the above line if you're an Ubidots for Education user.
-
 
 /****************************************
  * Auxiliar Functions
  ****************************************/
 
-//Put here your auxiliar functions
-
+// Put here your auxiliar functions
 
 /****************************************
  * Main Functions
  ****************************************/
 
 void setup() {
-    Serial.begin(115200);
-    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+  Serial.begin(115200);
+  // ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 
 void loop() {
-    /* Obtain last value from a variable as float using HTTP */
-    float value = ubidots.get("weather-station", "temperature");
+  /* Obtain last value from a variable as float using HTTP */
+  float value = ubidots.get("weather-station", "temperature");
 
-    // Evaluates the results obtained
-    if(value!=ERROR_VALUE){
-      Serial.print("Value:");
-      Serial.println(value);
-    }
-    delay(5000);
+  // Evaluates the results obtained
+  if (value != ERROR_VALUE) {
+    Serial.print("Value:");
+    Serial.println(value);
+  }
+  delay(5000);
 }

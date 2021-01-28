@@ -39,7 +39,7 @@ Ubidots(char* token, UbiServer server, IotProtocol iot_protocol)
 ```
 
 - @token, [Required]. Your Ubidots unique account [TOKEN](http://help.ubidots.com/user-guides/find-your-token-from-your-ubidots-account).  
-- @server, [Optional], [Options] = [`UBI_INDUSTRIAL`, `UBI_EDUCATIONAL`], [Default] = `UBI_INDUSTRIAL`. The server to send data, set `UBI_EDUCATIONAL` if your account is educational type.  
+- @server, [Optional], [Options] = [`UBI_INDUSTRIAL`], [Default] = `UBI_INDUSTRIAL`.  
 - @iot_protocol, [Optional], [Options] = [`UBI_HTTP`, `UBI_TCP`, `UBI_UDP`, `UBI_PARTICLE`], [Default] = `UBI_TCP`. The IoT protocol that you will use to send or retrieve data.
 
 Creates an Ubidots instance.
