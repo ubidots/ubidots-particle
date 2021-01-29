@@ -1,4 +1,4 @@
-// This example send data with hardcoded GPS Coordinates 
+// This example send data with hardcoded GPS Coordinates
 // to a variable to Ubidots through TCP protocol.
 
 /****************************************
@@ -16,63 +16,61 @@
 #endif
 
 Ubidots ubidots(UBIDOTS_TOKEN, UBI_TCP);
-//Ubidots ubidots(UBIDOTS_TOKEN, UBI_EDUCATIONAL, UBI_TCP); Replace the above line if you're an Ubidots for Education user.
 
 /****************************************
  * Auxiliar Functions
  ****************************************/
 
-//Put here your auxiliar functions
-
+// Put here your auxiliar functions
 
 /****************************************
  * Main Functions
  ****************************************/
 
 void setup() {
-    Serial.begin(115200);
-    //ubidots.setDebug(true); //Uncomment this line for printing debug messages
+  Serial.begin(115200);
+  // ubidots.setDebug(true); //Uncomment this line for printing debug messages
 }
 
 void loop() {
-    float value = analogRead(A0);
+  float value = analogRead(A0);
 
-    /* Hardcoded Coordinates */
-    float latitude = 37.773;
-    float longitude = -6.2345;
+  /* Hardcoded Coordinates */
+  float latitude = 37.773;
+  float longitude = -6.2345;
 
-    /* Reserves memory to store context key values, add as much as you need */
-    char* str_lat = (char *) malloc(sizeof(char) * 10);
-    char* str_lng = (char *) malloc(sizeof(char) * 10);
+  /* Reserves memory to store context key values, add as much as you need */
+  char* str_lat = (char*)malloc(sizeof(char) * 10);
+  char* str_lng = (char*)malloc(sizeof(char) * 10);
 
-    /* Saves the coordinates as char */
-    sprintf(str_lat, "%f", latitude);
-    sprintf(str_lng, "%f", longitude);
+  /* Saves the coordinates as char */
+  sprintf(str_lat, "%f", latitude);
+  sprintf(str_lng, "%f", longitude);
 
-    /* Reserves memory to store context array */
-    char* context = (char *) malloc(sizeof(char) * 30);
+  /* Reserves memory to store context array */
+  char* context = (char*)malloc(sizeof(char) * 30);
 
-    /* Adds context key-value pairs */
-    ubidots.addContext("lat", str_lat);
-    ubidots.addContext("lng", str_lng);
+  /* Adds context key-value pairs */
+  ubidots.addContext("lat", str_lat);
+  ubidots.addContext("lng", str_lng);
 
-    /* Builds the context with the coordinates to send to Ubidots */
-    ubidots.getContext(context);
+  /* Builds the context with the coordinates to send to Ubidots */
+  ubidots.getContext(context);
 
-    /* Sends the position */
-    ubidots.add("position", value, context);  // Change for your variable name
+  /* Sends the position */
+  ubidots.add("position", value, context);  // Change for your variable name
 
-    bool bufferSent = false;
-    bufferSent = ubidots.send(); // Will send data to a device label that matches the device Id
+  bool bufferSent = false;
+  bufferSent = ubidots.send();  // Will send data to a device label that matches the device Id
 
-    if (bufferSent) { 
-        // Do something if values were sent properly
-        Serial.println("Values sent by the device");
-    }
+  if (bufferSent) {
+    // Do something if values were sent properly
+    Serial.println("Values sent by the device");
+  }
 
-    /* free memory */
-    free(str_lat);
-    free(str_lng);
-    free(context);
-    delay(5000);
+  /* free memory */
+  free(str_lat);
+  free(str_lng);
+  free(context);
+  delay(5000);
 }

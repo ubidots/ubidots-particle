@@ -1,4 +1,4 @@
-// This example sends data to multiple variables to 
+// This example sends data to multiple variables to
 // Ubidots through UDP protocol.
 
 /****************************************
@@ -16,14 +16,12 @@
 #endif
 
 Ubidots ubidots(UBIDOTS_TOKEN, UBI_UDP);
-//Ubidots ubidots(UBIDOTS_TOKEN, UBI_EDUCATIONAL, UBI_UDP); Replace the above line if you're an Ubidots for Education user.
 
 /****************************************
  * Auxiliar Functions
  ****************************************/
 
-//Put here your auxiliar functions
-
+// Put here your auxiliar functions
 
 /****************************************
  * Main Functions
@@ -31,7 +29,7 @@ Ubidots ubidots(UBIDOTS_TOKEN, UBI_UDP);
 
 void setup() {
   Serial.begin(115200);
-  //ubidots.setDebug(true);  // Uncomment this line for printing debug messages
+  // ubidots.setDebug(true);  // Uncomment this line for printing debug messages
 }
 
 void loop() {
@@ -45,7 +43,7 @@ void loop() {
   bool bufferSent = false;
   bufferSent = ubidots.send();  // Will send data to a device label that matches the device Id
 
-  if(bufferSent){
+  if (bufferSent) {
     // Do something if values were sent properly
     Serial.println("Values sent by the device");
   }
