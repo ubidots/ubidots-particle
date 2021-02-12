@@ -76,6 +76,15 @@ Returns as float the last value of the dot from the variable.
 IotProtocol getCloudProtocol()
 
 ```
+std::map<int, float> tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels)
+```
+
+- @deviceLabel [Mandatory] pointer that stores the label of the device to retrieve values from.
+- @variableLabels [Mandatory] comma separated variable labels to retrieve values from
+
+Returns an ordered map list with the values retrieved for the provided variable labels. The values can be accesed by index, starting at position 0, and are mapped to every variable label set in the comma separated array.
+
+```
 void addContext(char *key_label, char *key_value)
 ```
 

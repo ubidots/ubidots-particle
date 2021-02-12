@@ -57,3 +57,8 @@ float UbiParticle::get(const char* device_label, const char* variable_label) {
 }
 
 void UbiParticle::setDebug(bool debug) { _debug = debug; }
+
+tcpMap UbiParticle::getMultipleValues(const char* deviceLabel, const char* variableLabels) {
+  tcpMap results;
+  return results;
+}

@@ -319,3 +319,8 @@ bool UbiHTTP::waitServerAnswer() {
  */
 
 void UbiHTTP::setDebug(bool debug) { _debug = debug; }
+
+tcpMap UbiHTTP::getMultipleValues(const char* deviceLabel, const char* variableLabels) {
+  tcpMap results;
+  return results;
+}

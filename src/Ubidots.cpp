@@ -101,6 +101,17 @@ float Ubidots::get(const char* device_label, const char* variable_label) {
   return _cloudProtocol->get(device_label, variable_label);
 }
 
+/**
+ * Retrieves multiple values in one request using TCP
+ * @deviceLabel [Mandatory] pointer that stores the label of the device to retrieve values from.
+ * @variableLabels [Mandatory] comma separated variable labels to retrieve values from
+ */
+
+tcpMap Ubidots::getMultipleValues(const char* deviceLabel, const char* variableLabels) {
+  tcpMap myMap = _cloudProtocol->getMultipleValues(deviceLabel, variableLabels);
+  return myMap;
+}
+
 void Ubidots::setDebug(bool debug) {
   _debug = debug;
   _cloudProtocol->setDebug(debug);

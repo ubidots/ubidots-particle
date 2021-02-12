@@ -104,3 +104,8 @@ IPAddress UbiUDP::getServerIp() {
 
   return IPAddress(169, 55, 61, 243);
 }
+
+tcpMap UbiUDP::getMultipleValues(const char *deviceLabel, const char *variableLabels) {
+  tcpMap results;
+  return results;
+}
