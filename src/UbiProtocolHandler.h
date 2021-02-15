@@ -32,10 +32,8 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 class UbiProtocolHandler {
  public:
   explicit UbiProtocolHandler(char* token, IotProtocol iot_protocol);
-  explicit UbiProtocolHandler(char* token, UbiServer server = UBI_INDUSTRIAL,
-                              IotProtocol iot_protocol = UBI_TCP);
-  void add(char* variable_label, float value, char* context,
-           unsigned long dot_timestamp_seconds,
+  explicit UbiProtocolHandler(char* token, UbiServer server = UBI_INDUSTRIAL, IotProtocol iot_protocol = UBI_TCP);
+  void add(char* variable_label, float value, char* context, unsigned long dot_timestamp_seconds,
            unsigned int dot_timestamp_millis);
   bool send();
   bool send(const char* device_label);
@@ -43,6 +41,7 @@ class UbiProtocolHandler {
   bool send(const char* device_label, PublishFlags flags);
   bool send(const char* device_label, const char* device_name, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
+  tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels);
   void setDebug(bool debug);
   ~UbiProtocolHandler();
 
@@ -56,8 +55,7 @@ class UbiProtocolHandler {
   bool _debug;
   IotProtocol _iot_protocol;
   void buildHttpPayload(char* payload);
-  void buildTcpPayload(char* payload, const char* device_label,
-                       const char* device_name);
+  void buildTcpPayload(char* payload, const char* device_label, const char* device_name);
   void builder(char* token, UbiServer server, IotProtocol iot_protocol);
   void _floatToChar(char* value_str, float value);
 };

@@ -164,6 +164,29 @@ float UbiProtocolHandler::get(const char* device_label, const char* variable_lab
 }
 
 /**
+ * Retrieves multiple values in one request using TCP
+ * @deviceLabel [Mandatory] pointer that stores the label of the device to retrieve values from.
+ * @variableLabels [Mandatory] comma separated variable labels to retrieve values from
+ */
+
+tcpMap UbiProtocolHandler::getMultipleValues(const char* deviceLabel, const char* variableLabels) {
+  tcpMap results;
+  if (_iot_protocol != UBI_TCP) {
+    Serial.println("Multiple values retrieval is supported just through TCP");
+    char* token = strtok((char*)variableLabels, ",");
+    int mapKey = 0;
+    while (token != NULL) {
+      results.insert(std::pair<int, float>(mapKey, ERROR_VALUE));
+      mapKey++;
+      token = strtok(NULL, ",");
+    }
+    return results;
+  }
+  results = _ubiProtocol->getMultipleValues(deviceLabel, variableLabels);
+  return results;
+}
+
+/**
  * Builds the HTTP payload to send and saves it to the input char pointer.
  * @payload [Mandatory] char payload pointer to store the built structure.
  * @timestamp_global [Optional] If set, it will be used for any dot without

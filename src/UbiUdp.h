@@ -35,6 +35,7 @@ class UbiUDP : public UbiProtocol {
   bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
   float get(const char* device_label, const char* variable_label);
   void setDebug(bool debug);
+  tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels);
   ~UbiUDP();
 
  private:

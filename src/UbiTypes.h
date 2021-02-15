@@ -24,6 +24,8 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #ifndef _UbiTypes_H_
 #define _UbiTypes_H_
 
+#include <map>
+
 #include "Particle.h"
 
 typedef struct Value {
@@ -47,5 +49,7 @@ typedef struct UbiFlags {
   UbiFlags() : particle_flag(PUBLIC) {}
   PublishFlags particle_flag;
 } UbiFlags;
+
+typedef std::map<int, float> tcpMap;
 
 #endif

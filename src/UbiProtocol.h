@@ -30,6 +30,7 @@ class UbiProtocol {
   virtual bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags) = 0;
   virtual float get(const char* device_label, const char* variable_label) = 0;
   virtual void setDebug(bool debug) = 0;
+  virtual tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels) = 0;
 };
 
 #endif
