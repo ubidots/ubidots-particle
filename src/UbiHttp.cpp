@@ -134,7 +134,7 @@ float UbiHTTP::get(const char* device_label, const char* variable_label) {
     _client_http_ubi.print("/lv");
     _client_http_ubi.print(" HTTP/1.1\r\n");
     _client_http_ubi.print("Host: ");
-    _client_http_ubi.print(UBIDOTS_HTTP_PORT);
+    _client_http_ubi.print(_host);
     _client_http_ubi.print("\r\n");
     _client_http_ubi.print("User-Agent: ");
     _client_http_ubi.print(_user_agent);
@@ -152,7 +152,7 @@ float UbiHTTP::get(const char* device_label, const char* variable_label) {
       Serial.print("/lv");
       Serial.print(" HTTP/1.1\r\n");
       Serial.print("Host: ");
-      Serial.print(UBIDOTS_HTTP_PORT);
+      Serial.print(_host);
       Serial.print("\r\n");
       Serial.print("User-Agent: ");
       Serial.print(_user_agent);
