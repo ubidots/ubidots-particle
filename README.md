@@ -125,6 +125,20 @@ IotProtocol getCloudProtocol();
 
 Retrieves the actual cloud protocol used to send data from the Mesh gateway.
 
+```
+setMaxBufferSize(int bufferSize)
+```
+
+Increases the max number of allowed bytes to be used to build the payload. Use it wisely, to increase this number may result in timeout errors due to the amount of bytes to
+be processed by the device.
+
+```
+setMaxNumberOfValuesToSend(uint8_t maxValues)
+```
+
+Increases the max number of allowed variables to be used to build the payload. Use it wisely, to increase this number may result in timeout errors due to the amount of bytes to
+be processed by the device.
+
 # Examples
 
 Refer to the examples folder

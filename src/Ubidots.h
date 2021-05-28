@@ -26,6 +26,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
+#include "UbiDynamicParams.h"
 #include "UbiProtocol.h"
 #include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
@@ -47,6 +48,8 @@ class Ubidots {
   bool send(const char* device_label, const char* device_name);
   bool send(const char* device_label, PublishFlags flags);
   bool send(const char* device_label, const char* device_name, UbiFlags* flags);
+  void setMaxBufferSize(int bufferSize);
+  void setMaxNumberOfValuesToSend(uint8_t maxValues);
   float get(const char* device_label, const char* variable_label);
   tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels);
   void setDebug(bool debug);

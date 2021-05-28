@@ -26,6 +26,7 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
+#include "UbiDynamicParams.h"
 #include "UbiProtocol.h"
 #include "UbiTypes.h"
 
@@ -54,6 +55,8 @@ class UbiProtocolHandler {
   bool _dirty = false;
   bool _debug;
   IotProtocol _iot_protocol;
+  void buildShortHttpPayload(char* payload);
+  void buildCompleteHttpPayload(char* payload);
   void buildHttpPayload(char* payload);
   void buildTcpPayload(char* payload, const char* device_label, const char* device_name);
   void builder(char* token, UbiServer server, IotProtocol iot_protocol);

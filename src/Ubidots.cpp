@@ -117,6 +117,10 @@ void Ubidots::setDebug(bool debug) {
   _cloudProtocol->setDebug(debug);
 }
 
+/***************************************************************************
+AUX FUNCTIONS
+***************************************************************************/
+
 /*
  * Adds to the context structure values to retrieve later it easily by the user
  */
@@ -170,3 +174,7 @@ void Ubidots::getContext(char* context_result, IotProtocol iotProtocol) {
     }
   }
 }
+
+void Ubidots::setMaxBufferSize(int bufferSize) { MAX_BUFFER_SIZE = bufferSize; }
+
+void Ubidots::setMaxNumberOfValuesToSend(uint8_t maxValues) { MAX_VALUES = maxValues; }

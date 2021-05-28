@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2019 Ubidots.
+Copyright (c) 2013-2021 Ubidots.
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -21,38 +21,10 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 @jotathebest at github: https://github.com/jotathebest
 */
 
-#ifndef _UbiTcp_H_
-#define _UbiTcp_H_
+#ifndef _UbiDynamicParams_H_
+#define _UbiDynamicParams_H_
 
-#include <map>
-
-#include "UbiConstants.h"
-#include "UbiDynamicParams.h"
-#include "UbiProtocol.h"
-
-static TCPClient _client_tcp_ubi;
-
-class UbiTCP : public UbiProtocol {
- public:
-  UbiTCP(const char* host, const int port, const char* user_agent, const char* token);
-  bool sendData(const char* device_label, const char* device_name, char* payload, UbiFlags* flags);
-  float get(const char* device_label, const char* variable_label);
-  tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels);
-  void setDebug(bool debug);
-  ~UbiTCP();
-
- private:
-  const char* _host;
-  const char* _user_agent;
-  const char* _token;
-  int _port;
-  bool _debug = false;
-  int _timeout = 5000;
-  bool waitServerAnswer();
-  void buildAndSendGetPacket(const char* device_label, const char* variable_label);
-  float parseTCPAnswer(const char* request_type, char* response);
-  tcpMap parseMultipleValues();
-  void reconnect(const char* host, const int port);
-};
+static uint8_t MAX_VALUES = 10;
+static int MAX_BUFFER_SIZE = 700;
 
 #endif

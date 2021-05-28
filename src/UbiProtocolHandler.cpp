@@ -193,7 +193,35 @@ tcpMap UbiProtocolHandler::getMultipleValues(const char* deviceLabel, const char
  * timestamp.
  */
 
-void UbiProtocolHandler::buildHttpPayload(char* payload) {
+void UbiProtocolHandler::buildShortHttpPayload(char* payload) {
+  /* Builds the payload */
+  sprintf(payload, "{");
+
+  for (uint8_t i = 0; i < _current_value;) {
+    char str_value[20];
+    _floatToChar(str_value, (_dots + i)->dot_value);
+    sprintf(payload, "%s\"%s\":%s", payload, (_dots + i)->variable_label, str_value);
+    sprintf(payload, "%s", payload);
+    i++;
+
+    if (i < _current_value) {
+      sprintf(payload, "%s,", payload);
+    } else {
+      sprintf(payload, "%s}", payload);
+      _current_value = 0;
+    }
+  }
+
+  if (_debug) {
+    Serial.println("----------");
+    Serial.println("payload:");
+    Serial.println(payload);
+    Serial.println("----------");
+    Serial.println("");
+  }
+}
+
+void UbiProtocolHandler::buildCompleteHttpPayload(char* payload) {
   /* Builds the payload */
   sprintf(payload, "{");
 
@@ -241,6 +269,23 @@ void UbiProtocolHandler::buildHttpPayload(char* payload) {
     Serial.println(payload);
     Serial.println("----------");
     Serial.println("");
+  }
+}
+
+void UbiProtocolHandler::buildHttpPayload(char* payload) {
+  /* Builds the payload */
+  bool shoulBuildShortPayload = true;
+  for (uint8_t i = 0; i < _current_value; i++) {
+    if ((_dots + i)->dot_timestamp_seconds != NULL || (_dots + i)->dot_context != NULL) {
+      shoulBuildShortPayload = false;
+      break;
+    }
+  }
+
+  if (shoulBuildShortPayload) {
+    buildShortHttpPayload(payload);
+  } else {
+    buildCompleteHttpPayload(payload);
   }
 }
 
