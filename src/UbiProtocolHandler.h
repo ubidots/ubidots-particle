@@ -26,7 +26,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
-#include "UbiDynamicParams.h"
 #include "UbiProtocol.h"
 #include "UbiTypes.h"
 
@@ -44,6 +43,8 @@ class UbiProtocolHandler {
   float get(const char* device_label, const char* variable_label);
   tcpMap getMultipleValues(const char* deviceLabel, const char* variableLabels);
   void setDebug(bool debug);
+  void setMaxBufferSize(int bufferSize);
+  void setMaxNumberOfValuesToSend(uint8_t maxValues);
   ~UbiProtocolHandler();
 
  private:
@@ -52,6 +53,9 @@ class UbiProtocolHandler {
   const char* _token;
   Value* _dots;
   int8_t _current_value = 0;
+  int _maxBufferSize = 700;                // Max buffer size to store payload chars
+  uint8_t _maxNumberOfAllowedValues = 10;  // Max number of allowed values to be added to the payload
+  float aa = 1;
   bool _dirty = false;
   bool _debug;
   IotProtocol _iot_protocol;

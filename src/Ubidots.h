@@ -26,7 +26,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 
 #include "Particle.h"
 #include "UbiConstants.h"
-#include "UbiDynamicParams.h"
 #include "UbiProtocol.h"
 #include "UbiProtocolHandler.h"
 #include "UbiTypes.h"
@@ -61,6 +60,7 @@ class Ubidots {
   ContextUbi* _context;
   IotProtocol _iotProtocol;
   int8_t _current_context = 0;
+  uint8_t _maxNumberOfAllowedValues = 10;  // Max number of allowed values to be added to the payload
   bool _debug = false;
   void _builder(char* token, UbiServer server, IotProtocol iot_protocol);
 };

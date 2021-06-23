@@ -32,5 +32,6 @@ const int UBIDOTS_HTTP_PORT = 80;
 const int UBIDOTS_TCP_PORT = 9012;
 const float ERROR_VALUE = -3.4028235E+8;
 static UbiServer UBI_INDUSTRIAL = "industrial.api.ubidots.com";
+const int MAX_BUFFER_SIZE = 4096;  // Buffer size to read response from Ubidots
 
 #endif

@@ -27,7 +27,6 @@ Developed and maintained by Jose Garcia for IoT Services Inc
 #include <map>
 
 #include "UbiConstants.h"
-#include "UbiDynamicParams.h"
 #include "UbiProtocol.h"
 
 static TCPClient _client_tcp_ubi;

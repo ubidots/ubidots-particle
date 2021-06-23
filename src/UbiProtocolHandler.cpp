@@ -46,7 +46,7 @@ void UbiProtocolHandler::builder(char* token, UbiServer server, IotProtocol iot_
   strcpy(_default_device_label, particle_id_str.c_str());
   _iot_protocol = iot_protocol;
   UbiBuilder builder(server, token, _iot_protocol);
-  _dots = (Value*)malloc(MAX_VALUES * sizeof(Value));
+  _dots = (Value*)malloc(_maxNumberOfAllowedValues * sizeof(Value));
   _ubiProtocol = builder.builder();
   _token = token;
   _current_value = 0;
@@ -87,11 +87,11 @@ void UbiProtocolHandler::add(char* variable_label, float value, char* context, u
   (_dots + _current_value)->dot_timestamp_seconds = dot_timestamp_seconds;
   (_dots + _current_value)->dot_timestamp_millis = dot_timestamp_millis;
   _current_value++;
-  if (_current_value > MAX_VALUES) {
+  if (_current_value > _maxNumberOfAllowedValues) {
     if (_debug) {
       Serial.println(F("You are sending more than the maximum of consecutive variables"));
     }
-    _current_value = MAX_VALUES;
+    _current_value = _maxNumberOfAllowedValues;
   }
 }
 
@@ -126,7 +126,7 @@ bool UbiProtocolHandler::send(const char* device_label, PublishFlags flag) {
 
 bool UbiProtocolHandler::send(const char* device_label, const char* device_name, UbiFlags* flags) {
   // Builds the payload
-  char* payload = (char*)malloc(sizeof(char) * MAX_BUFFER_SIZE);
+  char* payload = (char*)malloc(sizeof(char) * _maxBufferSize);
   if (_iot_protocol == UBI_TCP || _iot_protocol == UBI_UDP) {
     buildTcpPayload(payload, device_label, device_name);
   } else {
@@ -379,4 +379,18 @@ void UbiProtocolHandler::_floatToChar(char* str_value, float value) {
     }
     j++;
   }
+}
+
+/*
+ * Changes the max threshold value number to create payload buffer and to add values
+ */
+
+void UbiProtocolHandler::setMaxBufferSize(int bufferSize) {
+  bufferSize <= 4096 ? _maxBufferSize = bufferSize : Serial.println("The max allowed buffer size is 4096 bytes");
+}
+
+void UbiProtocolHandler::setMaxNumberOfValuesToSend(uint8_t maxValues) {
+  maxValues <= 128 ? _maxNumberOfAllowedValues = maxValues
+                   : Serial.println("The max allowed number of variables is 128");
+  ;
 }

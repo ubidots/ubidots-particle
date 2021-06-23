@@ -33,7 +33,7 @@ Ubidots::Ubidots(char* token, UbiServer server, IotProtocol iotProtocol) { _buil
 
 void Ubidots::_builder(char* token, UbiServer server, IotProtocol iotProtocol) {
   _iotProtocol = iotProtocol;
-  _context = (ContextUbi*)malloc(MAX_VALUES * sizeof(ContextUbi));
+  _context = (ContextUbi*)malloc(_maxNumberOfAllowedValues * sizeof(ContextUbi));
 
   _cloudProtocol = new UbiProtocolHandler(token, server, iotProtocol);
 }
@@ -129,11 +129,11 @@ void Ubidots::addContext(char* key_label, char* key_value) {
   (_context + _current_context)->key_label = key_label;
   (_context + _current_context)->key_value = key_value;
   _current_context++;
-  if (_current_context >= MAX_VALUES) {
+  if (_current_context >= _maxNumberOfAllowedValues) {
     Serial.println(
         F("You are adding more than the maximum of consecutive key-values "
           "pairs"));
-    _current_context = MAX_VALUES;
+    _current_context = _maxNumberOfAllowedValues;
   }
 }
 
@@ -175,6 +175,11 @@ void Ubidots::getContext(char* context_result, IotProtocol iotProtocol) {
   }
 }
 
-void Ubidots::setMaxBufferSize(int bufferSize) { MAX_BUFFER_SIZE = bufferSize; }
+void Ubidots::setMaxBufferSize(int bufferSize) { _cloudProtocol->setMaxBufferSize(bufferSize); }
 
-void Ubidots::setMaxNumberOfValuesToSend(uint8_t maxValues) { MAX_VALUES = maxValues; }
+void Ubidots::setMaxNumberOfValuesToSend(uint8_t maxValues) {
+  maxValues <= 128 ? _maxNumberOfAllowedValues = maxValues
+                   : Serial.println("The max allowed number of variables is 128");
+  ;
+  _cloudProtocol->setMaxNumberOfValuesToSend(maxValues);
+}
